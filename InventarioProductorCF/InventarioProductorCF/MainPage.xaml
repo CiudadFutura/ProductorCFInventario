@@ -8,12 +8,18 @@
 
   <ContentPage.Content>
     <ScrollView>
-      <StackLayout Spacing="0" Padding="0" BackgroundColor="Red">
-        <Image Source="drawable/ciudadFutura.png" VerticalOptions="Start" HorizontalOptions="End" WidthRequest="100" HeightRequest="100"/>
-        <Label Text="Welcome to Xamarin Forms!"
+      <StackLayout Spacing="0" Padding="0" BackgroundColor="#c41d23">
+        <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand">
+          <Image Source="drawable/ciudadFutura.png" VerticalOptions="Start" HorizontalOptions="End"/>
+        </StackLayout>
+        <StackLayout Orientation="Horizontal">
+          <Label Text="Welcome to Xamarin Forms!"
                  VerticalOptions="Center"
                  HorizontalOptions="Center" />
-        <Button HorizontalOptions="End" VerticalOptions="End" Text="Escanear"/>
+        </StackLayout>
+        <StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand" HorizontalOptions="EndAndExpand">
+          <Button HorizontalOptions="End" VerticalOptions="End" Text="Escanear" WidthRequest="100" HeightRequest="80" Clicked="AbrirPaginaEscaner"/>
+        </StackLayout>
       </StackLayout>
     </ScrollView>
   </ContentPage.Content>

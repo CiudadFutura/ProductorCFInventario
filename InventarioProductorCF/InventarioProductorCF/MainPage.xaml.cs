@@ -10,6 +10,8 @@ namespace InventarioProductorCF
         public MainPage()
         {
             InitializeComponent();
+
+            Cabecera.Source = ImageSource.FromResource("InventarioProductorCF.Imagenes.ciudadFutura.png");
         }
 
         async void AbrirPaginaEscaner(object sender, EventArgs args)

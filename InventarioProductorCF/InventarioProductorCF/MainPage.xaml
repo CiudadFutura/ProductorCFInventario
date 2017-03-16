@@ -10,7 +10,7 @@
     <ScrollView>
       <StackLayout Spacing="0" Padding="0" BackgroundColor="#c41d23">
         <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand">
-          <Image Source="drawable/ciudadFutura.png" VerticalOptions="Start" HorizontalOptions="End"/>
+          <Image x:Name="Cabecera" WidthRequest="298" HeightRequest="106" VerticalOptions="Start" HorizontalOptions="End"/>
         </StackLayout>
         <StackLayout Orientation="Horizontal">
           <Label Text="Welcome to Xamarin Forms!"

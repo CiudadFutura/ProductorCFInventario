@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StockProductorCF.Vistas.PaginaGrilla"
+             BackgroundColor="Red"
+             Title="Productor de la CF - Inventario">
+
+  <ContentPage.Content>
+    <ScrollView>
+      <StackLayout Spacing="0" Padding="0" BackgroundColor="#c41d23">
+        <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand">
+          <Image x:Name="Cabecera" WidthRequest="298" HeightRequest="106" VerticalOptions="Start" HorizontalOptions="End"/>
+        </StackLayout>
+        <StackLayout Orientation="Horizontal">
+          <Label x:Name="Grilla" Text="GRILLA"
+                 VerticalOptions="Center"
+                 HorizontalOptions="Center" />
+        </StackLayout>
+        <StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand" HorizontalOptions="EndAndExpand">
+          <Button HorizontalOptions="End" VerticalOptions="End" Text="Escanear" WidthRequest="100" HeightRequest="80" Clicked="AbrirPaginaEscaner"/>
+        </StackLayout>
+      </StackLayout>
+    </ScrollView>
+  </ContentPage.Content>
+  
+</ContentPage>

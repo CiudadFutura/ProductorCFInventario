@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:GoogleLogin.ModelosDeVista;assembly=StockProductorCF"
+             x:Class="StockProductorCF.PaginaAuntenticacion"
+             Title="Autenticación en Google"
+             BackgroundColor="White">
+
+  <StackLayout x:Name="MainStackLayout"
+               Padding="8,30">
+
+    <StackLayout Orientation="Horizontal"
+                 Padding="0,20,0,50">
+
+      <Image x:Name="Cabecera" WidthRequest="298" HeightRequest="106" VerticalOptions="Start" HorizontalOptions="End"/>
+
+    </StackLayout>
+
+  </StackLayout>
+  
+</ContentPage>

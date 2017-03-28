@@ -1,25 +1,49 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using StockProductorCF.Modelos;
-using Newtonsoft.Json;
+﻿
+
+using Google.GData.Client;
+using Google.GData.Spreadsheets;
 
 namespace StockProductorCF.Servicios
 {
     public class ServiciosGoogle
     {
-        public async Task<PerfilGoogle> ObtenerPerfilGoogleAsinc(string tokenDeAcceso)
+        public SpreadsheetsService ObtenerServicioParaConsultaGoogleSpreadsheets(string tokenDeAcceso)
         {
-            var requestUrl =
-                "https://graph.facebook.com/v2.7/me/?fields=name,picture,work,website,religion,location,locale,link,cover,age_range,bio,birthday,devices,email,first_name,last_name,gender,hometown,is_verified,languages&access_token="
-                + tokenDeAcceso;
+            SpreadsheetsService servicio = new SpreadsheetsService("Inventario - Productor de la Ciudad Futura");
 
-            var httpCliente = new HttpClient();
+            var parametros = new OAuth2Parameters();
+            parametros.AccessToken = tokenDeAcceso;
+            servicio.RequestFactory = new GOAuth2RequestFactory(null, "Inventario - Productor de la Ciudad Futura", parametros);
 
-            var jsonDeUsuario = await httpCliente.GetStringAsync(requestUrl);
+            return servicio;
+        }
 
-            var perfilGoogle = JsonConvert.DeserializeObject<PerfilGoogle>(jsonDeUsuario);
+        public SpreadsheetFeed ObtenerListaLibros(SpreadsheetsService servicio)
+        {
+            SpreadsheetQuery consulta = new SpreadsheetQuery();
+            return servicio.Query(consulta);
+        }
 
-            return perfilGoogle;
+        public WorksheetFeed ObtenerListaHojas(AtomEntry libro, SpreadsheetsService servicio)
+        {
+            AtomLink link = libro.Links.FindService(GDataSpreadsheetsNameTable.WorksheetRel, null);
+
+            WorksheetQuery consulta = new WorksheetQuery(link.HRef.ToString());
+            return servicio.Query(consulta);
+        }
+
+        public CellFeed ObtenerCeldasDeUnaHoja(string linkHojaConsulta, SpreadsheetsService servicio)
+        {
+            CellQuery consulta = new CellQuery(linkHojaConsulta);
+            CellFeed celdas = servicio.Query(consulta);
+
+            return celdas;
+        }
+
+
+        public void ActualizarCelda(SpreadsheetsService servicio, AtomEntry celda)
+        {
+            servicio.Update(celda);
         }
     }
 

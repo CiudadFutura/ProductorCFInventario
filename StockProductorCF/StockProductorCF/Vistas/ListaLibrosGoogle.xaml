@@ -1,10 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:StockProductorCF"
-             x:Class="StockProductorCF.Vistas.AccesoDatos"
-             BackgroundColor="White"
-             Title="Productor de la CF - Inventario">
+             x:Class="StockProductorCF.Vistas.ListaLibrosGoogle"
+             Title="Productor de la CF - Inventario" 
+             BackgroundColor="White">
 
   <ContentPage.Content>
     <ScrollView>
@@ -13,11 +12,7 @@
           <Image x:Name="LogoEmprendimiento" WidthRequest="53" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="Start"/>
           <Image x:Name="Cabecera" WidthRequest="149" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
         </StackLayout>
-        <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Center">
-          <Button HorizontalOptions="Center" VerticalOptions="Center" Text="Conectar con cuenta de Google" WidthRequest="250" HeightRequest="80" Clicked="ConectarGoogle"/>
-        </StackLayout>
-        <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Center">
-          <Button HorizontalOptions="Center" VerticalOptions="Center" Text="Conectar con Base de datos" WidthRequest="250" HeightRequest="80"/>
+        <StackLayout x:Name="ContenedorLibros" BackgroundColor="#FFFFFF">
         </StackLayout>
       </StackLayout>
     </ScrollView>

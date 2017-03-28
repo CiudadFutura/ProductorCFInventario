@@ -2,25 +2,22 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="StockProductorCF.Vistas.PaginaGrilla"
-             BackgroundColor="Red"
-             Title="Productor de la CF - Inventario">
+             Title="Productor de la CF - Inventario"
+             BackgroundColor="#c41d23">
 
   <ContentPage.Content>
-    <ScrollView>
-      <StackLayout Spacing="0" Padding="0" BackgroundColor="#c41d23">
-        <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand">
-          <Image x:Name="Cabecera" WidthRequest="298" HeightRequest="106" VerticalOptions="Start" HorizontalOptions="End"/>
+    <StackLayout Spacing="0" Padding="0" BackgroundColor="#c41d23">
+      <ScrollView>
+        <StackLayout x:Name="ContenedorTabla" Spacing="0" Padding="0" BackgroundColor="Black">
+        
         </StackLayout>
-        <StackLayout Orientation="Horizontal">
-          <Label x:Name="Grilla" Text="GRILLA"
-                 VerticalOptions="Center"
-                 HorizontalOptions="Center" />
-        </StackLayout>
-        <StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand" HorizontalOptions="EndAndExpand">
-          <Button HorizontalOptions="End" VerticalOptions="End" Text="Escanear" WidthRequest="100" HeightRequest="80" Clicked="AbrirPaginaEscaner"/>
-        </StackLayout>
+      </ScrollView>
+      <StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
+        <Button HorizontalOptions="Start" VerticalOptions="End" Text="Acceso a datos" WidthRequest="100" HeightRequest="60" Clicked="AccederDatos"/>
+        <Button HorizontalOptions="Center" VerticalOptions="End" Text="Refrescar datos" WidthRequest="110" HeightRequest="60" Clicked="RefrescarDatos"/>
+        <Button HorizontalOptions="End" VerticalOptions="End" Text="Escanear" WidthRequest="100" HeightRequest="60" Clicked="AbrirPaginaEscaner"/>
       </StackLayout>
-    </ScrollView>
+    </StackLayout>
   </ContentPage.Content>
   
 </ContentPage>

@@ -8,9 +8,11 @@ namespace StockProductorCF.Vistas
 		public AccesoDatos ()
 		{
 			InitializeComponent ();
+            LogoEmprendimiento.Source = ImageSource.FromResource("StockProductorCF.Imagenes.logoEmprendimiento.png");
             Cabecera.Source = ImageSource.FromResource("StockProductorCF.Imagenes.ciudadFutura.png");
         }
 
+        [Android.Runtime.Preserve]
         void ConectarGoogle(object sender, EventArgs args)
         {
             var paginaAuntenticacion = new PaginaAuntenticacion();

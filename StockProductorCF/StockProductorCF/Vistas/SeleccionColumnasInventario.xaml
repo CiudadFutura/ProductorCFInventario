@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StockProductorCF.Vistas.SeleccionColumnasInventario"
+             Title="Seleccione columnas stock"
+             BackgroundColor="#c41d23">
+
+  <ContentPage.Content>
+    <StackLayout Spacing="0" Padding="0" BackgroundColor="#c41d23">
+      <StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
+        <Image x:Name="LogoEmprendimiento" WidthRequest="53" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="Start"/>
+        <Image x:Name="Cabecera" WidthRequest="149" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
+      </StackLayout>
+      <ScrollView>
+        <StackLayout x:Name="ContenedorColumnas" Spacing="0" Padding="2" BackgroundColor="#c41d23">
+
+        </StackLayout>
+      </ScrollView>
+      <StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
+        <Button HorizontalOptions="End" VerticalOptions="End" Text="Listo" WidthRequest="200" HeightRequest="60" Clicked="Listo"/>
+      </StackLayout>
+    </StackLayout>
+  </ContentPage.Content>
+  
+</ContentPage>

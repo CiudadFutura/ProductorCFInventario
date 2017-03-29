@@ -11,6 +11,7 @@ namespace StockProductorCF.Vistas
     {
         AtomEntryCollection _listaHojas;
         SpreadsheetsService _servicio;
+
         public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
         {
             InitializeComponent();
@@ -60,8 +61,8 @@ namespace StockProductorCF.Vistas
             //Se almacena el link para recobrar los datos de stock de la hoja cuando ingrese nuevamente
             CuentaUsuario.AlmacenarLinkHojaConsulta(link.HRef.ToString());
 
-            var paginaGrilla = new PaginaGrilla(link.HRef.ToString(), _servicio);
-            Navigation.PushAsync(paginaGrilla);
+            var paginaSeleccionColumnasParaVer = new SeleccionColumnasParaVer(link.HRef.ToString(), _servicio);
+            Navigation.PushAsync(paginaSeleccionColumnasParaVer);
             
         }
     }

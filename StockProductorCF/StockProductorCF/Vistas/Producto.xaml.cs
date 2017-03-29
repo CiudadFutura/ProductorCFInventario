@@ -3,16 +3,18 @@ using System;
 using Google.GData.Spreadsheets;
 using Xamarin.Forms;
 using StockProductorCF.Servicios;
+using StockProductorCF.Clases;
 
 namespace StockProductorCF.Vistas
 {
     public partial class Producto : ContentPage
     {
-        private bool _signoPositivo5 = true;
-        private bool _signoPositivo6 = true;
+        private bool[] _signoPositivo;
+        private double[] _movimientos;
         private SpreadsheetsService _servicio;
         private CellEntry[] _producto;
         private ServiciosGoogle _servicioGoogle;
+        private string[] _listaColumnasInventario;
 
         public Producto(CellEntry[] producto, CellEntry[] nombresColumnas, SpreadsheetsService servicio, ServiciosGoogle servicioGoogle)
         {
@@ -33,6 +35,14 @@ namespace StockProductorCF.Vistas
 
             Button botonSigno;
             Entry movimiento;
+
+            var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
+            _listaColumnasInventario = null;
+            if (!string.IsNullOrEmpty(columnasInventario))
+                _listaColumnasInventario = columnasInventario.Split(',');
+
+            _signoPositivo = new bool[_producto.Length];
+            _movimientos = new double[_producto.Length];
 
             foreach (CellEntry celda in _producto)
             {
@@ -56,7 +66,8 @@ namespace StockProductorCF.Vistas
                     HorizontalOptions = LayoutOptions.CenterAndExpand,
                     VerticalOptions = LayoutOptions.Center,
                     HorizontalTextAlignment = TextAlignment.Start,
-                    WidthRequest = 180
+                    WidthRequest = 180,
+                    IsEnabled = false
                 };
                 valorCampo.Text = celda != null ? celda.Value : "";
 
@@ -72,8 +83,10 @@ namespace StockProductorCF.Vistas
                 ContenedorProducto.Children.Add(campoValor);
 
                 //REEMPLAZAR
-                if (celda != null && (celda.Column == 5 || celda.Column == 6))
+                if (celda != null && _listaColumnasInventario != null && _listaColumnasInventario[(int)celda.Column - 1] == "1")
                 {
+                    _signoPositivo.SetValue(true, (int)celda.Column - 1);
+
                     nombreCampo = new Label()
                     {
                         HorizontalOptions = LayoutOptions.EndAndExpand,
@@ -89,25 +102,20 @@ namespace StockProductorCF.Vistas
                         Text = "+",
                         HorizontalOptions = LayoutOptions.Start,
                         VerticalOptions = LayoutOptions.Center,
-                        FontSize = 25
+                        FontSize = 25,
+                        StyleId = celda.Column.ToString()
                     };
 
-                    if (celda.Column == 5)
-                    {
-                        botonSigno.Clicked += DefinirSigno5;
-                    }
-                    else
-                    {
-                        botonSigno.Clicked += DefinirSigno6;
-                    }
+                    botonSigno.Clicked += DefinirSigno;
 
                     movimiento = new Entry()
                     {
                         HorizontalOptions = LayoutOptions.StartAndExpand,
                         VerticalOptions = LayoutOptions.Center,
                         HorizontalTextAlignment = TextAlignment.Start,
-                        StyleId = "movimiento" + celda.Column,
-                        WidthRequest = 100
+                        StyleId = "movimiento-" + celda.Column.ToString(),
+                        WidthRequest = 100,
+                        Keyboard = Keyboard.Numeric
                     };
 
                     campoValor = new StackLayout
@@ -127,46 +135,39 @@ namespace StockProductorCF.Vistas
             
         }
 
-        private void DefinirSigno5(object sender, EventArgs e)
+        private void DefinirSigno(object sender, EventArgs e)
         {
-            ((Button)sender).Text = _signoPositivo5 ? "-" : "+";
-            _signoPositivo5 = ((Button)sender).Text == "+";
-        }
-        private void DefinirSigno6(object sender, EventArgs e)
-        {
-            ((Button)sender).Text = _signoPositivo6 ? "-" : "+";
-            _signoPositivo6 = ((Button)sender).Text == "+";
+            Button boton = ((Button)sender);
+            boton.Text = _signoPositivo[Convert.ToInt32(boton.StyleId) - 1] ? "-" : "+";
+            _signoPositivo.SetValue(boton.Text == "+", Convert.ToInt32(boton.StyleId) - 1);
         }
 
         [Android.Runtime.Preserve]
         void GuardarCambios(object sender, EventArgs args)
         {
-            var movimiento5 = 0.00;
-            var movimiento6 = 0.00;
             foreach (View stackLayout in ContenedorProducto.Children)
             {
                 foreach (View control in ((StackLayout)stackLayout).Children)
                 {
-                    if (control.StyleId == "movimiento5")
-                        movimiento5 = Convert.ToDouble(((Entry)control).Text);
-                    if (control.StyleId == "movimiento6")
-                        movimiento6 = Convert.ToDouble(((Entry)control).Text);
+                    if (control.StyleId != null && control.StyleId.Contains("movimiento-"))
+                    {
+                        var columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
+                        var valor = Convert.ToDouble(((Entry)control).Text);
+                        _movimientos.SetValue(valor, columna - 1);
+                    }
                 }
             }
 
-            int multiplicador5 = _signoPositivo5 ? 1 : -1;
-            int multiplicador6 = _signoPositivo6 ? 1 : -1;
+            var multiplicador = 1;
+            var movimiento = 0.00;
             foreach (CellEntry celda in _producto)
             {
-                if (celda != null && celda.Column == 5)
+                if (_listaColumnasInventario[(int)celda.Column - 1] == "1")
                 {
-                    celda.InputValue = (Convert.ToDouble(celda.InputValue) + multiplicador5 * movimiento5).ToString();
-                    _servicioGoogle.ActualizarCelda(_servicio, celda);
-                }
+                    multiplicador = _signoPositivo[(int)celda.Column - 1] ? 1 : -1;
+                    movimiento = _movimientos[(int)celda.Column - 1];
 
-                if (celda != null && celda.Column == 6)
-                {
-                    celda.InputValue = (Convert.ToDouble(celda.InputValue) + multiplicador6 * movimiento6).ToString();
+                    celda.InputValue = (Convert.ToDouble(celda.InputValue) + multiplicador * movimiento).ToString();
                     _servicioGoogle.ActualizarCelda(_servicio, celda);
                 }
             }

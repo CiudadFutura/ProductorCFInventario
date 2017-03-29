@@ -13,10 +13,11 @@ namespace StockProductorCF.Vistas
         private SpreadsheetsService _servicio;
         private CellFeed _celdas;
         private string _linkHojaConsulta;
+        private CellEntry[] _nombresColumnas;
 
         public PaginaGrilla(string linkHojaConsulta, SpreadsheetsService servicio)
         {
-            CargaInicial();
+            InitializeComponent();
 
             _servicioGoogle = new ServiciosGoogle();
             _servicio = servicio;
@@ -24,18 +25,15 @@ namespace StockProductorCF.Vistas
 
             ObtenerDatosProductos();
         }
-
-        private void CargaInicial()
-        {
-            InitializeComponent();
-        }
-        
+                
         private void ObtenerDatosProductos()
         {
             if (_servicio == null)
                 _servicio = _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActual());
 
             _celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
+
+            _nombresColumnas = new CellEntry[_celdas.ColCount.Count];
 
             try
             {
@@ -52,7 +50,7 @@ namespace StockProductorCF.Vistas
                     }
                     else
                     {
-
+                        _nombresColumnas.SetValue(celda, (int)celda.Column - 1);
                     }
                 }
 
@@ -71,6 +69,17 @@ namespace StockProductorCF.Vistas
             StackLayout itemProducto;
             Label etiquetaProducto;
             var esGris = false;
+
+            var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
+            string[] listaColumnasParaVer = null;
+            if (!string.IsNullOrEmpty(columnasParaVer))
+                listaColumnasParaVer = columnasParaVer.Split(',');
+
+            var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
+            string[] listacolumnasInventario = null;
+            if (!string.IsNullOrEmpty(columnasInventario))
+                listacolumnasInventario = columnasInventario.Split(',');
+
             foreach (string[] producto in productos)
             {
                 etiquetaProducto = new Label
@@ -78,24 +87,33 @@ namespace StockProductorCF.Vistas
                     TextColor = Color.Black,
                     HorizontalOptions = LayoutOptions.StartAndExpand,
                     HorizontalTextAlignment = TextAlignment.Start,
-                    VerticalTextAlignment = TextAlignment.Center
+                    VerticalOptions = LayoutOptions.Center,
+                    FontSize = 16
                 };
+
+                var i = 0;
+                
                 foreach (string dato in producto)
                 {
-                    etiquetaProducto.Text += " " + dato + " -";
+                    if (listacolumnasInventario[i] == "1")
+                        etiquetaProducto.Text += " " + _nombresColumnas[i].Value + " :";
+
+                    if (listaColumnasParaVer != null && listaColumnasParaVer[i] == "1")
+                        etiquetaProducto.Text += " " + dato + " -";
+                    i += 1;
                 }
-                etiquetaProducto.Text.TrimEnd('-');
+                etiquetaProducto.Text = etiquetaProducto.Text.TrimEnd('-');
 
                 itemProducto = new StackLayout
                 {
                     HorizontalOptions = LayoutOptions.FillAndExpand,
                     VerticalOptions = LayoutOptions.CenterAndExpand,
                     Orientation = StackOrientation.Horizontal,
-                    HeightRequest = 50,
+                    HeightRequest = 55,
                     Children = { etiquetaProducto },
                     Spacing = 0,
-                    Padding = 0,
-                    Margin = 2,
+                    Padding = 2,
+                    Margin = 1,
                     BackgroundColor = esGris ? Color.Silver : Color.White,
                     GestureRecognizers = { new TapGestureRecognizer { Command = new Command(CargarProducto), CommandParameter = producto[0] } }
                 };
@@ -109,14 +127,9 @@ namespace StockProductorCF.Vistas
         {
             int fila = -1;
             CellEntry[] producto = new CellEntry[_celdas.ColCount.Count];
-            CellEntry[] nombresColumnas = new CellEntry[_celdas.ColCount.Count];
 
             foreach (CellEntry celda in _celdas.Entries)
             {
-                if (celda.Row == 1)
-                {
-                    nombresColumnas.SetValue(celda, (int)celda.Column - 1);
-                }
                 if (celda.Value == codigoProducto.ToString())
                     fila = (int)celda.Row;
                 if (celda.Row == fila)
@@ -125,7 +138,7 @@ namespace StockProductorCF.Vistas
                     break;
             }
             
-            Navigation.PushAsync(new Producto(producto, nombresColumnas, _servicio, _servicioGoogle));
+            Navigation.PushAsync(new Producto(producto, _nombresColumnas, _servicio, _servicioGoogle));
         }
 
         [Android.Runtime.Preserve]
@@ -159,6 +172,13 @@ namespace StockProductorCF.Vistas
         [Android.Runtime.Preserve]
         void RefrescarDatos(object sender, EventArgs args)
         {
+            ContenedorTabla.Children.Clear();
+            ContenedorTabla.Children.Add(new ActivityIndicator {
+                Color = Color.Red,
+                IsRunning = true,
+                HeightRequest = 60,
+                WidthRequest = 60
+            });
             ObtenerDatosProductos();
         }
     }

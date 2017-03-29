@@ -8,7 +8,7 @@
   <ContentPage.Content>
     <StackLayout Spacing="0" Padding="0" BackgroundColor="#c41d23">
       <ScrollView>
-        <StackLayout x:Name="ContenedorTabla" Spacing="0" Padding="0" BackgroundColor="Black">
+        <StackLayout x:Name="ContenedorTabla" Spacing="0" Padding="0" BackgroundColor="#c41d23">
         
         </StackLayout>
       </ScrollView>

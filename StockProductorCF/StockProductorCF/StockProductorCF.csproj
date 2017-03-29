@@ -60,6 +60,9 @@
     <Compile Include="Vistas\Producto.xaml.cs">
       <DependentUpon>Producto.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Vistas\SeleccionColumnasInventario.xaml.cs">
+      <DependentUpon>SeleccionColumnasInventario.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Vistas\SeleccionColumnasParaVer.xaml.cs">
       <DependentUpon>SeleccionColumnasParaVer.xaml</DependentUpon>
     </Compile>
@@ -191,6 +194,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Vistas\SeleccionColumnasParaVer.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Vistas\SeleccionColumnasInventario.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
       <SubType>Designer</SubType>
     </EmbeddedResource>

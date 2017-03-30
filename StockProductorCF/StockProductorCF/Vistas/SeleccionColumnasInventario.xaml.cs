@@ -16,16 +16,16 @@ namespace StockProductorCF.Vistas
         public SeleccionColumnasInventario(string linkHojaConsulta, SpreadsheetsService servicio)
         {
             InitializeComponent();
-            LogoEmprendimiento.Source = ImageSource.FromResource("StockProductorCF.Imagenes.logoEmprendimiento.png");
+            //LogoEmprendimiento.Source = ImageSource.FromResource("StockProductorCF.Imagenes.logoEmprendimiento.png");
             Cabecera.Source = ImageSource.FromResource("StockProductorCF.Imagenes.ciudadFutura.png");
 
             _servicio = servicio;
             _linkHojaConsulta = linkHojaConsulta;
 
-            ObtenerDatosProductos();
+            ObtenerColumnas();
         }
 
-        private void ObtenerDatosProductos()
+        private void ObtenerColumnas()
         {
             try
             {
@@ -47,7 +47,7 @@ namespace StockProductorCF.Vistas
                     }
                 }
 
-                LlenarGrillaProductos(columnas);
+                LlenarGrillaColumnasInventario(columnas);
             }
             catch (Exception)
             {
@@ -55,7 +55,7 @@ namespace StockProductorCF.Vistas
             }
         }
 
-        private void LlenarGrillaProductos(CellEntry[] columnas)
+        private void LlenarGrillaColumnasInventario(CellEntry[] columnas)
         {
             StackLayout itemColumna;
             Label etiquetaColumna;

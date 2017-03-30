@@ -2,20 +2,17 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="StockProductorCF.Vistas.PaginaGrilla"
-             Title="Productor de la CF - Inventario"
-             BackgroundColor="#c41d23">
+             Title="Productor de la CF - Inventario">
 
   <ContentPage.Content>
-    <StackLayout Spacing="0" Padding="0" BackgroundColor="#c41d23">
-      <ScrollView>
-        <StackLayout x:Name="ContenedorTabla" Spacing="0" Padding="0" BackgroundColor="#c41d23">
+    <StackLayout Spacing="0" Padding="0">
+      <StackLayout x:Name="ContenedorTabla" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
         
-        </StackLayout>
-      </ScrollView>
-      <StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
-        <Button HorizontalOptions="Start" VerticalOptions="End" Text="Acceso a datos" WidthRequest="100" HeightRequest="60" Clicked="AccederDatos"/>
-        <Button HorizontalOptions="Center" VerticalOptions="End" Text="Refrescar datos" WidthRequest="110" HeightRequest="60" Clicked="RefrescarDatos"/>
-        <Button HorizontalOptions="End" VerticalOptions="End" Text="Escanear" WidthRequest="100" HeightRequest="60" Clicked="AbrirPaginaEscaner"/>
+      </StackLayout>
+      <StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
+        <Button HorizontalOptions="StartAndExpand" VerticalOptions="End" Text="Acceso a datos" HeightRequest="60" Clicked="AccederDatos"/>
+        <Button HorizontalOptions="CenterAndExpand" VerticalOptions="End" Text="Refrescar datos" HeightRequest="60" Clicked="RefrescarDatos"/>
+        <Button HorizontalOptions="EndAndExpand" VerticalOptions="End" Text="Escanear" HeightRequest="60" Clicked="AbrirPaginaEscaner"/>
       </StackLayout>
     </StackLayout>
   </ContentPage.Content>

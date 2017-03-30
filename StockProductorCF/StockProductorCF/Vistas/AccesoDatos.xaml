@@ -3,21 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:StockProductorCF"
              x:Class="StockProductorCF.Vistas.AccesoDatos"
-             BackgroundColor="White"
              Title="Productor de la CF - Inventario">
 
   <ContentPage.Content>
     <ScrollView>
-      <StackLayout Spacing="0" Padding="0" BackgroundColor="#c41d23">
-        <StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
-          <Image x:Name="LogoEmprendimiento" WidthRequest="53" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="Start"/>
+      <StackLayout Spacing="0" Padding="0">
+        <StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
           <Image x:Name="Cabecera" WidthRequest="149" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
         </StackLayout>
         <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Center">
-          <Button HorizontalOptions="Center" VerticalOptions="Center" Text="Conectar con cuenta de Google" WidthRequest="250" HeightRequest="80" Clicked="ConectarGoogle"/>
+          <Button HorizontalOptions="Center" VerticalOptions="Center" Text="Conectar con cuenta de Google" WidthRequest="250" HeightRequest="100" Clicked="ConectarGoogle"/>
         </StackLayout>
         <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Center">
-          <Button HorizontalOptions="Center" VerticalOptions="Center" Text="Conectar con Base de datos" WidthRequest="250" HeightRequest="80"/>
+          <Button HorizontalOptions="Center" VerticalOptions="Center" Text="Conectar con Base de datos" WidthRequest="250" HeightRequest="100"/>
         </StackLayout>
       </StackLayout>
     </ScrollView>

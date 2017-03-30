@@ -2,22 +2,22 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="StockProductorCF.Vistas.SeleccionColumnasParaVer"
-             Title="Seleccione columnas para ver"
-             BackgroundColor="#c41d23">
+             Title="Productor de la CF - Inventario">
 
   <ContentPage.Content>
-    <StackLayout Spacing="0" Padding="0" BackgroundColor="#c41d23">
-      <StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
-        <Image x:Name="LogoEmprendimiento" WidthRequest="53" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="Start"/>
+    <StackLayout Spacing="0" Padding="0">
+      <StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
         <Image x:Name="Cabecera" WidthRequest="149" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
       </StackLayout>
-      <ScrollView>
-        <StackLayout x:Name="ContenedorColumnas" Spacing="0" Padding="2" BackgroundColor="#c41d23">
-
+      <StackLayout BackgroundColor="Gray" VerticalOptions="Start" HorizontalOptions="Fill">
+        <Label FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center">Seleccione columnas para ver en grilla</Label>
+      </StackLayout>
+      <ScrollView VerticalOptions="FillAndExpand" HorizontalOptions="Center">
+        <StackLayout x:Name="ContenedorColumnas" VerticalOptions="Start" HorizontalOptions="Center" Spacing="0" Padding="0">
         </StackLayout>
       </ScrollView>
-      <StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
-        <Button HorizontalOptions="End" VerticalOptions="End" Text="Listo" WidthRequest="200" HeightRequest="60" Clicked="Listo"/>
+      <StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
+        <Button HorizontalOptions="FillAndExpand" VerticalOptions="End" Text="Listo" HeightRequest="60" Clicked="Listo"/>
       </StackLayout>
     </StackLayout>
   </ContentPage.Content>

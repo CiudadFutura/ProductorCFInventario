@@ -57,8 +57,11 @@ namespace StockProductorCF.Vistas
 
                 foreach (CellEntry nombreColumna in nombresColumnas)
                 {
-                    if(celda != null && nombreColumna.Column == celda.Column)
+                    if (celda != null && nombreColumna.Column == celda.Column)
+                    {
                         nombreCampo.Text = nombreColumna.Value;
+                        break;
+                    }
                 }
                 
                 valorCampo = new Entry()

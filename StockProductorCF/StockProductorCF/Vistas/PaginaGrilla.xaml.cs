@@ -2,6 +2,8 @@
 using StockProductorCF.Clases;
 using StockProductorCF.Servicios;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xamarin.Forms;
 using ZXing.Net.Mobile.Forms;
 
@@ -14,6 +16,9 @@ namespace StockProductorCF.Vistas
         private CellFeed _celdas;
         private string _linkHojaConsulta;
         private CellEntry[] _nombresColumnas;
+        private string[] _listaColumnasParaVer;
+        private string[] _listacolumnasInventario;
+        private bool _seleccionoItem;
 
         public PaginaGrilla(string linkHojaConsulta, SpreadsheetsService servicio)
         {
@@ -23,9 +28,18 @@ namespace StockProductorCF.Vistas
             _servicio = servicio;
             _linkHojaConsulta = linkHojaConsulta;
 
+            var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
+            if (!string.IsNullOrEmpty(columnasParaVer))
+                _listaColumnasParaVer = columnasParaVer.Split(',');
+
+            var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
+            _listacolumnasInventario = null;
+            if (!string.IsNullOrEmpty(columnasInventario))
+                _listacolumnasInventario = columnasInventario.Split(',');
+
             ObtenerDatosProductos();
         }
-                
+
         private void ObtenerDatosProductos()
         {
             if (_servicio == null)
@@ -33,20 +47,22 @@ namespace StockProductorCF.Vistas
 
             _celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
 
+            ContenedorTabla.Children.Clear();
+
             _nombresColumnas = new CellEntry[_celdas.ColCount.Count];
 
             try
             {
-                string[][] productos = new string[_celdas.RowCount.Count - 1][];
+                IList<string[]> productos = new string[_celdas.RowCount.Count - 1][];
 
                 foreach (CellEntry celda in _celdas.Entries)
                 {
                     if (celda.Row != 1)
                     {
                         if (celda.Column == 1)
-                            productos[celda.Row - 2] = new string[_celdas.ColCount.Count];
+                            productos[(int)celda.Row - 2] = new string[_celdas.ColCount.Count];
 
-                        productos[celda.Row - 2].SetValue(celda.Value, (int)celda.Column - 1);
+                        productos[(int)celda.Row - 2].SetValue(celda.Value, (int)celda.Column - 1);
                     }
                     else
                     {
@@ -62,98 +78,60 @@ namespace StockProductorCF.Vistas
             }
         }
 
-        private void LlenarGrillaProductos(string[][] productos)
+        private void LlenarGrillaProductos(IList<string[]> productos)
         {
-            ContenedorTabla.Children.Clear();
-
-            StackLayout itemProducto;
-            Label etiquetaProducto;
-            var esGris = false;
-
-            var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
-            string[] listaColumnasParaVer = null;
-            if (!string.IsNullOrEmpty(columnasParaVer))
-                listaColumnasParaVer = columnasParaVer.Split(',');
-
-            var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
-            string[] listacolumnasInventario = null;
-            if (!string.IsNullOrEmpty(columnasInventario))
-                listacolumnasInventario = columnasInventario.Split(',');
-
-            foreach (string[] producto in productos)
-            {
-                etiquetaProducto = new Label
-                {
-                    TextColor = Color.Black,
-                    HorizontalOptions = LayoutOptions.StartAndExpand,
-                    HorizontalTextAlignment = TextAlignment.Start,
-                    VerticalOptions = LayoutOptions.Center,
-                    FontSize = 16
-                };
-
-                var i = 0;
-                
-                foreach (string dato in producto)
-                {
-                    if (listacolumnasInventario[i] == "1")
-                        etiquetaProducto.Text += " " + _nombresColumnas[i].Value + " :";
-
-                    if (listaColumnasParaVer != null && listaColumnasParaVer[i] == "1")
-                        etiquetaProducto.Text += " " + dato + " -";
-                    i += 1;
-                }
-                etiquetaProducto.Text = etiquetaProducto.Text.TrimEnd('-');
-
-                itemProducto = new StackLayout
-                {
-                    HorizontalOptions = LayoutOptions.FillAndExpand,
-                    VerticalOptions = LayoutOptions.CenterAndExpand,
-                    Orientation = StackOrientation.Horizontal,
-                    HeightRequest = 55,
-                    Children = { etiquetaProducto },
-                    Spacing = 0,
-                    Padding = 2,
-                    Margin = 1,
-                    BackgroundColor = esGris ? Color.Silver : Color.White,
-                    GestureRecognizers = { new TapGestureRecognizer { Command = new Command(CargarProducto), CommandParameter = producto[0] } }
-                };
-
-                esGris = !esGris;
-                ContenedorTabla.Children.Add(itemProducto);
-            }
+            var lista = ConstruirVistaDeLista(productos.ToList());
+            ContenedorTabla.Children.Add(lista);
         }
 
-        private void CargarProducto(object codigoProducto)
+        [Android.Runtime.Preserve]
+        void CargarProducto(object sender, EventArgs args)
+        {
+            if (!_seleccionoItem)
+            {
+                var Id = ((ClaseProducto)((ListView)sender).SelectedItem).ID;
+                IrAlProducto(Id);
+                ((ListView)sender).SelectedItem = null;
+                _seleccionoItem = true;
+            }
+            else
+                _seleccionoItem = false;
+        }
+
+        private void IrAlProducto(string codigoProducto)
         {
             int fila = -1;
             CellEntry[] producto = new CellEntry[_celdas.ColCount.Count];
 
             foreach (CellEntry celda in _celdas.Entries)
             {
-                if (celda.Value == codigoProducto.ToString())
+                if (celda.Column == 1 && celda.Value == codigoProducto.ToString())
                     fila = (int)celda.Row;
                 if (celda.Row == fila)
                     producto.SetValue(celda, (int)celda.Column - 1);
                 if (fila > -1 && celda.Row > fila)
                     break;
             }
-            
+
             Navigation.PushAsync(new Producto(producto, _nombresColumnas, _servicio, _servicioGoogle));
         }
+
 
         [Android.Runtime.Preserve]
         async void AbrirPaginaEscaner(object sender, EventArgs args)
         {
             var paginaEscaner = new ZXingScannerPage();
 
-            paginaEscaner.OnScanResult += (result) => {
+            paginaEscaner.OnScanResult += (result) =>
+            {
                 // Detiene el escaner
                 paginaEscaner.IsScanning = false;
 
                 // Cierra la página del escaner y llama a la página del producto
-                Device.BeginInvokeOnMainThread(() => {
+                Device.BeginInvokeOnMainThread(() =>
+                {
                     Navigation.PopModalAsync();
-                    CargarProducto(result.Text);
+                    IrAlProducto(result.Text);
                 });
             };
 
@@ -173,7 +151,8 @@ namespace StockProductorCF.Vistas
         void RefrescarDatos(object sender, EventArgs args)
         {
             ContenedorTabla.Children.Clear();
-            ContenedorTabla.Children.Add(new ActivityIndicator {
+            ContenedorTabla.Children.Add(new ActivityIndicator
+            {
                 Color = Color.Red,
                 IsRunning = true,
                 HeightRequest = 60,
@@ -181,5 +160,150 @@ namespace StockProductorCF.Vistas
             });
             ObtenerDatosProductos();
         }
+
+
+        private StackLayout ConstruirVistaDeLista(List<string[]> productos)
+        {
+            List<ClaseProducto> listaProductos = new List<ClaseProducto>();
+            ClaseProducto producto;
+            List<string> datosParaVer;
+            foreach (string[] datosProducto in productos)
+            {
+                datosParaVer = new List<string>();
+                var i = 0;
+                string textoDato;
+                foreach (string dato in datosProducto)
+                {
+                    textoDato = "";
+
+                    if (_listaColumnasParaVer != null && _listaColumnasParaVer[i] == "1")
+                    {
+                        if (_listacolumnasInventario[i] == "1")
+                            textoDato += _nombresColumnas[i].Value + " : ";
+
+                        textoDato += dato;
+                        datosParaVer.Add(textoDato);
+                    }
+                    i += 1;
+                }
+
+                producto = new ClaseProducto(datosProducto[0], datosParaVer);
+                listaProductos.Add(producto);
+            }
+            
+            StackLayout Encabezado = new StackLayout
+            {
+                HorizontalOptions = LayoutOptions.Fill,
+                VerticalOptions = LayoutOptions.Start,
+                BackgroundColor = Color.Gray,
+                Children =
+                {
+                    new Label
+                    {
+                        Text = "Productos",
+                        FontSize = 18,
+                        HorizontalOptions = LayoutOptions.Center,
+                        FontAttributes = FontAttributes.Bold,
+                        TextColor = Color.White
+                    }
+                }
+            };
+
+            ListView vista = new ListView
+            {
+                RowHeight = 60,
+                SeparatorColor = Color.Black,
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                HorizontalOptions = LayoutOptions.Fill,
+                ItemsSource = listaProductos,
+                ItemTemplate = new DataTemplate(() =>
+                {
+                    Label nombreProducto = new Label
+                    {
+                        FontSize = 16.5,
+                        FontAttributes = FontAttributes.Bold,
+                        VerticalOptions = LayoutOptions.CenterAndExpand
+                    };
+                    nombreProducto.SetBinding(Label.TextProperty, "Nombre");
+
+                    Label datos = new Label()
+                    {
+                        FontSize = 15,
+                        TextColor = Color.Black,
+                        VerticalOptions = LayoutOptions.CenterAndExpand
+                    };
+                    datos.SetBinding(Label.TextProperty, "Datos");
+
+                    BoxView cuadradito = new BoxView()
+                    {
+                        WidthRequest = 5,
+                        BackgroundColor = Color.Red
+                    };
+
+                    // Return an assembled ViewCell.
+                    return new ViewCell
+                    {
+                        View = new StackLayout
+                        {
+                            Padding = 2,
+                            Orientation = StackOrientation.Horizontal,
+                            BackgroundColor = Color.White,
+                            Children =
+                            {
+                                cuadradito,
+                                nombreProducto,
+                                new StackLayout
+                                {
+                                    Orientation = StackOrientation.Vertical,
+                                    Spacing = 0,
+                                    Children =
+                                    {
+                                        datos
+                                    }
+                                }
+                            }
+                        }
+                    };
+                })
+            };
+
+            vista.ItemSelected += CargarProducto;
+
+            // Build the page.
+            return new StackLayout
+            {
+                Spacing = 0,
+                Padding = 0,
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                HorizontalOptions = LayoutOptions.Fill,
+                Children =
+                {
+                    Encabezado,
+                    vista
+                }
+            };
+        }
+
     }
+
+    [Android.Runtime.Preserve]
+    public class ClaseProducto
+    {
+        [Android.Runtime.Preserve]
+        public ClaseProducto(string id, IList<string> datos)
+        {
+            ID = id;
+            Nombre = datos[0] + " |";
+            Datos = string.Join(" - ", datos.Skip(0).Take(datos.Count));
+        }
+
+        [Android.Runtime.Preserve]
+        public string ID { private set; get; }
+        [Android.Runtime.Preserve]
+        public string Nombre { private set; get; }
+        [Android.Runtime.Preserve]
+        public string Datos { private set; get; }
+    };
+
+    
 }

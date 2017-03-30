@@ -2,18 +2,20 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="StockProductorCF.Vistas.Producto"
-             Title="Productor de la CF - Inventario"
-             BackgroundColor="White">
+             Title="Productor de la CF - Inventario">
 
   <ContentPage.Content>
-    <StackLayout Spacing="0" Padding="0" BackgroundColor="White">
-      <ScrollView>
-        <StackLayout x:Name="ContenedorProducto" Spacing="0" Padding="0">
+    <StackLayout Spacing="0" Padding="0">
+      <StackLayout BackgroundColor="Gray" VerticalOptions="Start" HorizontalOptions="Fill">
+        <Label FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center">Detalle del producto</Label>
+      </StackLayout>
+      <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="Fill">
+        <StackLayout x:Name="ContenedorProducto" VerticalOptions="Start" HorizontalOptions="Fill" Spacing="0" Padding="0">
         
         </StackLayout>
       </ScrollView>
-      <StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand" HorizontalOptions="EndAndExpand">
-        <Button HorizontalOptions="End" VerticalOptions="End" Text="Guardar cambios" WidthRequest="100" HeightRequest="60" Clicked="GuardarCambios"/>
+      <StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" VerticalOptions="End" HorizontalOptions="Fill">
+        <Button HorizontalOptions="FillAndExpand" VerticalOptions="End" HeightRequest="60" Text="Guardar cambios" Clicked="GuardarCambios"/>
       </StackLayout>
     </StackLayout>
   </ContentPage.Content>

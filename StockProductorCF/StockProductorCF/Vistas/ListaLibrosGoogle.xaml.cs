@@ -14,7 +14,7 @@ namespace StockProductorCF.Vistas
         public ListaLibrosGoogle(SpreadsheetsService servicio, AtomEntryCollection listaLibros)
         {
             InitializeComponent();
-            LogoEmprendimiento.Source = ImageSource.FromResource("StockProductorCF.Imagenes.logoEmprendimiento.png");
+            //LogoEmprendimiento.Source = ImageSource.FromResource("StockProductorCF.Imagenes.logoEmprendimiento.png");
             Cabecera.Source = ImageSource.FromResource("StockProductorCF.Imagenes.ciudadFutura.png");
 
             _servicio = servicio;

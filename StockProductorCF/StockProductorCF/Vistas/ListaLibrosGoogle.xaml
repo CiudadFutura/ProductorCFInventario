@@ -2,17 +2,18 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="StockProductorCF.Vistas.ListaLibrosGoogle"
-             Title="Seleccione el libro" 
-             BackgroundColor="White">
+             Title="Productor de la CF - Inventario">
 
   <ContentPage.Content>
     <ScrollView>
-      <StackLayout Spacing="0" Padding="0" BackgroundColor="#c41d23">
-        <StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
-          <Image x:Name="LogoEmprendimiento" WidthRequest="53" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="Start"/>
+      <StackLayout Spacing="0" Padding="0">
+        <StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
           <Image x:Name="Cabecera" WidthRequest="149" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
         </StackLayout>
-        <StackLayout x:Name="ContenedorLibros" BackgroundColor="#FFFFFF">
+        <StackLayout BackgroundColor="Gray" VerticalOptions="Start" HorizontalOptions="Fill">
+          <Label FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center">Seleccione un libro</Label>
+        </StackLayout>
+        <StackLayout x:Name="ContenedorLibros" Spacing="4" Padding="4">
         </StackLayout>
       </StackLayout>
     </ScrollView>

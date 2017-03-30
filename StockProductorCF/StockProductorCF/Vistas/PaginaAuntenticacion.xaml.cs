@@ -37,7 +37,7 @@ namespace StockProductorCF
 
             webView.HeightRequest = 1;
             webView.Navigated += CuandoNavegaWebView;
-            Content = webView;
+            ContenedorWebView.Children.Add(webView);
         }
 
         private void CuandoNavegaWebView(object sender, WebNavigatedEventArgs e)
@@ -71,6 +71,8 @@ namespace StockProductorCF
         {
             if (url.Contains("access_token") && url.Contains("&expires_in="))
             {
+                ContenedorWebView.Children.Clear();
+
                 var at = url.Replace("http://localhost/#access_token=", "");
 
                 if (Device.OS == TargetPlatform.WinPhone || Device.OS == TargetPlatform.Windows) //VER

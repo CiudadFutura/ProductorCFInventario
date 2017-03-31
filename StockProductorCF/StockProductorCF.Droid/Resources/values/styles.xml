@@ -21,6 +21,7 @@
          colorControlHighlight and colorSwitchThumbNormal. -->
 
     <item name="colorControlHighlight">#c41d23</item>
+    <item name="colorControlActivated">#c41d23</item>
     <item name="colorSwitchThumbNormal">#455A64</item>
     
     <item name="windowActionModeOverlay">true</item>
@@ -30,5 +31,16 @@
 
   <style name="AppCompatDialogStyle" parent="Theme.AppCompat.Light.Dialog">
     <item name="colorAccent">#FF4081</item>
+  </style>
+
+  <style name="Theme.Lanzamiento"
+    parent="android:Theme">
+    <item name="android:windowBackground">
+      @drawable/pantallaLanzamiento
+    </item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowIsTranslucent">false</item>
+    <item name="android:windowIsFloating">false</item>
+    <item name="android:backgroundDimEnabled">true</item>
   </style>
 </resources>

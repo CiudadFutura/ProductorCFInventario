@@ -9,10 +9,10 @@
       <StackLayout x:Name="ContenedorTabla" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
         
       </StackLayout>
-      <StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
-        <Button HorizontalOptions="StartAndExpand" VerticalOptions="End" Text="Acceso a datos" HeightRequest="60" Clicked="AccederDatos"/>
-        <Button HorizontalOptions="CenterAndExpand" VerticalOptions="End" Text="Refrescar datos" HeightRequest="60" Clicked="RefrescarDatos"/>
-        <Button HorizontalOptions="EndAndExpand" VerticalOptions="End" Text="Escanear" HeightRequest="60" Clicked="AbrirPaginaEscaner"/>
+      <StackLayout x:Name="ContenedorBotones" BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
+        <Button x:Name="Datos" VerticalOptions="End" Text="Acceso a datos" HeightRequest="60" Clicked="AccederDatos"/>
+        <Button x:Name="Refrescar" VerticalOptions="End" Text="Refrescar datos" HeightRequest="60" Clicked="RefrescarDatos"/>
+        <Button x:Name="Escanear" VerticalOptions="End" Text="Escanear" HeightRequest="60" Clicked="AbrirPaginaEscaner"/>
       </StackLayout>
     </StackLayout>
   </ContentPage.Content>

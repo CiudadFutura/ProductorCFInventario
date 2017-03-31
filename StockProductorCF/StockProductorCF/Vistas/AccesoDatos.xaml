@@ -9,13 +9,16 @@
     <ScrollView>
       <StackLayout Spacing="0" Padding="0">
         <StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
-          <Image x:Name="Cabecera" WidthRequest="149" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
+          <Image x:Name="Cabecera" WidthRequest="250" HeightRequest="90" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
         </StackLayout>
-        <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Center">
-          <Button HorizontalOptions="Center" VerticalOptions="Center" Text="Conectar con cuenta de Google" WidthRequest="250" HeightRequest="100" Clicked="ConectarGoogle"/>
+        <StackLayout BackgroundColor="Gray" VerticalOptions="Start" HorizontalOptions="Fill">
+          <Label FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center">Seleccione la fuente de datos</Label>
         </StackLayout>
-        <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Center">
-          <Button HorizontalOptions="Center" VerticalOptions="Center" Text="Conectar con Base de datos" WidthRequest="250" HeightRequest="100"/>
+        <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Fill">
+          <Button HorizontalOptions="FillAndExpand" VerticalOptions="Center" Text="Conectar con cuenta de Google" WidthRequest="250" HeightRequest="100" Clicked="ConectarGoogle"/>
+        </StackLayout>
+        <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Fill">
+          <Button HorizontalOptions="FillAndExpand" VerticalOptions="Center" Text="Conectar con Base de datos" WidthRequest="250" HeightRequest="100"/>
         </StackLayout>
       </StackLayout>
     </ScrollView>

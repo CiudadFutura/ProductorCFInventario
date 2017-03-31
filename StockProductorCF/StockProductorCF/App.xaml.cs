@@ -1,14 +1,16 @@
-﻿using StockProductorCF.Clases;
+﻿
+using StockProductorCF.Clases;
 using Xamarin.Forms;
 
 namespace StockProductorCF
 {
     public partial class App : Application
     {
+        public static int AnchoDePantalla;
         public App()
         {
             InitializeComponent();
-            
+           
             var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaConsulta();
 
             if (!string.IsNullOrEmpty(linkHojaConsulta))
@@ -22,11 +24,17 @@ namespace StockProductorCF
                 MainPage = new NavigationPage(new Vistas.AccesoDatos());
         }
 
+        [Android.Runtime.Preserve]
+        public static void AlmacenarAnchoPantalla(int ancho)
+        {
+            AnchoDePantalla = ancho;
+        }
+
         protected override void OnStart()
         {
             // Handle when your app starts
         }
-        
+
         protected override void OnSleep()
         {
             // Handle when your app sleeps

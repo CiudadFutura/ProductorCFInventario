@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto" android:versionCode="1" android:versionName="1.0" package="InventarioProductorCiudadFutura">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto" android:versionCode="1" android:versionName="1.0" package="InventarioProductorCiudadFutura.InventarioProductorCiudadFutura">
 	<uses-sdk android:minSdkVersion="19" />
-	<application android:label="Inventario - Ciudad Futura"></application>
+	<application android:label="Inventario - Productor de la Ciudad Futura" android:icon="@drawable/icon"></application>
 	<uses-permission android:name="android.permission.CAMERA" />
 </manifest>

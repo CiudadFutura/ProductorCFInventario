@@ -14,8 +14,6 @@ namespace StockProductorCF.Vistas
         public ListaLibrosGoogle(SpreadsheetsService servicio, AtomEntryCollection listaLibros)
         {
             InitializeComponent();
-            //LogoEmprendimiento.Source = ImageSource.FromResource("StockProductorCF.Imagenes.logoEmprendimiento.png");
-            Cabecera.Source = ImageSource.FromResource("StockProductorCF.Imagenes.ciudadFutura.png");
 
             _servicio = servicio;
             _listaLibros = listaLibros;
@@ -30,16 +28,15 @@ namespace StockProductorCF.Vistas
             {
                 itemLibro = new StackLayout
                 {
-                    HorizontalOptions = LayoutOptions.CenterAndExpand,
-                    VerticalOptions = LayoutOptions.CenterAndExpand
+                    HorizontalOptions = LayoutOptions.Fill,
+                    VerticalOptions = LayoutOptions.Start
                 };
                 var boton = new Button
                 {
                     Text = libro.Title.Text,
-                    HorizontalOptions = LayoutOptions.Center,
-                    VerticalOptions = LayoutOptions.Center,
-                    WidthRequest = 250,
-                    HeightRequest = 60
+                    HorizontalOptions = LayoutOptions.FillAndExpand,
+                    VerticalOptions = LayoutOptions.Start,
+                    HeightRequest = 55
                 };
 
                 boton.Resources = new ResourceDictionary();

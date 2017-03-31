@@ -18,7 +18,6 @@ namespace StockProductorCF.iOS
         //
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
-
             //// define useragent android like
             //string userAgent = "Mozilla/5.0 (Linux; Android 5.1.1; Nexus 5 Build/LMY48B; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/43.0.2357.65 Mobile Safari/537.36";
 
@@ -28,6 +27,8 @@ namespace StockProductorCF.iOS
 
             ZXing.Net.Mobile.Forms.iOS.Platform.Init();
             global::Xamarin.Forms.Forms.Init();
+
+            //OBTENER ancho de pantalla  App.AlmacenarAnchoPantalla
 
             LoadApplication(new App());
 

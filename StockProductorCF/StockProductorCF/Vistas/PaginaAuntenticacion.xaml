@@ -5,19 +5,5 @@
              x:Class="StockProductorCF.PaginaAuntenticacion"
              Title="Autenticación en Google - CF">
 
-  <ContentPage.Content>
-    <ScrollView>
-      <StackLayout Spacing="0" Padding="0">
-        <StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
-          <Image x:Name="Cabecera" WidthRequest="149" HeightRequest="53" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
-        </StackLayout>
-        <StackLayout BackgroundColor="Gray" VerticalOptions="Start" HorizontalOptions="Fill">
-          <Label FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center">Autenticando la cuenta de Google...</Label>
-        </StackLayout>
-        <StackLayout x:Name="ContenedorWebView" Spacing="0" Padding="0">
-        </StackLayout>
-      </StackLayout>
-    </ScrollView>
-  </ContentPage.Content>
   
 </ContentPage>

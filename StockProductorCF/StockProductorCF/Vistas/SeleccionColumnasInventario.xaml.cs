@@ -2,8 +2,8 @@
 using System;
 using Google.GData.Spreadsheets;
 using Xamarin.Forms;
-using StockProductorCF.Servicios;
 using StockProductorCF.Clases;
+using System.Linq;
 
 namespace StockProductorCF.Vistas
 {
@@ -13,50 +13,20 @@ namespace StockProductorCF.Vistas
         private string _linkHojaConsulta;
         private int[] _listaColumnas;
 
-        public SeleccionColumnasInventario(string linkHojaConsulta, SpreadsheetsService servicio)
+        public SeleccionColumnasInventario(CellEntry[] columnas, string linkHojaConsulta, SpreadsheetsService servicio)
         {
             InitializeComponent();
-            //LogoEmprendimiento.Source = ImageSource.FromResource("StockProductorCF.Imagenes.logoEmprendimiento.png");
-            Cabecera.Source = ImageSource.FromResource("StockProductorCF.Imagenes.ciudadFutura.png");
 
             _servicio = servicio;
             _linkHojaConsulta = linkHojaConsulta;
 
-            ObtenerColumnas();
-        }
-
-        private void ObtenerColumnas()
-        {
-            try
-            {
-                var celdas = new ServiciosGoogle().ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
-
-                CellEntry[] columnas = new CellEntry[celdas.ColCount.Count];
-                _listaColumnas = new int[celdas.ColCount.Count];
-
-                foreach (CellEntry celda in celdas.Entries)
-                {
-                    if (celda.Row == 1)
-                    {
-                        columnas.SetValue(celda, (int)celda.Column - 1);
-                        _listaColumnas.SetValue(1, (int)celda.Column - 1);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                LlenarGrillaColumnasInventario(columnas);
-            }
-            catch (Exception)
-            {
-                Navigation.PushAsync(new AccesoDatos());
-            }
+            LlenarGrillaColumnasInventario(columnas);
         }
 
         private void LlenarGrillaColumnasInventario(CellEntry[] columnas)
         {
+            _listaColumnas = Enumerable.Repeat(1, columnas.Length).ToArray();
+
             StackLayout itemColumna;
             Label etiquetaColumna;
             Switch seleccionar;
@@ -70,13 +40,11 @@ namespace StockProductorCF.Vistas
                     HorizontalTextAlignment = TextAlignment.Start,
                     VerticalOptions = LayoutOptions.Center,
                     Text = columna.Value,
-                    FontSize = 20
+                    FontSize = 18
                 };
 
                 seleccionar = new Switch
                 {
-                    HeightRequest = 50,
-                    WidthRequest = 50,
                     HorizontalOptions = LayoutOptions.Center,
                     VerticalOptions = LayoutOptions.CenterAndExpand,
                     StyleId = columna.Column.ToString()
@@ -88,13 +56,12 @@ namespace StockProductorCF.Vistas
                     HorizontalOptions = LayoutOptions.FillAndExpand,
                     VerticalOptions = LayoutOptions.CenterAndExpand,
                     Orientation = StackOrientation.Horizontal,
-                    HeightRequest = 50,
-                    WidthRequest = 250,
+                    HeightRequest = 45,
+                    WidthRequest = 300,
                     Children = { etiquetaColumna, seleccionar },
                     Spacing = 0,
-                    Padding = 2,
-                    Margin = 1,
-                    BackgroundColor = esGris ? Color.Silver : Color.White
+                    Padding = 4,
+                    BackgroundColor = esGris ? Color.Silver : Color.FromHex("#F5F5F5")
                 };
 
                 esGris = !esGris;

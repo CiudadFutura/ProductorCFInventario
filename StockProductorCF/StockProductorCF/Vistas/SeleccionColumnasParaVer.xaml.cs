@@ -4,20 +4,20 @@ using Google.GData.Spreadsheets;
 using Xamarin.Forms;
 using StockProductorCF.Servicios;
 using StockProductorCF.Clases;
+using System.Linq;
 
 namespace StockProductorCF.Vistas
 {
     public partial class SeleccionColumnasParaVer : ContentPage
     {
         private SpreadsheetsService _servicio;
-        private string _linkHojaConsulta;
         private int[] _listaColumnas;
+        private CellEntry[] _columnas;
+        private string _linkHojaConsulta;
 
         public SeleccionColumnasParaVer(string linkHojaConsulta, SpreadsheetsService servicio)
         {
             InitializeComponent();
-            //LogoEmprendimiento.Source = ImageSource.FromResource("StockProductorCF.Imagenes.logoEmprendimiento.png");
-            Cabecera.Source = ImageSource.FromResource("StockProductorCF.Imagenes.ciudadFutura.png");
 
             _servicio = servicio;
             _linkHojaConsulta = linkHojaConsulta;
@@ -31,15 +31,14 @@ namespace StockProductorCF.Vistas
             {
                 var celdas = new ServiciosGoogle().ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
 
-                CellEntry[] columnas = new CellEntry[celdas.ColCount.Count];
-                _listaColumnas = new int[celdas.ColCount.Count];
+                _columnas = new CellEntry[celdas.ColCount.Count];
+                _listaColumnas = Enumerable.Repeat(1, (int)celdas.ColCount.Count).ToArray();
 
                 foreach (CellEntry celda in celdas.Entries)
                 {
                     if (celda.Row == 1)
                     {
-                        columnas.SetValue(celda, (int)celda.Column - 1);
-                        _listaColumnas.SetValue(1, (int)celda.Column - 1);
+                        _columnas.SetValue(celda, (int)celda.Column - 1);
                     }
                     else
                     {
@@ -47,7 +46,7 @@ namespace StockProductorCF.Vistas
                     }
                 }
 
-                LlenarGrillaColumnasParaVer(columnas);
+                LlenarGrillaColumnasParaVer(_columnas);
             }
             catch (Exception)
             {
@@ -70,13 +69,11 @@ namespace StockProductorCF.Vistas
                     HorizontalTextAlignment = TextAlignment.Start,
                     VerticalOptions = LayoutOptions.Center,
                     Text = columna.Value,
-                    FontSize = 20
+                    FontSize = 18
                 };
 
                 seleccionar = new Switch
                 {
-                    HeightRequest = 50,
-                    WidthRequest = 50,
                     HorizontalOptions = LayoutOptions.End,
                     VerticalOptions = LayoutOptions.Center,
                     StyleId = columna.Column.ToString()
@@ -88,13 +85,12 @@ namespace StockProductorCF.Vistas
                     HorizontalOptions = LayoutOptions.FillAndExpand,
                     VerticalOptions = LayoutOptions.CenterAndExpand,
                     Orientation = StackOrientation.Horizontal,
-                    HeightRequest = 50,
-                    WidthRequest = 250,
+                    HeightRequest = 45,
+                    WidthRequest = 300,
                     Children = { etiquetaColumna, seleccionar },
                     Spacing = 0,
-                    Padding = 2,
-                    Margin = 2,
-                    BackgroundColor = esGris ? Color.Silver : Color.White
+                    Padding = 4,
+                    BackgroundColor = esGris ? Color.Silver : Color.FromHex("#F5F5F5")
                 };
 
                 esGris = !esGris;
@@ -113,7 +109,7 @@ namespace StockProductorCF.Vistas
         void Listo(object sender, EventArgs e)
         {
             CuentaUsuario.AlmacenarColumnasParaVer(string.Join(",", _listaColumnas));
-            var paginaSeleccionColumnasInventario = new SeleccionColumnasInventario(_linkHojaConsulta, _servicio);
+            var paginaSeleccionColumnasInventario = new SeleccionColumnasInventario(_columnas, _linkHojaConsulta, _servicio);
             Navigation.PushAsync(paginaSeleccionColumnasInventario);
         }
     }

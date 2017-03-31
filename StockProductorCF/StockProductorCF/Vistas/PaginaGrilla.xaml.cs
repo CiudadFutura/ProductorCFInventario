@@ -19,6 +19,7 @@ namespace StockProductorCF.Vistas
         private string[] _listaColumnasParaVer;
         private string[] _listacolumnasInventario;
         private bool _seleccionoItem;
+        private ViewCell _ultimoItemSeleccionado;
 
         public PaginaGrilla(string linkHojaConsulta, SpreadsheetsService servicio)
         {
@@ -36,6 +37,10 @@ namespace StockProductorCF.Vistas
             _listacolumnasInventario = null;
             if (!string.IsNullOrEmpty(columnasInventario))
                 _listacolumnasInventario = columnasInventario.Split(',');
+
+            Datos.WidthRequest = App.AnchoDePantalla / 3;
+            Refrescar.WidthRequest = App.AnchoDePantalla / 3;
+            Escanear.WidthRequest = App.AnchoDePantalla / 3;
 
             ObtenerDatosProductos();
         }
@@ -220,9 +225,10 @@ namespace StockProductorCF.Vistas
                 {
                     Label nombreProducto = new Label
                     {
-                        FontSize = 16.5,
+                        FontSize = 16,
                         FontAttributes = FontAttributes.Bold,
-                        VerticalOptions = LayoutOptions.CenterAndExpand
+                        VerticalOptions = LayoutOptions.CenterAndExpand,
+                        WidthRequest = 110
                     };
                     nombreProducto.SetBinding(Label.TextProperty, "Nombre");
 
@@ -240,8 +246,15 @@ namespace StockProductorCF.Vistas
                         BackgroundColor = Color.Red
                     };
 
+                    BoxView separador = new BoxView()
+                    {
+                        WidthRequest = 1,
+                        BackgroundColor = Color.FromHex("#E0E0E0"),
+                        HeightRequest = 55
+                    };
+
                     // Return an assembled ViewCell.
-                    return new ViewCell
+                    var celda = new ViewCell
                     {
                         View = new StackLayout
                         {
@@ -252,6 +265,7 @@ namespace StockProductorCF.Vistas
                             {
                                 cuadradito,
                                 nombreProducto,
+                                separador,
                                 new StackLayout
                                 {
                                     Orientation = StackOrientation.Vertical,
@@ -264,11 +278,20 @@ namespace StockProductorCF.Vistas
                             }
                         }
                     };
+
+                    celda.SetBinding(ViewCell.ClassIdProperty, "ID");
+                    celda.Tapped += (sender, args) => {
+                        if(_ultimoItemSeleccionado != null)
+                            _ultimoItemSeleccionado.View.BackgroundColor = Color.White;
+                        IrAlProducto(((ViewCell)sender).ClassId);
+                        celda.View.BackgroundColor = Color.Silver;
+                        _ultimoItemSeleccionado = ((ViewCell)sender);
+                    };
+
+                    return celda;
                 })
             };
-
-            vista.ItemSelected += CargarProducto;
-
+            
             // Build the page.
             return new StackLayout
             {
@@ -293,8 +316,8 @@ namespace StockProductorCF.Vistas
         public ClaseProducto(string id, IList<string> datos)
         {
             ID = id;
-            Nombre = datos[0] + " |";
-            Datos = string.Join(" - ", datos.Skip(0).Take(datos.Count));
+            Nombre = datos[0];
+            Datos = string.Join(" - ", datos.Skip(1).Take(datos.Count));
         }
 
         [Android.Runtime.Preserve]

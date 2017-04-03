@@ -4,6 +4,7 @@ using Google.GData.Spreadsheets;
 using Xamarin.Forms;
 using StockProductorCF.Clases;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace StockProductorCF.Vistas
 {
@@ -13,7 +14,7 @@ namespace StockProductorCF.Vistas
         private string _linkHojaConsulta;
         private int[] _listaColumnas;
 
-        public SeleccionColumnasInventario(CellEntry[] columnas, string linkHojaConsulta, SpreadsheetsService servicio)
+        public SeleccionColumnasInventario(List<CellEntry> columnas, string linkHojaConsulta, SpreadsheetsService servicio)
         {
             InitializeComponent();
 
@@ -23,9 +24,9 @@ namespace StockProductorCF.Vistas
             LlenarGrillaColumnasInventario(columnas);
         }
 
-        private void LlenarGrillaColumnasInventario(CellEntry[] columnas)
+        private void LlenarGrillaColumnasInventario(List<CellEntry> columnas)
         {
-            _listaColumnas = Enumerable.Repeat(1, columnas.Length).ToArray();
+            _listaColumnas = Enumerable.Repeat(1, columnas.Count).ToArray();
 
             StackLayout itemColumna;
             Label etiquetaColumna;

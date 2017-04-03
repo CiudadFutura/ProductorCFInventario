@@ -57,6 +57,7 @@
       <DependentUpon>PaginaGrilla.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Modelos\PerfilUsuario.cs" />
     <Compile Include="Vistas\Producto.xaml.cs">
       <DependentUpon>Producto.xaml</DependentUpon>
     </Compile>

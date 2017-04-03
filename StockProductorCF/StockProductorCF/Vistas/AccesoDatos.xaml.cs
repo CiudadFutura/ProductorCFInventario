@@ -18,7 +18,6 @@ namespace StockProductorCF.Vistas
         void ConectarGoogle(object sender, EventArgs args)
         {
             var paginaAuntenticacion = new PaginaAuntenticacion();
-
             Navigation.PushAsync(paginaAuntenticacion);
         }
     }

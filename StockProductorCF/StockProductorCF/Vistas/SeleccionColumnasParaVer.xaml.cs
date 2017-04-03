@@ -5,6 +5,7 @@ using Xamarin.Forms;
 using StockProductorCF.Servicios;
 using StockProductorCF.Clases;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace StockProductorCF.Vistas
 {
@@ -12,7 +13,7 @@ namespace StockProductorCF.Vistas
     {
         private SpreadsheetsService _servicio;
         private int[] _listaColumnas;
-        private CellEntry[] _columnas;
+        private List<CellEntry> _columnas;
         private string _linkHojaConsulta;
 
         public SeleccionColumnasParaVer(string linkHojaConsulta, SpreadsheetsService servicio)
@@ -31,14 +32,13 @@ namespace StockProductorCF.Vistas
             {
                 var celdas = new ServiciosGoogle().ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
 
-                _columnas = new CellEntry[celdas.ColCount.Count];
-                _listaColumnas = Enumerable.Repeat(1, (int)celdas.ColCount.Count).ToArray();
+                _columnas = new List<CellEntry>(); //Columnas para listar en pantalla, si hay una de nombre Usuario - Movimiento se quita.
 
                 foreach (CellEntry celda in celdas.Entries)
                 {
                     if (celda.Row == 1)
                     {
-                        _columnas.SetValue(celda, (int)celda.Column - 1);
+                        _columnas.Add(celda);
                     }
                     else
                     {
@@ -46,6 +46,7 @@ namespace StockProductorCF.Vistas
                     }
                 }
 
+                _listaColumnas = Enumerable.Repeat(1, _columnas.Count).ToArray(); //El arreglo de columnas para ver, todas con valor inicial en 1
                 LlenarGrillaColumnasParaVer(_columnas);
             }
             catch (Exception)
@@ -54,7 +55,7 @@ namespace StockProductorCF.Vistas
             }
         }
 
-        private void LlenarGrillaColumnasParaVer(CellEntry[] columnas)
+        private void LlenarGrillaColumnasParaVer(List<CellEntry> columnas)
         {
             StackLayout itemColumna;
             Label etiquetaColumna;

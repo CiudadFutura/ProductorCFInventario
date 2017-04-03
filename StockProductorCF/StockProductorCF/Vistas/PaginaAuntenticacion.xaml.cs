@@ -1,9 +1,12 @@
 ﻿
 using Google.GData.Spreadsheets;
+using Newtonsoft.Json;
 using StockProductorCF.Clases;
+using StockProductorCF.Modelos;
 using StockProductorCF.Servicios;
 using StockProductorCF.Vistas;
 using System;
+using System.Net.Http;
 using Xamarin.Forms;
 
 namespace StockProductorCF
@@ -24,7 +27,7 @@ namespace StockProductorCF
             {
                 var solicitud =
                         "https://accounts.google.com/o/oauth2/auth?client_id=" + _clientId
-                        + "&scope=https://www.googleapis.com/auth/drive https://spreadsheets.google.com/feeds https://docs.google.com/feeds"
+                        + "&scope=https://www.googleapis.com/auth/drive https://spreadsheets.google.com/feeds https://www.googleapis.com/auth/plus.login"
                         + "&token_uri=https://accounts.google.com/o/oauth2/token"
                         + "&response_type=token&redirect_uri=http://localhost";
 
@@ -89,7 +92,22 @@ namespace StockProductorCF
                 var tokenDeAcceso = at.Remove(at.IndexOf("&token_type="));
 
                 CuentaUsuario.AlmacenarToken(tokenDeAcceso);
+
+                //Recuperar el nombre de usuario para el historial de movimientos
+                RecuperarNombreUsuarioGoogle(tokenDeAcceso);
+                //A partir de la procedencia determinar si irá hacia la página de grilla o hacia la de libros
                 DeterminarProcesoParaCargaDatos(tokenDeAcceso);
+            }
+        }
+
+        private async void RecuperarNombreUsuarioGoogle(string tokenDeAcceso)
+        {
+            string url = @"https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + tokenDeAcceso;
+
+            using (var client = new HttpClient())
+            {
+                var result = await client.GetStringAsync(url);
+                CuentaUsuario.AlmacenarNombreUsuarioGoogle(JsonConvert.DeserializeObject<PerfilUsuario>(result).name);
             }
         }
     }

@@ -46,80 +46,28 @@ namespace StockProductorCF.Vistas
 
             foreach (CellEntry celda in _producto)
             {
-                nombreCampo = new Label()
+                if (celda != null && nombresColumnas[celda.Column - 1].Value != "Usuario-Movimiento")
                 {
-                    HorizontalOptions = LayoutOptions.EndAndExpand,
-                    VerticalOptions = LayoutOptions.Center,
-                    HorizontalTextAlignment = TextAlignment.End,
-                    FontSize = 16,
-                    WidthRequest = 130
-                };
-
-                foreach (CellEntry nombreColumna in nombresColumnas)
-                {
-                    if (celda != null && nombreColumna.Column == celda.Column)
-                    {
-                        nombreCampo.Text = nombreColumna.Value;
-                        break;
-                    }
-                }
-                
-                valorCampo = new Entry()
-                {
-                    HorizontalOptions = LayoutOptions.CenterAndExpand,
-                    VerticalOptions = LayoutOptions.Center,
-                    HorizontalTextAlignment = TextAlignment.Start,
-                    WidthRequest = 180,
-                    IsEnabled = false
-                };
-                valorCampo.Text = celda != null ? celda.Value : "";
-
-                campoValor = new StackLayout
-                {
-                    HorizontalOptions = LayoutOptions.FillAndExpand,
-                    VerticalOptions = LayoutOptions.CenterAndExpand,
-                    Orientation = StackOrientation.Horizontal,
-                    HeightRequest = 50,
-                    Children = { nombreCampo, valorCampo }
-                };
-
-                ContenedorProducto.Children.Add(campoValor);
-
-                //REEMPLAZAR
-                if (celda != null && _listaColumnasInventario != null && _listaColumnasInventario[(int)celda.Column - 1] == "1")
-                {
-                    _signoPositivo.SetValue(true, (int)celda.Column - 1);
-
                     nombreCampo = new Label()
                     {
                         HorizontalOptions = LayoutOptions.EndAndExpand,
                         VerticalOptions = LayoutOptions.Center,
                         HorizontalTextAlignment = TextAlignment.End,
-                        Text = "Movimiento",
                         FontSize = 16,
                         WidthRequest = 130
                     };
 
-                    botonSigno = new Button()
-                    {
-                        Text = "+",
-                        HorizontalOptions = LayoutOptions.Start,
-                        VerticalOptions = LayoutOptions.Center,
-                        FontSize = 25,
-                        StyleId = celda.Column.ToString()
-                    };
+                    nombreCampo.Text = nombresColumnas[celda.Column - 1].Value;
 
-                    botonSigno.Clicked += DefinirSigno;
-
-                    movimiento = new Entry()
+                    valorCampo = new Entry()
                     {
-                        HorizontalOptions = LayoutOptions.StartAndExpand,
+                        HorizontalOptions = LayoutOptions.CenterAndExpand,
                         VerticalOptions = LayoutOptions.Center,
                         HorizontalTextAlignment = TextAlignment.Start,
-                        StyleId = "movimiento-" + celda.Column.ToString(),
-                        WidthRequest = 100,
-                        Keyboard = Keyboard.Numeric
+                        WidthRequest = 180,
+                        IsEnabled = false
                     };
+                    valorCampo.Text = celda != null ? celda.Value : "";
 
                     campoValor = new StackLayout
                     {
@@ -127,15 +75,59 @@ namespace StockProductorCF.Vistas
                         VerticalOptions = LayoutOptions.CenterAndExpand,
                         Orientation = StackOrientation.Horizontal,
                         HeightRequest = 50,
-                        Children = { nombreCampo, botonSigno, movimiento }
+                        Children = { nombreCampo, valorCampo }
                     };
 
                     ContenedorProducto.Children.Add(campoValor);
+
+                    if (celda != null && _listaColumnasInventario != null && _listaColumnasInventario[(int)celda.Column - 1] == "1")
+                    {
+                        _signoPositivo.SetValue(true, (int)celda.Column - 1);
+
+                        nombreCampo = new Label()
+                        {
+                            HorizontalOptions = LayoutOptions.EndAndExpand,
+                            VerticalOptions = LayoutOptions.Center,
+                            HorizontalTextAlignment = TextAlignment.End,
+                            Text = "Movimiento",
+                            FontSize = 16,
+                            WidthRequest = 130
+                        };
+
+                        botonSigno = new Button()
+                        {
+                            Text = "+",
+                            HorizontalOptions = LayoutOptions.Start,
+                            VerticalOptions = LayoutOptions.Center,
+                            FontSize = 25,
+                            StyleId = celda.Column.ToString()
+                        };
+
+                        botonSigno.Clicked += DefinirSigno;
+
+                        movimiento = new Entry()
+                        {
+                            HorizontalOptions = LayoutOptions.StartAndExpand,
+                            VerticalOptions = LayoutOptions.Center,
+                            HorizontalTextAlignment = TextAlignment.Start,
+                            StyleId = "movimiento-" + celda.Column.ToString(),
+                            WidthRequest = 100,
+                            Keyboard = Keyboard.Numeric
+                        };
+
+                        campoValor = new StackLayout
+                        {
+                            HorizontalOptions = LayoutOptions.FillAndExpand,
+                            VerticalOptions = LayoutOptions.CenterAndExpand,
+                            Orientation = StackOrientation.Horizontal,
+                            HeightRequest = 50,
+                            Children = { nombreCampo, botonSigno, movimiento }
+                        };
+
+                        ContenedorProducto.Children.Add(campoValor);
+                    }
                 }
-                
-                
             }
-            
         }
 
         private void DefinirSigno(object sender, EventArgs e)
@@ -146,7 +138,7 @@ namespace StockProductorCF.Vistas
         }
 
         [Android.Runtime.Preserve]
-        void GuardarCambios(object sender, EventArgs args)
+        async void GuardarCambios(object sender, EventArgs args)
         {
             foreach (View stackLayout in ContenedorProducto.Children)
             {
@@ -160,7 +152,7 @@ namespace StockProductorCF.Vistas
                     }
                 }
             }
-
+                        
             var multiplicador = 1;
             var movimiento = 0.00;
             foreach (CellEntry celda in _producto)
@@ -171,11 +163,28 @@ namespace StockProductorCF.Vistas
                     movimiento = _movimientos[(int)celda.Column - 1];
 
                     celda.InputValue = (Convert.ToDouble(celda.InputValue) + multiplicador * movimiento).ToString();
-                    _servicioGoogle.ActualizarCelda(_servicio, celda);
+
+                    try
+                    {
+                        _servicioGoogle.ActualizarCelda(_servicio, celda);
+
+                        //Historial
+                        var usuario = CuentaUsuario.ObtenerNombreUsuarioGoogle() ?? "";
+                        //Almacena Usuario-Movimiento en la columna auxiliar de la hoja de inventario. Luego, el código del libro moverá esos 2 datos a la hoja Historial.
+                        _producto[_producto.Length - 1].InputValue = usuario + "|" + (multiplicador * movimiento).ToString();
+                        _servicioGoogle.ActualizarCelda(_servicio, _producto[_producto.Length - 1]);
+                    }
+                    catch (Exception)
+                    {
+                        //Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
+                        var paginaAuntenticacion = new PaginaAuntenticacion(true);
+                        Navigation.InsertPageBefore(paginaAuntenticacion, this);
+                        await Navigation.PopAsync();
+                    }
                 }
             }
-            
-            Navigation.PopAsync();
+
+            await Navigation.PopAsync();
         }
     }
 }

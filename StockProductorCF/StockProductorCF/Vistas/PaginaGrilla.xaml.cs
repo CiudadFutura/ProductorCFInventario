@@ -1,4 +1,5 @@
-﻿using Google.GData.Spreadsheets;
+﻿
+using Google.GData.Spreadsheets;
 using StockProductorCF.Clases;
 using StockProductorCF.Servicios;
 using System;
@@ -45,42 +46,45 @@ namespace StockProductorCF.Vistas
             ObtenerDatosProductos();
         }
 
-        private void ObtenerDatosProductos()
+        private async void ObtenerDatosProductos()
         {
-            if (_servicio == null)
+            if (_servicio == null) //El servicio viene nulo cuando se llama directamente desde el lanzador (ya tiene conexión a datos configurada)
                 _servicio = _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActual());
-
-            _celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
+            
+            try
+            {
+                _celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
+            }
+            catch (Exception)
+            {
+                //Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
+                var paginaAuntenticacion = new PaginaAuntenticacion(true);
+                Navigation.InsertPageBefore(paginaAuntenticacion, this);
+                await Navigation.PopAsync();
+            }
 
             ContenedorTabla.Children.Clear();
 
             _nombresColumnas = new CellEntry[_celdas.ColCount.Count];
 
-            try
-            {
-                IList<string[]> productos = new string[_celdas.RowCount.Count - 1][];
+            IList<string[]> productos = new string[_celdas.RowCount.Count - 1][];
 
-                foreach (CellEntry celda in _celdas.Entries)
+            foreach (CellEntry celda in _celdas.Entries)
+            {
+                if (celda.Row != 1)
                 {
-                    if (celda.Row != 1)
-                    {
-                        if (celda.Column == 1)
-                            productos[(int)celda.Row - 2] = new string[_celdas.ColCount.Count];
+                    if (celda.Column == 1)
+                        productos[(int)celda.Row - 2] = new string[_celdas.ColCount.Count];
 
-                        productos[(int)celda.Row - 2].SetValue(celda.Value, (int)celda.Column - 1);
-                    }
-                    else
-                    {
-                        _nombresColumnas.SetValue(celda, (int)celda.Column - 1);
-                    }
+                    productos[(int)celda.Row - 2].SetValue(celda.Value, (int)celda.Column - 1);
                 }
+                else
+                {
+                    _nombresColumnas.SetValue(celda, (int)celda.Column - 1);
+                }
+            }
 
-                LlenarGrillaProductos(productos);
-            }
-            catch (Exception)
-            {
-                Navigation.PushAsync(new AccesoDatos());
-            }
+            LlenarGrillaProductos(productos);
         }
 
         private void LlenarGrillaProductos(IList<string[]> productos)
@@ -108,6 +112,7 @@ namespace StockProductorCF.Vistas
             int fila = -1;
             CellEntry[] producto = new CellEntry[_celdas.ColCount.Count];
 
+            //Obtener el arreglo del producto para enviar
             foreach (CellEntry celda in _celdas.Entries)
             {
                 if (celda.Column == 1 && celda.Value == codigoProducto.ToString())
@@ -165,7 +170,6 @@ namespace StockProductorCF.Vistas
             });
             ObtenerDatosProductos();
         }
-
 
         private StackLayout ConstruirVistaDeLista(List<string[]> productos)
         {

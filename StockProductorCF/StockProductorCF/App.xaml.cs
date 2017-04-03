@@ -12,8 +12,10 @@ namespace StockProductorCF
             InitializeComponent();
            
             var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaConsulta();
+            var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
+            var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
 
-            if (!string.IsNullOrEmpty(linkHojaConsulta))
+            if (!string.IsNullOrEmpty(linkHojaConsulta) && !string.IsNullOrEmpty(columnasParaVer) && !string.IsNullOrEmpty(columnasInventario))
             {
                 if (!CuentaUsuario.ValidarToken())
                     MainPage = new NavigationPage(new PaginaAuntenticacion(true));

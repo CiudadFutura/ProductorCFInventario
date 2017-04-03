@@ -1,7 +1,7 @@
 ﻿
-
 using Google.GData.Client;
 using Google.GData.Spreadsheets;
+
 
 namespace StockProductorCF.Servicios
 {
@@ -9,12 +9,12 @@ namespace StockProductorCF.Servicios
     {
         public SpreadsheetsService ObtenerServicioParaConsultaGoogleSpreadsheets(string tokenDeAcceso)
         {
-            SpreadsheetsService servicio = new SpreadsheetsService("Inventario - Productor de la Ciudad Futura");
+            SpreadsheetsService servicio = new SpreadsheetsService("Productor de la Ciudad Futura");
 
             var parametros = new OAuth2Parameters();
             parametros.AccessToken = tokenDeAcceso;
-            servicio.RequestFactory = new GOAuth2RequestFactory(null, "Inventario - Productor de la Ciudad Futura", parametros);
-
+            servicio.RequestFactory = new GOAuth2RequestFactory(null, "Productor de la Ciudad Futura", parametros);
+            
             return servicio;
         }
 
@@ -45,6 +45,7 @@ namespace StockProductorCF.Servicios
         {
             servicio.Update(celda);
         }
+        
     }
 
 }

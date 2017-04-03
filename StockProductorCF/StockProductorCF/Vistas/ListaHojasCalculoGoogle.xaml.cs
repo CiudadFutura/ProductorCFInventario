@@ -9,8 +9,8 @@ namespace StockProductorCF.Vistas
 {
     public partial class ListaHojasCalculoGoogle : ContentPage
     {
-        AtomEntryCollection _listaHojas;
-        SpreadsheetsService _servicio;
+        private AtomEntryCollection _listaHojas;
+        private SpreadsheetsService _servicio;
 
         public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
         {

@@ -25,7 +25,6 @@ namespace StockProductorCF.Clases
             else
             {
                 _cuenta = new Account { Username = "local" };
-
                 _cuenta.Properties.Add("token", tokenDeAcceso);
             }
 
@@ -43,7 +42,6 @@ namespace StockProductorCF.Clases
             else
             {
                 _cuenta = new Account { Username = "local" };
-                
                 _cuenta.Properties.Add("fechaExpiracion", fechaExpiracion.ToString());
             }
 
@@ -61,7 +59,6 @@ namespace StockProductorCF.Clases
             else
             {
                 _cuenta = new Account { Username = "local" };
-
                 _cuenta.Properties.Add("linkHojaConsulta", linkHojaConsulta);
             }
 
@@ -79,7 +76,6 @@ namespace StockProductorCF.Clases
             else
             {
                 _cuenta = new Account { Username = "local" };
-
                 _cuenta.Properties.Add("columnasParaVer", columnasParaVer);
             }
 
@@ -97,8 +93,24 @@ namespace StockProductorCF.Clases
             else
             {
                 _cuenta = new Account { Username = "local" };
-
                 _cuenta.Properties.Add("columnasInventario", columnasInventario);
+            }
+
+            AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
+        }
+
+        public static void AlmacenarNombreUsuarioGoogle(string nombreUsuarioGoogle)
+        {
+            RecuperarCuentaLocal();
+            if (_cuenta != null)
+            {
+                _cuenta.Properties.Remove("nombreUsuarioGoogle");
+                _cuenta.Properties.Add("nombreUsuarioGoogle", nombreUsuarioGoogle);
+            }
+            else
+            {
+                _cuenta = new Account { Username = "local" };
+                _cuenta.Properties.Add("nombreUsuarioGoogle", nombreUsuarioGoogle);
             }
 
             AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
@@ -136,6 +148,12 @@ namespace StockProductorCF.Clases
             return (_cuenta != null && _cuenta.Properties.ContainsKey("columnasInventario")) ? _cuenta.Properties["columnasInventario"] : null;
         }
 
+        public static string ObtenerNombreUsuarioGoogle()
+        {
+            RecuperarCuentaLocal();
+            return (_cuenta != null && _cuenta.Properties.ContainsKey("nombreUsuarioGoogle")) ? _cuenta.Properties["nombreUsuarioGoogle"] : null;
+        }
+        
         public static bool ValidarToken()
         {
             if (string.IsNullOrEmpty(ObtenerTokenActual()) || ObtenerFechaExpiracion() <= DateTime.Now)

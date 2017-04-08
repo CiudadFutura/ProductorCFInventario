@@ -174,7 +174,7 @@ namespace StockProductorCF.Vistas
 							// Inserta histórico en Google
 							servicioGoogle.InsertarHistoricos(_servicio, celda, multiplicador * movimiento, _producto, _nombresColumnas, _listaColumnasInventario);
 						}
-						catch (Exception)
+						catch (Exception ex)
 						{
 							// Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
 							var paginaAuntenticacion = new PaginaAuntenticacion(true);

@@ -5,6 +5,7 @@ using StockProductorCF.Clases;
 using System.IO;
 using System.Text;
 using System;
+using System.Text.RegularExpressions;
 
 namespace StockProductorCF.Servicios
 {
@@ -45,12 +46,13 @@ namespace StockProductorCF.Servicios
 
 		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, CellEntry[] producto, CellEntry[] nombresColumnas, string[] listaColumnasInventario)
 		{
+			var columna = "";
 			var valor = "";
 
 			// Abre la fila
 			var fila = "<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:gsx=\"http://schemas.google.com/spreadsheets/2006/extended\">";
 			// Agrega la fecha
-			fila += "<gsx:fecha>" + DateTime.Today.ToString("dd/MM/yyyy") + "</gsx:fecha>";
+			fila += "<gsx:fecha>" + DateTime.Now.ToString("dd/MM/yyyy HH:mm") + "</gsx:fecha>";
 			// Agrega los valores del producto
 			foreach (CellEntry nombreColumna in nombresColumnas)
 			{
@@ -59,7 +61,8 @@ namespace StockProductorCF.Servicios
 				else
 					valor = producto[nombreColumna.Column - 1].Value;
 
-				fila += "<gsx:" + nombreColumna.Value.ToLower() + ">" + valor + "</gsx:" + nombreColumna.Value.ToLower() + ">";
+				columna = Regex.Replace(nombreColumna.Value.ToLower(), @"\s+", "");
+				fila += "<gsx:" + columna + ">" + valor + "</gsx:" + columna + ">";
 			}
 
 			// Agrega el movimiento

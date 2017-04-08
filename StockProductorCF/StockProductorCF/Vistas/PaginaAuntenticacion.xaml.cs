@@ -1,8 +1,6 @@
 ﻿
 using Google.GData.Spreadsheets;
-using Newtonsoft.Json;
 using StockProductorCF.Clases;
-using StockProductorCF.Modelos;
 using StockProductorCF.Servicios;
 using StockProductorCF.Vistas;
 using System;
@@ -52,7 +50,7 @@ namespace StockProductorCF
         {
             if (_conexionExistente) //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros
             {
-                var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaConsulta();
+                var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaInventario();
                 Navigation.InsertPageBefore(new PaginaGrilla(linkHojaConsulta, null), this);
             }
             else
@@ -107,7 +105,9 @@ namespace StockProductorCF
             using (var client = new HttpClient())
             {
                 var result = await client.GetStringAsync(url);
-                CuentaUsuario.AlmacenarNombreUsuarioGoogle(JsonConvert.DeserializeObject<PerfilUsuario>(result).name);
+                result = result.Substring(result.IndexOf("\"name\": \"") + 9);
+                var usuario = result.Remove(result.IndexOf("\",\n"));
+                CuentaUsuario.AlmacenarNombreUsuarioGoogle(usuario);
             }
         }
     }

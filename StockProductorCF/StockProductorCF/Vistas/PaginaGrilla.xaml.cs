@@ -24,68 +24,74 @@ namespace StockProductorCF.Vistas
 
         public PaginaGrilla(string linkHojaConsulta, SpreadsheetsService servicio)
         {
-            InitializeComponent();
+          InitializeComponent();
 
-            _servicioGoogle = new ServiciosGoogle();
-            _servicio = servicio;
-            _linkHojaConsulta = linkHojaConsulta;
+          InicializarVariablesGlobales(linkHojaConsulta, servicio);
 
-            var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
-            if (!string.IsNullOrEmpty(columnasParaVer))
-                _listaColumnasParaVer = columnasParaVer.Split(',');
+          ObtenerDatosProductos();
+        }
 
-            var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
-            _listacolumnasInventario = null;
-            if (!string.IsNullOrEmpty(columnasInventario))
-                _listacolumnasInventario = columnasInventario.Split(',');
+        private void InicializarVariablesGlobales(string linkHojaConsulta, SpreadsheetsService servicio)
+        {
+          _linkHojaConsulta = linkHojaConsulta;
+          _servicio = servicio;
+          _servicioGoogle = new ServiciosGoogle();
 
-            Datos.WidthRequest = App.AnchoDePantalla / 3;
-            Refrescar.WidthRequest = App.AnchoDePantalla / 3;
-            Escanear.WidthRequest = App.AnchoDePantalla / 3;
+          var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
+          if (!string.IsNullOrEmpty(columnasParaVer))
+            _listaColumnasParaVer = columnasParaVer.Split(',');
 
-            ObtenerDatosProductos();
+          var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
+          _listacolumnasInventario = null;
+          if (!string.IsNullOrEmpty(columnasInventario))
+            _listacolumnasInventario = columnasInventario.Split(',');
+
+          Datos.WidthRequest = App.AnchoDePantalla / 3;
+          Refrescar.WidthRequest = App.AnchoDePantalla / 3;
+          Escanear.WidthRequest = App.AnchoDePantalla / 3;
         }
 
         private async void ObtenerDatosProductos()
         {
-            if (_servicio == null) //El servicio viene nulo cuando se llama directamente desde el lanzador (ya tiene conexión a datos configurada)
-                _servicio = _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActual());
-            
-            try
+
+          if (_servicio == null) //El servicio viene nulo cuando se llama directamente desde el lanzador (ya tiene conexión a datos configurada)
+            _servicio = _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActual());
+
+          try
+          {
+            _celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
+          }
+          catch (Exception)
+          {
+            //Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
+            var paginaAuntenticacion = new PaginaAuntenticacion(true);
+            Navigation.InsertPageBefore(paginaAuntenticacion, this);
+            await Navigation.PopAsync();
+          }
+
+          ContenedorTabla.Children.Clear();
+
+          _nombresColumnas = new CellEntry[_celdas.ColCount.Count];
+
+          IList<string[]> productos = new string[_celdas.RowCount.Count - 1][];
+
+          foreach (CellEntry celda in _celdas.Entries)
+          {
+            if (celda.Row != 1)
             {
-                _celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
+              if (celda.Column == 1)
+                productos[(int)celda.Row - 2] = new string[_celdas.ColCount.Count];
+
+              productos[(int)celda.Row - 2].SetValue(celda.Value, (int)celda.Column - 1);
             }
-            catch (Exception)
+            else
             {
-                //Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
-                var paginaAuntenticacion = new PaginaAuntenticacion(true);
-                Navigation.InsertPageBefore(paginaAuntenticacion, this);
-                await Navigation.PopAsync();
+              _nombresColumnas.SetValue(celda, (int)celda.Column - 1);
             }
+          }
 
-            ContenedorTabla.Children.Clear();
-
-            _nombresColumnas = new CellEntry[_celdas.ColCount.Count];
-
-            IList<string[]> productos = new string[_celdas.RowCount.Count - 1][];
-
-            foreach (CellEntry celda in _celdas.Entries)
-            {
-                if (celda.Row != 1)
-                {
-                    if (celda.Column == 1)
-                        productos[(int)celda.Row - 2] = new string[_celdas.ColCount.Count];
-
-                    productos[(int)celda.Row - 2].SetValue(celda.Value, (int)celda.Column - 1);
-                }
-                else
-                {
-                    _nombresColumnas.SetValue(celda, (int)celda.Column - 1);
-                }
-            }
-
-            LlenarGrillaProductos(productos);
-        }
+          LlenarGrillaProductos(productos);
+        }         
 
         private void LlenarGrillaProductos(IList<string[]> productos)
         {
@@ -123,9 +129,8 @@ namespace StockProductorCF.Vistas
                     break;
             }
 
-            Navigation.PushAsync(new Producto(producto, _nombresColumnas, _servicio, _servicioGoogle));
+            Navigation.PushAsync(new Producto(producto, _nombresColumnas, _servicio));
         }
-
 
         [Android.Runtime.Preserve]
         async void AbrirPaginaEscaner(object sender, EventArgs args)
@@ -136,6 +141,14 @@ namespace StockProductorCF.Vistas
             {
                 // Detiene el escaner
                 paginaEscaner.IsScanning = false;
+
+                //Hace autofoco, particularmente para los códigos de barra
+                TimeSpan ts = new TimeSpan(0, 0, 0, 3, 0);
+                Device.StartTimer(ts, () => {
+                    if (paginaEscaner.IsScanning)
+                        paginaEscaner.AutoFocus();
+                    return true;
+                });
 
                 // Cierra la página del escaner y llama a la página del producto
                 Device.BeginInvokeOnMainThread(() =>
@@ -160,15 +173,8 @@ namespace StockProductorCF.Vistas
         [Android.Runtime.Preserve]
         void RefrescarDatos(object sender, EventArgs args)
         {
-            ContenedorTabla.Children.Clear();
-            ContenedorTabla.Children.Add(new ActivityIndicator
-            {
-                Color = Color.Red,
-                IsRunning = true,
-                HeightRequest = 60,
-                WidthRequest = 60
-            });
-            ObtenerDatosProductos();
+          ContenedorTabla.Children.Clear();
+          ObtenerDatosProductos();
         }
 
         private StackLayout ConstruirVistaDeLista(List<string[]> productos)

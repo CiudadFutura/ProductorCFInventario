@@ -5,161 +5,121 @@ using Xamarin.Auth;
 
 namespace StockProductorCF.Clases
 {
-    static public class CuentaUsuario
-    {
-        private static Account _cuenta;
+	static public class CuentaUsuario
+	{
+		private static Account _cuenta;
 
-        private static void RecuperarCuentaLocal()
-        {
-            _cuenta = AccountStore.Create().FindAccountsForService("InventarioProductorCiudadFutura").FirstOrDefault();
-        }
+		private static void RecuperarCuentaLocal()
+		{
+			//Recupera la cuenta local
+			if (_cuenta == null)
+				_cuenta = AccountStore.Create().FindAccountsForService("InventarioProductorCiudadFutura").FirstOrDefault();
+		}
 
-        public static void AlmacenarToken(string tokenDeAcceso)
-        {
-            RecuperarCuentaLocal();
-            if (_cuenta != null)
-            {
-                _cuenta.Properties.Remove("token");
-                _cuenta.Properties.Add("token", tokenDeAcceso);
-            }
-            else
-            {
-                _cuenta = new Account { Username = "local" };
-                _cuenta.Properties.Add("token", tokenDeAcceso);
-            }
+		private static void GuardarValorEnCuentaLocal(string llave, string valor)
+		{
+			RecuperarCuentaLocal();
 
-            AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
-        }
+			if (_cuenta != null)
+			{
+				//Si existe la cuenta, agrega el valor a la cuenta
+				_cuenta.Properties.Remove(llave);
+				_cuenta.Properties.Add(llave, valor);
+			}
+			else
+			{
+				//Si no existe la cuenta, la crea y luego agrega el valor a la cuenta
+				_cuenta = new Account { Username = "local" };
+				_cuenta.Properties.Add(llave, valor);
+			}
 
-        public static void AlmacenarFechaExpiracion(DateTime? fechaExpiracion)
-        {
-            RecuperarCuentaLocal();
-            if (_cuenta != null)
-            {
-                _cuenta.Properties.Remove("fechaExpiracion");
-                _cuenta.Properties.Add("fechaExpiracion", fechaExpiracion.ToString());
-            }
-            else
-            {
-                _cuenta = new Account { Username = "local" };
-                _cuenta.Properties.Add("fechaExpiracion", fechaExpiracion.ToString());
-            }
+			//Almacena la cuenta local
+			AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
+		}
 
-            AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
-        }
+		private static string RecuperarValorDeCuentaLocal(string llave)
+		{
+			RecuperarCuentaLocal();
+			return (_cuenta != null && _cuenta.Properties.ContainsKey(llave)) ? _cuenta.Properties[llave] : null;
+		}
 
-        public static void AlmacenarLinkHojaConsulta(string linkHojaConsulta)
-        {
-            RecuperarCuentaLocal();
-            if (_cuenta != null)
-            {
-                _cuenta.Properties.Remove("linkHojaConsulta");
-                _cuenta.Properties.Add("linkHojaConsulta", linkHojaConsulta);
-            }
-            else
-            {
-                _cuenta = new Account { Username = "local" };
-                _cuenta.Properties.Add("linkHojaConsulta", linkHojaConsulta);
-            }
+		public static void AlmacenarToken(string tokenDeAcceso)
+		{
+			GuardarValorEnCuentaLocal("token", tokenDeAcceso);
+		}
 
-            AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
-        }
+		public static void AlmacenarFechaExpiracion(DateTime? fechaExpiracion)
+		{
+			GuardarValorEnCuentaLocal("fechaExpiracion", fechaExpiracion.ToString());
+		}
 
-        public static void AlmacenarColumnasParaVer(string columnasParaVer)
-        {
-            RecuperarCuentaLocal();
-            if (_cuenta != null)
-            {
-                _cuenta.Properties.Remove("columnasParaVer");
-                _cuenta.Properties.Add("columnasParaVer", columnasParaVer);
-            }
-            else
-            {
-                _cuenta = new Account { Username = "local" };
-                _cuenta.Properties.Add("columnasParaVer", columnasParaVer);
-            }
+		public static void AlmacenarLinkHojaConsulta(string linkHojaConsulta)
+		{
+			GuardarValorEnCuentaLocal("linkHojaConsulta", linkHojaConsulta);
+		}
 
-            AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
-        }
+		public static void AlmacenarColumnasParaVer(string columnasParaVer)
+		{
+			GuardarValorEnCuentaLocal("columnasParaVer", columnasParaVer);
+		}
 
-        public static void AlmacenarColumnasInventario(string columnasInventario)
-        {
-            RecuperarCuentaLocal();
-            if (_cuenta != null)
-            {
-                _cuenta.Properties.Remove("columnasInventario");
-                _cuenta.Properties.Add("columnasInventario", columnasInventario);
-            }
-            else
-            {
-                _cuenta = new Account { Username = "local" };
-                _cuenta.Properties.Add("columnasInventario", columnasInventario);
-            }
+		public static void AlmacenarColumnasInventario(string columnasInventario)
+		{
+			GuardarValorEnCuentaLocal("columnasInventario", columnasInventario);
+		}
 
-            AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
-        }
+		public static void AlmacenarNombreUsuarioGoogle(string nombreUsuarioGoogle)
+		{
+			GuardarValorEnCuentaLocal("nombreUsuarioGoogle", nombreUsuarioGoogle);
+		}
 
-        public static void AlmacenarNombreUsuarioGoogle(string nombreUsuarioGoogle)
-        {
-            RecuperarCuentaLocal();
-            if (_cuenta != null)
-            {
-                _cuenta.Properties.Remove("nombreUsuarioGoogle");
-                _cuenta.Properties.Add("nombreUsuarioGoogle", nombreUsuarioGoogle);
-            }
-            else
-            {
-                _cuenta = new Account { Username = "local" };
-                _cuenta.Properties.Add("nombreUsuarioGoogle", nombreUsuarioGoogle);
-            }
+		public static void AlmacenarLinkHojaHistorial(string linkHojaHistorial)
+		{
+			GuardarValorEnCuentaLocal("linkHojaHistorial", linkHojaHistorial);
+		}
 
-            AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
-        }
+		public static string ObtenerTokenActual()
+		{
+			return RecuperarValorDeCuentaLocal("token");
+		}
 
-        public static string ObtenerTokenActual()
-        {
-            RecuperarCuentaLocal();
-            return (_cuenta != null && _cuenta.Properties.ContainsKey("token")) ? _cuenta.Properties["token"] : null;
-        }
+		public static DateTime? ObtenerFechaExpiracion()
+		{
+			var valor = RecuperarValorDeCuentaLocal("fechaExpiracion");
+			return !string.IsNullOrEmpty(valor) ? Convert.ToDateTime(valor) : (DateTime?)null;
+		}
 
-        public static DateTime? ObtenerFechaExpiracion()
-        {
-            RecuperarCuentaLocal();
-            return (_cuenta != null && _cuenta.Properties.ContainsKey("fechaExpiracion") && !string.IsNullOrEmpty(_cuenta.Properties["fechaExpiracion"])) ?
-                Convert.ToDateTime(_cuenta.Properties["fechaExpiracion"])
-                : (DateTime?)null;
-        }
+		public static string ObtenerLinkHojaInventario()
+		{
+			return RecuperarValorDeCuentaLocal("linkHojaConsulta");
+		}
 
-        public static string ObtenerLinkHojaConsulta()
-        {
-            RecuperarCuentaLocal();
-            return (_cuenta != null && _cuenta.Properties.ContainsKey("linkHojaConsulta")) ? _cuenta.Properties["linkHojaConsulta"] : null;
-        }
+		public static string ObtenerColumnasParaVer()
+		{
+			return RecuperarValorDeCuentaLocal("columnasParaVer");
+		}
 
-        public static string ObtenerColumnasParaVer()
-        {
-            RecuperarCuentaLocal();
-            return (_cuenta != null && _cuenta.Properties.ContainsKey("columnasParaVer")) ? _cuenta.Properties["columnasParaVer"] : null;
-        }
+		public static string ObtenerColumnasInventario()
+		{
+			return RecuperarValorDeCuentaLocal("columnasInventario");
+		}
 
-        public static string ObtenerColumnasInventario()
-        {
-            RecuperarCuentaLocal();
-            return (_cuenta != null && _cuenta.Properties.ContainsKey("columnasInventario")) ? _cuenta.Properties["columnasInventario"] : null;
-        }
+		public static string ObtenerNombreUsuarioGoogle()
+		{
+			return RecuperarValorDeCuentaLocal("nombreUsuarioGoogle");
+		}
 
-        public static string ObtenerNombreUsuarioGoogle()
-        {
-            RecuperarCuentaLocal();
-            return (_cuenta != null && _cuenta.Properties.ContainsKey("nombreUsuarioGoogle")) ? _cuenta.Properties["nombreUsuarioGoogle"] : null;
-        }
-        
-        public static bool ValidarToken()
-        {
-            if (string.IsNullOrEmpty(ObtenerTokenActual()) || ObtenerFechaExpiracion() <= DateTime.Now)
-                return false;
+		public static string ObtenerLinkHojaHistorial()
+		{
+			return RecuperarValorDeCuentaLocal("linkHojaHistorial");
+		}
 
-            return true;
-        }
-    }
+		public static bool ValidarToken()
+		{
+			if (string.IsNullOrEmpty(ObtenerTokenActual()) || ObtenerFechaExpiracion() <= DateTime.Now)
+				return false;
+
+			return true;
+		}
+	}
 }

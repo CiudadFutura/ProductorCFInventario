@@ -7,60 +7,64 @@ using StockProductorCF.Clases;
 
 namespace StockProductorCF.Vistas
 {
-    public partial class ListaHojasCalculoGoogle : ContentPage
-    {
-        private AtomEntryCollection _listaHojas;
-        private SpreadsheetsService _servicio;
+	public partial class ListaHojasCalculoGoogle : ContentPage
+	{
+		private AtomEntryCollection _listaHojas;
+		private SpreadsheetsService _servicio;
 
-        public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
-        {
-            InitializeComponent();
+		public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
+		{
+			InitializeComponent();
 
-            _servicio = servicio;
-            _listaHojas = listaHojas;
+			_servicio = servicio;
+			_listaHojas = listaHojas;
 
-            CargarListaHojas();
-        }
+			CargarListaHojas();
+		}
 
-        private void CargarListaHojas()
-        {
-            StackLayout itemHoja;
-            foreach (WorksheetEntry hoja in _listaHojas)
-            {
-                itemHoja = new StackLayout
-                {
-                    HorizontalOptions = LayoutOptions.Fill,
-                    VerticalOptions = LayoutOptions.Start
-                };
-                var boton = new Button
-                {
-                    Text = hoja.Title.Text,
-                    HorizontalOptions = LayoutOptions.FillAndExpand,
-                    VerticalOptions = LayoutOptions.Start,
-                    HeightRequest = 55
-                };
+		private void CargarListaHojas()
+		{
+			StackLayout itemHoja;
+			foreach (WorksheetEntry hoja in _listaHojas)
+			{
+				if (hoja.Title.Text == "Historial")
+					CuentaUsuario.AlmacenarLinkHojaHistorial(hoja.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null).HRef.ToString());
 
-                boton.Resources = new ResourceDictionary();
-                boton.Resources.Add("Id", hoja.Id);
-                boton.Clicked += EnviarPaginaGrilla;
+				itemHoja = new StackLayout
+				{
+					HorizontalOptions = LayoutOptions.Fill,
+					VerticalOptions = LayoutOptions.Start
+				};
 
-                itemHoja.Children.Add(boton);
-                ContenedorHojas.Children.Add(itemHoja);
-            }
-        }
+				var boton = new Button
+				{
+					Text = hoja.Title.Text,
+					HorizontalOptions = LayoutOptions.FillAndExpand,
+					VerticalOptions = LayoutOptions.Start,
+					HeightRequest = 55
+				};
 
-        void EnviarPaginaGrilla(object boton, EventArgs args)
-        {
-            var hoja = _listaHojas.FindById(((AtomId)((Button)boton).Resources["Id"]));
+				boton.Resources = new ResourceDictionary();
+				boton.Resources.Add("Id", hoja.Id);
+				boton.Clicked += EnviarPaginaGrilla;
 
-            AtomLink link = hoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null);
-            
-            //Se almacena el link para recobrar los datos de stock de la hoja cuando ingrese nuevamente
-            CuentaUsuario.AlmacenarLinkHojaConsulta(link.HRef.ToString());
+				itemHoja.Children.Add(boton);
+				ContenedorHojas.Children.Add(itemHoja);
+			}
+		}
 
-            var paginaSeleccionColumnasParaVer = new SeleccionColumnasParaVer(link.HRef.ToString(), _servicio);
-            Navigation.PushAsync(paginaSeleccionColumnasParaVer);
-            
-        }
-    }
+		void EnviarPaginaGrilla(object boton, EventArgs args)
+		{
+			var hoja = _listaHojas.FindById(((AtomId)((Button)boton).Resources["Id"]));
+
+			AtomLink link = hoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null);
+
+			//Se almacena el link para recobrar los datos de stock de la hoja cuando ingrese nuevamente
+			CuentaUsuario.AlmacenarLinkHojaConsulta(link.HRef.ToString());
+
+			var paginaSeleccionColumnasParaVer = new SeleccionColumnasParaVer(link.HRef.ToString(), _servicio);
+			Navigation.PushAsync(paginaSeleccionColumnasParaVer);
+
+		}
+	}
 }

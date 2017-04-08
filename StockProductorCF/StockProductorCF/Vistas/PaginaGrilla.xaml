@@ -7,7 +7,7 @@
   <ContentPage.Content>
     <StackLayout Spacing="0" Padding="0">
       <StackLayout x:Name="ContenedorTabla" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
-        
+        <ActivityIndicator x:Name="IndicadorDeActividad" />
       </StackLayout>
       <StackLayout x:Name="ContenedorBotones" BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
         <Button x:Name="Datos" VerticalOptions="End" Text="Acceso a datos" HeightRequest="60" Clicked="AccederDatos"/>

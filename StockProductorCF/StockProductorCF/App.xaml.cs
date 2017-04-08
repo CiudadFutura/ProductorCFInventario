@@ -11,7 +11,7 @@ namespace StockProductorCF
         {
             InitializeComponent();
            
-            var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaConsulta();
+            var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaInventario();
             var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
             var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
 

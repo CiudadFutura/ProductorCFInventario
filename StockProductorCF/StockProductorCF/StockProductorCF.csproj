@@ -2,7 +2,7 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-	<NoStdLib>true</NoStdLib>
+    <NoStdLib>true</NoStdLib>
     <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -53,6 +53,9 @@
     </Compile>
     <Compile Include="Vistas\PaginaAuntenticacion.xaml.cs">
       <DependentUpon>PaginaAuntenticacion.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Vistas\PaginaConexionBaseDatos.xaml.cs">
+      <DependentUpon>PaginaConexionBaseDatos.xaml</DependentUpon>
     </Compile>
     <Compile Include="Vistas\PaginaGrilla.xaml.cs">
       <DependentUpon>PaginaGrilla.xaml</DependentUpon>
@@ -195,6 +198,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Vistas\SeleccionColumnasInventario.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Vistas\PaginaConexionBaseDatos.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
       <SubType>Designer</SubType>
     </EmbeddedResource>

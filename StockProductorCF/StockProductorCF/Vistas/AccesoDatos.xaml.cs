@@ -5,20 +5,27 @@ namespace StockProductorCF.Vistas
 {
 	public partial class AccesoDatos : ContentPage
 	{
-		public AccesoDatos ()
+		public AccesoDatos()
 		{
-			InitializeComponent ();
-            //LogoEmprendimiento.Source = ImageSource.FromResource("StockProductorCF.Imagenes.logoEmprendimiento.png");
-            Cabecera.Source = ImageSource.FromResource("StockProductorCF.Imagenes.ciudadFutura.png");
+			InitializeComponent();
+			//LogoEmprendimiento.Source = ImageSource.FromResource("StockProductorCF.Imagenes.logoEmprendimiento.png");
+			Cabecera.Source = ImageSource.FromResource("StockProductorCF.Imagenes.ciudadFutura.png");
 
-            NavigationPage.SetHasNavigationBar(this, false);
-        }
+			NavigationPage.SetHasNavigationBar(this, false);
+		}
 
-        [Android.Runtime.Preserve]
-        void ConectarGoogle(object sender, EventArgs args)
-        {
-            var paginaAuntenticacion = new PaginaAuntenticacion();
-            Navigation.PushAsync(paginaAuntenticacion);
-        }
-    }
+		[Android.Runtime.Preserve]
+		void ConectarGoogle(object sender, EventArgs args)
+		{
+			var paginaAuntenticacion = new PaginaAuntenticacion();
+			Navigation.PushAsync(paginaAuntenticacion);
+		}
+
+		[Android.Runtime.Preserve]
+		void ConectarBaseDatos(object sender, EventArgs args)
+		{
+			var paginaConexionBaseDatos = new PaginaConexionBaseDatos();
+			Navigation.PushAsync(paginaConexionBaseDatos);
+		}
+	}
 }

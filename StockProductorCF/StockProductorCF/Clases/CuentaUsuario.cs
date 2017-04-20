@@ -43,12 +43,22 @@ namespace StockProductorCF.Clases
 			return (_cuenta != null && _cuenta.Properties.ContainsKey(llave)) ? _cuenta.Properties[llave] : null;
 		}
 
-		public static void AlmacenarToken(string tokenDeAcceso)
+		public static void AlmacenarAccesoDatos(string acceso)
 		{
-			GuardarValorEnCuentaLocal("token", tokenDeAcceso);
+			if(RecuperarValorDeCuentaLocal("accesoDatos") != acceso)
+			{
+				GuardarValorEnCuentaLocal("columnasParaVer", "");
+				GuardarValorEnCuentaLocal("columnasInventario", "");
+			}
+			GuardarValorEnCuentaLocal("accesoDatos", acceso);
 		}
 
-		public static void AlmacenarFechaExpiracion(DateTime? fechaExpiracion)
+		public static void AlmacenarTokenDeGoogle(string tokenDeAcceso)
+		{
+			GuardarValorEnCuentaLocal("tokenDeGoogle", tokenDeAcceso);
+		}
+
+		public static void AlmacenarFechaExpiracionToken(DateTime? fechaExpiracion)
 		{
 			GuardarValorEnCuentaLocal("fechaExpiracion", fechaExpiracion.ToString());
 		}
@@ -78,12 +88,22 @@ namespace StockProductorCF.Clases
 			GuardarValorEnCuentaLocal("linkHojaHistorial", linkHojaHistorial);
 		}
 
-		public static string ObtenerTokenActual()
+		public static void AlmacenarTokenDeBaseDeDatos(string tokenDeAcceso)
 		{
-			return RecuperarValorDeCuentaLocal("token");
+			GuardarValorEnCuentaLocal("tokenDeBaseDeDatos", tokenDeAcceso);
 		}
 
-		public static DateTime? ObtenerFechaExpiracion()
+		public static void AlmacenarUsuarioDeBaseDeDatos(string usuario)
+		{
+			GuardarValorEnCuentaLocal("usuarioDeBaseDeDatos", usuario);
+		}
+
+		public static string ObtenerTokenActualDeGoogle()
+		{
+			return RecuperarValorDeCuentaLocal("tokenDeGoogle");
+		}
+
+		public static DateTime? ObtenerFechaExpiracionToken()
 		{
 			var valor = RecuperarValorDeCuentaLocal("fechaExpiracion");
 			return !string.IsNullOrEmpty(valor) ? Convert.ToDateTime(valor) : (DateTime?)null;
@@ -114,9 +134,24 @@ namespace StockProductorCF.Clases
 			return RecuperarValorDeCuentaLocal("linkHojaHistorial");
 		}
 
-		public static bool ValidarToken()
+		public static string ObtenerTokenActualDeBaseDeDatos()
 		{
-			if (string.IsNullOrEmpty(ObtenerTokenActual()) || ObtenerFechaExpiracion() <= DateTime.Now)
+			return RecuperarValorDeCuentaLocal("tokenDeBaseDeDatos");
+		}
+
+		public static string ObtenerUsuarioDeBaseDeDatos()
+		{
+			return RecuperarValorDeCuentaLocal("usuarioDeBaseDeDatos");
+		}
+
+		public static string ObtenerAccesoDatos()
+		{
+			return RecuperarValorDeCuentaLocal("accesoDatos");
+		}
+
+		public static bool ValidarTokenDeGoogle()
+		{
+			if (string.IsNullOrEmpty(ObtenerTokenActualDeGoogle()) || ObtenerFechaExpiracionToken() <= DateTime.Now)
 				return false;
 
 			return true;

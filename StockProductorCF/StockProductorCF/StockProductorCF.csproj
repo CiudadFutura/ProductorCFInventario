@@ -54,8 +54,8 @@
     <Compile Include="Vistas\PaginaAuntenticacion.xaml.cs">
       <DependentUpon>PaginaAuntenticacion.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Vistas\PaginaConexionBaseDatos.xaml.cs">
-      <DependentUpon>PaginaConexionBaseDatos.xaml</DependentUpon>
+    <Compile Include="Vistas\PaginaConexionBaseDeDatos.xaml.cs">
+      <DependentUpon>PaginaConexionBaseDeDatos.xaml</DependentUpon>
     </Compile>
     <Compile Include="Vistas\PaginaGrilla.xaml.cs">
       <DependentUpon>PaginaGrilla.xaml</DependentUpon>
@@ -203,7 +203,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Vistas\PaginaConexionBaseDatos.xaml">
+    <EmbeddedResource Include="Vistas\PaginaConexionBaseDeDatos.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
       <SubType>Designer</SubType>
     </EmbeddedResource>

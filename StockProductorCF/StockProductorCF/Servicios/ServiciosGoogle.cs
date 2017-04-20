@@ -44,7 +44,7 @@ namespace StockProductorCF.Servicios
 			return celdas;
 		}
 
-		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, CellEntry[] producto, CellEntry[] nombresColumnas, string[] listaColumnasInventario)
+		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, CellEntry[] producto, string[] nombresColumnas, string[] listaColumnasInventario)
 		{
 			var columna = "";
 			var valor = "";
@@ -54,14 +54,14 @@ namespace StockProductorCF.Servicios
 			// Agrega la fecha
 			fila += "<gsx:fecha>" + DateTime.Now.ToString("dd/MM/yyyy HH:mm") + "</gsx:fecha>";
 			// Agrega los valores del producto
-			foreach (CellEntry nombreColumna in nombresColumnas)
+			for (var i = 0; i < nombresColumnas.Length; i++)
 			{
-				if (listaColumnasInventario[nombreColumna.Column - 1] == "1" && nombreColumna.Column != celdaMovimiento.Column)
+				if (listaColumnasInventario[i] == "1" && i + 1 != celdaMovimiento.Column)
 					valor = "-"; // Si la columna es de stock pero no la que recibió el movimiento el valor para el histórico es "-"
 				else
-					valor = producto[nombreColumna.Column - 1].Value;
+					valor = producto[i].Value;
 
-				columna = Regex.Replace(nombreColumna.Value.ToLower(), @"\s+", "");
+				columna = Regex.Replace(nombresColumnas[i].ToLower(), @"\s+", "");
 				fila += "<gsx:" + columna + ">" + valor + "</gsx:" + columna + ">";
 			}
 
@@ -76,7 +76,7 @@ namespace StockProductorCF.Servicios
 			return fila;
 		}
 
-		public void InsertarHistoricos(SpreadsheetsService servicio, CellEntry celdaMovimiento, double movimiento, CellEntry[] producto, CellEntry[] nombresColumnas, string[] listaColumnasInventario)
+		public void InsertarHistoricos(SpreadsheetsService servicio, CellEntry celdaMovimiento, double movimiento, CellEntry[] producto, string[] nombresColumnas, string[] listaColumnasInventario)
 		{
 			var url = CuentaUsuario.ObtenerLinkHojaHistorial();
 			var tipoDelContenido = "application/atom+xml";

@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:StockProductorCF"
+             x:Class="StockProductorCF.Vistas.PaginaConexionBaseDeDatos"
+             Title="Productor de la CF - Inventario">
+
+	<ContentPage.Content>
+		<StackLayout Spacing="0" Padding="0">
+			<StackLayout VerticalOptions="EndAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
+				<Label FontSize="18" Text="Usuario" WidthRequest="100" HorizontalTextAlignment="End" VerticalOptions="End" HorizontalOptions="StartAndExpand"/>
+				<Entry FontSize="18" x:Name="Usuario" WidthRequest="250" HorizontalTextAlignment="Start" VerticalOptions="End" HorizontalOptions="EndAndExpand"/>
+			</StackLayout>
+			<StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
+				<Label FontSize="18" Text="Contraseña" WidthRequest="100" HorizontalTextAlignment="End" VerticalOptions="End" HorizontalOptions="StartAndExpand"/>
+				<Entry FontSize="18" x:Name="Contrasena" WidthRequest="250" HorizontalTextAlignment="Start" VerticalOptions="End" HorizontalOptions="EndAndExpand"/>
+			</StackLayout>
+			<StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
+				<Button HorizontalOptions="FillAndExpand" VerticalOptions="Center" Text="Conectar" HeightRequest="60" Clicked="Conectar"/>
+			</StackLayout>
+		</StackLayout>
+	</ContentPage.Content>
+
+</ContentPage>

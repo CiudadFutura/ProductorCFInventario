@@ -1,51 +1,74 @@
 ﻿
+using System;
 using StockProductorCF.Clases;
 using Xamarin.Forms;
+using StockProductorCF.Vistas;
 
 namespace StockProductorCF
 {
-    public partial class App : Application
-    {
-        public static int AnchoDePantalla;
-        public App()
-        {
-            InitializeComponent();
-           
-            var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaInventario();
-            var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
-            var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
+	public partial class App : Application
+	{
+		public static int AnchoDePantalla;
+		public App()
+		{
+			InitializeComponent();
 
-            if (!string.IsNullOrEmpty(linkHojaConsulta) && !string.IsNullOrEmpty(columnasParaVer) && !string.IsNullOrEmpty(columnasInventario))
-            {
-                if (!CuentaUsuario.ValidarToken())
-                    MainPage = new NavigationPage(new PaginaAuntenticacion(true));
-                else
-                    MainPage = new NavigationPage(new Vistas.PaginaGrilla(linkHojaConsulta, null));
-            }
-            else
-                MainPage = new NavigationPage(new Vistas.AccesoDatos());
-        }
+			var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
+			var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
 
-        [Android.Runtime.Preserve]
-        public static void AlmacenarAnchoPantalla(int ancho)
-        {
-            AnchoDePantalla = ancho;
-        }
+			switch (CuentaUsuario.ObtenerAccesoDatos())
+			{
+				case "G":
+					AccesoHojaDeCalculoGoogle(columnasParaVer, columnasInventario);
+					break;
+				case "B":
+					AccesoBaseDeDatos(columnasParaVer, columnasInventario);
+					break;
+				default:
+					MainPage = new NavigationPage(new AccesoDatos());
+					break;
+			}
+		}
 
-        protected override void OnStart()
-        {
-            // Handle when your app starts
-        }
+		private void AccesoHojaDeCalculoGoogle(string columnasParaVer, string columnasInventario)
+		{
+			var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaInventario();
 
-        protected override void OnSleep()
-        {
-            // Handle when your app sleeps
-        }
-        
-        protected override void OnResume()
-        {
-            // Handle when your app resumes
-        }
-        
-    }
+			if (string.IsNullOrEmpty(linkHojaConsulta) || string.IsNullOrEmpty(columnasParaVer) || string.IsNullOrEmpty(columnasInventario) ||
+				!CuentaUsuario.ValidarTokenDeGoogle())
+					MainPage = new NavigationPage(new PaginaAuntenticacion(!string.IsNullOrEmpty(linkHojaConsulta) && !string.IsNullOrEmpty(columnasParaVer) && !string.IsNullOrEmpty(columnasInventario)));
+				else
+					MainPage = new NavigationPage(new PaginaGrilla(linkHojaConsulta, null));
+		}
+
+		private void AccesoBaseDeDatos(string columnasParaVer, string columnasInventario)
+		{
+			if (string.IsNullOrEmpty(columnasParaVer) || string.IsNullOrEmpty(columnasInventario))
+				MainPage = new NavigationPage(new PaginaConexionBaseDeDatos());
+			else
+				MainPage = new NavigationPage(new PaginaGrilla());
+		}
+
+		[Android.Runtime.Preserve]
+		public static void AlmacenarAnchoPantalla(int ancho)
+		{
+			AnchoDePantalla = ancho;
+		}
+
+		protected override void OnStart()
+		{
+			// Handle when your app starts
+		}
+
+		protected override void OnSleep()
+		{
+			// Handle when your app sleeps
+		}
+
+		protected override void OnResume()
+		{
+			// Handle when your app resumes
+		}
+
+	}
 }

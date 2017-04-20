@@ -4,6 +4,7 @@ using Google.GData.Spreadsheets;
 using Xamarin.Forms;
 using StockProductorCF.Clases;
 using StockProductorCF.Servicios;
+using System.Net.Http;
 
 namespace StockProductorCF.Vistas
 {
@@ -13,10 +14,12 @@ namespace StockProductorCF.Vistas
 		private double[] _movimientos;
 		private CellEntry[] _producto;
 		private string[] _listaColumnasInventario;
+		private string[] _productoString;
 		private SpreadsheetsService _servicio;
-		private CellEntry[] _nombresColumnas;
+		private string[] _nombresColumnas;
+		private string _mensaje = "";
 
-		public Producto(CellEntry[] producto, CellEntry[] nombresColumnas, SpreadsheetsService servicio)
+		public Producto(CellEntry[] producto, string[] nombresColumnas, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
 
@@ -24,10 +27,29 @@ namespace StockProductorCF.Vistas
 			_servicio = servicio;
 			_nombresColumnas = nombresColumnas;
 
-			CargarDatosProductos(nombresColumnas);
+			//Almacenar el arreglo de strings para cargar el producto en pantalla
+			_productoString = new string[producto.Length];
+			var i = 0;
+			foreach (CellEntry celda in producto)
+			{
+				_productoString.SetValue(celda.InputValue, i);
+				i = i + 1;
+			}
+
+			CargarDatosProductos();
 		}
 
-		private void CargarDatosProductos(CellEntry[] nombresColumnas)
+		public Producto(string[] productoBD, string[] nombresColumnas)
+		{
+			InitializeComponent();
+
+			_productoString = productoBD;
+			_nombresColumnas = nombresColumnas;
+
+			CargarDatosProductos();
+		}
+
+		private void CargarDatosProductos()
 		{
 			Label nombreCampo;
 			Entry valorCampo;
@@ -41,12 +63,13 @@ namespace StockProductorCF.Vistas
 			if (!string.IsNullOrEmpty(columnasInventario))
 				_listaColumnasInventario = columnasInventario.Split(',');
 
-			_signoPositivo = new bool[_producto.Length];
-			_movimientos = new double[_producto.Length];
+			_signoPositivo = new bool[_productoString.Length];
+			_movimientos = new double[_productoString.Length];
+			var i = 0;
 
-			foreach (CellEntry celda in _producto)
+			foreach (string celda in _productoString)
 			{
-				if (celda != null && nombresColumnas[celda.Column - 1].Value != "Usuario-Movimiento")
+				if (celda != null && _nombresColumnas[i] != "Usuario-Movimiento")
 				{
 					nombreCampo = new Label()
 					{
@@ -57,7 +80,7 @@ namespace StockProductorCF.Vistas
 						WidthRequest = 100
 					};
 
-					nombreCampo.Text = nombresColumnas[celda.Column - 1].Value;
+					nombreCampo.Text = _nombresColumnas[i];
 
 					valorCampo = new Entry()
 					{
@@ -67,7 +90,7 @@ namespace StockProductorCF.Vistas
 						WidthRequest = 210,
 						IsEnabled = false
 					};
-					valorCampo.Text = celda != null ? celda.Value : "";
+					valorCampo.Text = celda;
 
 					campoValor = new StackLayout
 					{
@@ -80,9 +103,9 @@ namespace StockProductorCF.Vistas
 
 					ContenedorProducto.Children.Add(campoValor);
 
-					if (celda != null && _listaColumnasInventario != null && _listaColumnasInventario[(int)celda.Column - 1] == "1")
+					if (celda != null && _listaColumnasInventario != null && _listaColumnasInventario[i] == "1")
 					{
-						_signoPositivo.SetValue(true, (int)celda.Column - 1);
+						_signoPositivo.SetValue(true, i);
 
 						nombreCampo = new Label()
 						{
@@ -100,7 +123,7 @@ namespace StockProductorCF.Vistas
 							HorizontalOptions = LayoutOptions.Start,
 							VerticalOptions = LayoutOptions.Center,
 							FontSize = 25,
-							StyleId = celda.Column.ToString()
+							StyleId = i.ToString()
 						};
 
 						botonSigno.Clicked += DefinirSigno;
@@ -110,7 +133,7 @@ namespace StockProductorCF.Vistas
 							HorizontalOptions = LayoutOptions.StartAndExpand,
 							VerticalOptions = LayoutOptions.Center,
 							HorizontalTextAlignment = TextAlignment.Start,
-							StyleId = "movimiento-" + celda.Column.ToString(),
+							StyleId = "movimiento-" + i.ToString(),
 							WidthRequest = 100,
 							Keyboard = Keyboard.Numeric
 						};
@@ -127,14 +150,18 @@ namespace StockProductorCF.Vistas
 						ContenedorProducto.Children.Add(campoValor);
 					}
 				}
+
+				i = i + 1;
 			}
+
 		}
 
 		private void DefinirSigno(object sender, EventArgs e)
 		{
 			Button boton = ((Button)sender);
-			boton.Text = _signoPositivo[Convert.ToInt32(boton.StyleId) - 1] ? "-" : "+";
-			_signoPositivo.SetValue(boton.Text == "+", Convert.ToInt32(boton.StyleId) - 1);
+			int columna = Convert.ToInt32(boton.StyleId);
+			boton.Text = _signoPositivo[columna] ? "-" : "+";
+			_signoPositivo.SetValue(boton.Text == "+", columna);
 		}
 
 		[Android.Runtime.Preserve]
@@ -148,11 +175,23 @@ namespace StockProductorCF.Vistas
 					{
 						var columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
 						var valor = Convert.ToDouble(((Entry)control).Text ?? "0");
-						_movimientos.SetValue(valor, columna - 1);
+						_movimientos.SetValue(valor, columna);
 					}
 				}
 			}
 
+			if (CuentaUsuario.ObtenerAccesoDatos() == "G")
+				GuardarProductoHojaDeCalculoGoogle();
+			else
+				GuardarProductoBaseDeDatos();
+
+			await Navigation.PopAsync();
+			await DisplayAlert("Producto", _mensaje, "Listo");
+		}
+
+		private async void GuardarProductoHojaDeCalculoGoogle()
+		{
+			_mensaje = "Ha ocurrido un error mientras se guardaba el mocimiento.";
 			var servicioGoogle = new ServiciosGoogle();
 			var multiplicador = 1;
 			var movimiento = 0.00;
@@ -173,8 +212,10 @@ namespace StockProductorCF.Vistas
 							celda.Update();
 							// Inserta histórico en Google
 							servicioGoogle.InsertarHistoricos(_servicio, celda, multiplicador * movimiento, _producto, _nombresColumnas, _listaColumnasInventario);
+
+							_mensaje = "Se guardó el movimiento con éxito.";
 						}
-						catch (Exception ex)
+						catch (Exception)
 						{
 							// Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
 							var paginaAuntenticacion = new PaginaAuntenticacion(true);
@@ -184,8 +225,37 @@ namespace StockProductorCF.Vistas
 					}
 				}
 			}
+		}
 
-			await Navigation.PopAsync();
+		private async void GuardarProductoBaseDeDatos()
+		{
+			var url = @"http://169.254.80.80/PruebaMision/Service.asmx/ActualizarProducto?codigo={0}&movimiento={1}";
+
+			var multiplicador = 1;
+			var movimiento = 0.00;
+			var i = 0;
+			var resultado = "";
+			foreach (string celda in _productoString)
+			{
+				if (_listaColumnasInventario[i] == "1")
+				{
+					multiplicador = _signoPositivo[i] ? 1 : -1;
+					movimiento = _movimientos[i];
+
+					if (movimiento != 0)
+					{
+						using (var cliente = new HttpClient())
+						{
+							resultado = await cliente.GetStringAsync(string.Format(url, _productoString[0], (Convert.ToDouble(celda) + multiplicador * movimiento).ToString()));
+						}
+					}
+				}
+				i = i + 1;
+			}
+
+			_mensaje = "Se guardó el movimiento con éxito.";
+			if(!resultado.Contains("anduvo"))
+				_mensaje = "Ha ocurrido un error mientras se guardaba el mocimiento.";
 		}
 
 	}

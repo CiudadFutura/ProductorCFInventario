@@ -4,11 +4,13 @@
              x:Class="StockProductorCF.Vistas.PaginaGrilla"
              Title="Productor de la CF - Inventario">
 
-  <ContentPage.Content>
-    <StackLayout Spacing="0" Padding="0">
-      <StackLayout x:Name="ContenedorTabla" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
-        <ActivityIndicator x:Name="IndicadorDeActividad" />
-      </StackLayout>
+	<ContentPage.Content>
+		<StackLayout Spacing="0" Padding="0">
+			<StackLayout VerticalOptions="Start" HorizontalOptions="Fill" Spacing="0" Padding="0">
+				<SearchBar x:Name="Buscador" IsVisible="False" HorizontalOptions="Fill" TextChanged="FiltrarProductos" SearchButtonPressed="FiltrarProductos" />
+			</StackLayout>
+			<StackLayout x:Name="ContenedorTabla" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
+			</StackLayout>
       <StackLayout x:Name="ContenedorBotones" BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
         <Button x:Name="Datos" VerticalOptions="End" Text="Acceso a datos" HeightRequest="60" Clicked="AccederDatos"/>
         <Button x:Name="Refrescar" VerticalOptions="End" Text="Refrescar datos" HeightRequest="60" Clicked="RefrescarDatos"/>

@@ -24,7 +24,7 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		void ConectarBaseDatos(object sender, EventArgs args)
 		{
-			var paginaConexionBaseDatos = new PaginaConexionBaseDatos();
+			var paginaConexionBaseDatos = new PaginaConexionBaseDeDatos();
 			Navigation.PushAsync(paginaConexionBaseDatos);
 		}
 	}

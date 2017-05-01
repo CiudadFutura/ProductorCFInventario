@@ -8,10 +8,7 @@ namespace StockProductorCF.Vistas
 		public AccesoDatos()
 		{
 			InitializeComponent();
-			//LogoEmprendimiento.Source = ImageSource.FromResource("StockProductorCF.Imagenes.logoEmprendimiento.png");
-			Cabecera.Source = ImageSource.FromResource("StockProductorCF.Imagenes.ciudadFutura.png");
-
-			NavigationPage.SetHasNavigationBar(this, false);
+			Cabecera.Source = ImageSource.FromResource(string.Format("StockProductorCF.Imagenes.encabezadoProyectos{0}.png", App.SufijoImagen));
 		}
 
 		[Android.Runtime.Preserve]

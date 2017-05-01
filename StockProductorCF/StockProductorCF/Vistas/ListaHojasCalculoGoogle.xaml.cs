@@ -15,6 +15,7 @@ namespace StockProductorCF.Vistas
 		public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
 		{
 			InitializeComponent();
+			Cabecera.Source = ImageSource.FromResource(string.Format("StockProductorCF.Imagenes.encabezadoProyectos{0}.png", App.SufijoImagen));
 
 			_servicio = servicio;
 			_listaHojas = listaHojas;
@@ -25,6 +26,8 @@ namespace StockProductorCF.Vistas
 		private void CargarListaHojas()
 		{
 			StackLayout itemHoja;
+			Button botonHoja;
+			Button botonReiniciarHoja;
 			foreach (WorksheetEntry hoja in _listaHojas)
 			{
 				if (hoja.Title.Text == "Historial")
@@ -36,34 +39,65 @@ namespace StockProductorCF.Vistas
 					VerticalOptions = LayoutOptions.Start
 				};
 
-				var boton = new Button
+				botonHoja = new Button
 				{
 					Text = hoja.Title.Text,
 					HorizontalOptions = LayoutOptions.FillAndExpand,
 					VerticalOptions = LayoutOptions.Start,
 					HeightRequest = 55
 				};
+				botonHoja.Resources = new ResourceDictionary();
+				botonHoja.Resources.Add("Id", hoja.Id);
+				botonHoja.Clicked += EnviarPaginaGrilla;
 
-				boton.Resources = new ResourceDictionary();
-				boton.Resources.Add("Id", hoja.Id);
-				boton.Clicked += EnviarPaginaGrilla;
+				itemHoja.Children.Add(botonHoja);
 
-				itemHoja.Children.Add(boton);
+				if(CuentaUsuario.VerificarHojaUsada(hoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString()))
+				{
+					botonHoja.HorizontalOptions = LayoutOptions.StartAndExpand;
+
+					botonReiniciarHoja = new Button
+					{
+						Text = "Reiniciar hoja",
+						HorizontalOptions = LayoutOptions.EndAndExpand,
+						VerticalOptions = LayoutOptions.Start,
+						HeightRequest = 55
+					};
+					botonReiniciarHoja.Resources = new ResourceDictionary();
+					botonReiniciarHoja.Resources.Add("Id", hoja.Id);
+					botonReiniciarHoja.StyleId = "R";
+					botonReiniciarHoja.Clicked += EnviarPaginaGrilla;
+
+					itemHoja.Children.Add(botonReiniciarHoja);
+				}
+
 				ContenedorHojas.Children.Add(itemHoja);
 			}
 		}
 
-		void EnviarPaginaGrilla(object boton, EventArgs args)
+		void EnviarPaginaGrilla(object control, EventArgs args)
 		{
-			var hoja = _listaHojas.FindById(((AtomId)((Button)boton).Resources["Id"]));
+			var boton = (Button)control;
+			var hoja = _listaHojas.FindById((AtomId)boton.Resources["Id"]);
 
-			AtomLink link = hoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null);
+			string link = hoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString();
 
-			//Se almacena el link para recobrar los datos de stock de la hoja cuando ingrese nuevamente
-			CuentaUsuario.AlmacenarLinkHojaConsulta(link.HRef.ToString());
+			//Se almacena el link para recobrar los datos de stock de la hoja cuando ingrese nuevamente.
+			CuentaUsuario.AlmacenarLinkHojaConsulta(link);
+			CuentaUsuario.AlmacenarNombreDeHoja(link, hoja.Title.Text);
 
-			var paginaSeleccionColumnasParaVer = new SeleccionColumnasParaVer(link.HRef.ToString(), _servicio);
-			Navigation.PushAsync(paginaSeleccionColumnasParaVer);
+			ContentPage pagina;
+			//Si ya se usó esta hoja alguna vez, carga las columnas ya seleccionadas y envía a Grilla.
+			//Si no o si el botón presionado es el de reiniciar, envía a pantallas de selección de columnas.
+			if (boton.StyleId != "R" && CuentaUsuario.VerificarHojaUsadaRecuperarColumnas(link))
+			{
+				pagina = new PaginaGrilla(link, _servicio);
+			}
+			else
+			{
+				pagina = new SeleccionColumnasParaVer(link, _servicio);
+			}
+			Navigation.PushAsync(pagina);
 
 		}
 	}

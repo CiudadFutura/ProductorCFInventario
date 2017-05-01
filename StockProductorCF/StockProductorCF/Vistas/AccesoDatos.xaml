@@ -3,13 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:StockProductorCF"
              x:Class="StockProductorCF.Vistas.AccesoDatos"
-             Title="Productor de la CF - Inventario">
+						 NavigationPage.HasNavigationBar="false">
 
   <ContentPage.Content>
     <ScrollView>
       <StackLayout Spacing="0" Padding="0">
-        <StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
-          <Image x:Name="Cabecera" WidthRequest="250" HeightRequest="90" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
+        <StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
+          <Image x:Name="Cabecera" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
         </StackLayout>
         <StackLayout BackgroundColor="Gray" VerticalOptions="Start" HorizontalOptions="Fill">
           <Label FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center">Seleccione la fuente de datos</Label>

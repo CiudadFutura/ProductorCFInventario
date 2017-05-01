@@ -18,9 +18,9 @@ namespace StockProductorCF.Droid
 
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
-            App.AlmacenarAnchoPantalla((int)(Resources.DisplayMetrics.WidthPixels / Resources.DisplayMetrics.Density));
+            App.AlmacenarAnchoPantalla((int)(Resources.DisplayMetrics.WidthPixels / Resources.DisplayMetrics.Density), Resources.DisplayMetrics.WidthPixels);
 
-            LoadApplication(new App());
+						LoadApplication(new App());
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)

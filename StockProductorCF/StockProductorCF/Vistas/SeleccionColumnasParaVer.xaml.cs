@@ -9,109 +9,110 @@ using System.Collections.Generic;
 
 namespace StockProductorCF.Vistas
 {
-    public partial class SeleccionColumnasParaVer : ContentPage
-    {
-        private SpreadsheetsService _servicio;
-        private int[] _listaColumnas;
-        private List<CellEntry> _columnas;
-        private string _linkHojaConsulta;
+	public partial class SeleccionColumnasParaVer : ContentPage
+	{
+		private SpreadsheetsService _servicio;
+		private int[] _listaColumnas;
+		private List<CellEntry> _columnas;
+		private string _linkHojaConsulta;
 
-        public SeleccionColumnasParaVer(string linkHojaConsulta, SpreadsheetsService servicio)
-        {
-            InitializeComponent();
+		public SeleccionColumnasParaVer(string linkHojaConsulta, SpreadsheetsService servicio)
+		{
+			InitializeComponent();
+			Cabecera.Source = ImageSource.FromResource(string.Format("StockProductorCF.Imagenes.encabezadoProyectos{0}.png", App.SufijoImagen));
 
-            _servicio = servicio;
-            _linkHojaConsulta = linkHojaConsulta;
+			_servicio = servicio;
+			_linkHojaConsulta = linkHojaConsulta;
 
-            ObtenerColumnas();
-        }
+			ObtenerColumnas();
+		}
 
-        private void ObtenerColumnas()
-        {
-            try
-            {
-                var celdas = new ServiciosGoogle().ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
+		private void ObtenerColumnas()
+		{
+			try
+			{
+				var celdas = new ServiciosGoogle().ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
 
-                _columnas = new List<CellEntry>(); //Columnas para listar en pantalla, si hay una de nombre Usuario - Movimiento se quita.
+				_columnas = new List<CellEntry>(); //Columnas para listar en pantalla, si hay una de nombre Usuario - Movimiento se quita.
 
-                foreach (CellEntry celda in celdas.Entries)
-                {
-                    if (celda.Row == 1)
-                    {
-                        _columnas.Add(celda);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
+				foreach (CellEntry celda in celdas.Entries)
+				{
+					if (celda.Row == 1)
+					{
+						_columnas.Add(celda);
+					}
+					else
+					{
+						break;
+					}
+				}
 
-                _listaColumnas = Enumerable.Repeat(1, _columnas.Count).ToArray(); //El arreglo de columnas para ver, todas con valor inicial en 1
-                LlenarGrillaColumnasParaVer(_columnas);
-            }
-            catch (Exception)
-            {
-                Navigation.PushAsync(new AccesoDatos());
-            }
-        }
+				_listaColumnas = Enumerable.Repeat(1, _columnas.Count).ToArray(); //El arreglo de columnas para ver, todas con valor inicial en 1
+				LlenarGrillaColumnasParaVer(_columnas);
+			}
+			catch (Exception)
+			{
+				Navigation.PushAsync(new AccesoDatos());
+			}
+		}
 
-        private void LlenarGrillaColumnasParaVer(List<CellEntry> columnas)
-        {
-            StackLayout itemColumna;
-            Label etiquetaColumna;
-            Switch seleccionar;
-            var esGris = false;
-            foreach (CellEntry columna in columnas)
-            {
-                etiquetaColumna = new Label
-                {
-                    TextColor = Color.Black,
-                    HorizontalOptions = LayoutOptions.StartAndExpand,
-                    HorizontalTextAlignment = TextAlignment.Start,
-                    VerticalOptions = LayoutOptions.Center,
-                    Text = columna.Value,
-                    FontSize = 18
-                };
+		private void LlenarGrillaColumnasParaVer(List<CellEntry> columnas)
+		{
+			StackLayout itemColumna;
+			Label etiquetaColumna;
+			Switch seleccionar;
+			var esGris = false;
+			foreach (CellEntry columna in columnas)
+			{
+				etiquetaColumna = new Label
+				{
+					TextColor = Color.Black,
+					HorizontalOptions = LayoutOptions.StartAndExpand,
+					HorizontalTextAlignment = TextAlignment.Start,
+					VerticalOptions = LayoutOptions.Center,
+					Text = columna.Value,
+					FontSize = 18
+				};
 
-                seleccionar = new Switch
-                {
-                    HorizontalOptions = LayoutOptions.End,
-                    VerticalOptions = LayoutOptions.Center,
-                    StyleId = columna.Column.ToString()
-                };
-                seleccionar.Toggled += AgregarColumna;
+				seleccionar = new Switch
+				{
+					HorizontalOptions = LayoutOptions.End,
+					VerticalOptions = LayoutOptions.Center,
+					StyleId = columna.Column.ToString()
+				};
+				seleccionar.Toggled += AgregarColumna;
 
-                itemColumna = new StackLayout
-                {
-                    HorizontalOptions = LayoutOptions.FillAndExpand,
-                    VerticalOptions = LayoutOptions.CenterAndExpand,
-                    Orientation = StackOrientation.Horizontal,
-                    HeightRequest = 45,
-                    WidthRequest = 300,
-                    Children = { etiquetaColumna, seleccionar },
-                    Spacing = 0,
-                    Padding = 4,
-                    BackgroundColor = esGris ? Color.Silver : Color.FromHex("#F5F5F5")
-                };
+				itemColumna = new StackLayout
+				{
+					HorizontalOptions = LayoutOptions.FillAndExpand,
+					VerticalOptions = LayoutOptions.CenterAndExpand,
+					Orientation = StackOrientation.Horizontal,
+					HeightRequest = 45,
+					WidthRequest = 300,
+					Children = { etiquetaColumna, seleccionar },
+					Spacing = 0,
+					Padding = 4,
+					BackgroundColor = esGris ? Color.Silver : Color.FromHex("#F5F5F5")
+				};
 
-                esGris = !esGris;
-                ContenedorColumnas.Children.Add(itemColumna);
-            }
-        }
+				esGris = !esGris;
+				ContenedorColumnas.Children.Add(itemColumna);
+			}
+		}
 
-        [Android.Runtime.Preserve]
-        private void AgregarColumna(object sender, ToggledEventArgs e)
-        {
-            Switch ficha = (Switch)sender;
-            _listaColumnas.SetValue(Convert.ToInt32(!e.Value), Convert.ToInt32(ficha.StyleId) - 1);
-        }
+		[Android.Runtime.Preserve]
+		private void AgregarColumna(object sender, ToggledEventArgs e)
+		{
+			Switch ficha = (Switch)sender;
+			_listaColumnas.SetValue(Convert.ToInt32(!e.Value), Convert.ToInt32(ficha.StyleId) - 1);
+		}
 
-        [Android.Runtime.Preserve]
-        void Listo(object sender, EventArgs e)
-        {
-            CuentaUsuario.AlmacenarColumnasParaVer(string.Join(",", _listaColumnas));
-            var paginaSeleccionColumnasInventario = new SeleccionColumnasInventario(_columnas, _linkHojaConsulta, _servicio);
-            Navigation.PushAsync(paginaSeleccionColumnasInventario);
-        }
-    }
+		[Android.Runtime.Preserve]
+		void Listo(object sender, EventArgs e)
+		{
+			CuentaUsuario.AlmacenarColumnasParaVerDeHoja(_linkHojaConsulta, string.Join(",", _listaColumnas));
+			var paginaSeleccionColumnasInventario = new SeleccionColumnasInventario(_columnas, _linkHojaConsulta, _servicio);
+			Navigation.PushAsync(paginaSeleccionColumnasInventario);
+		}
+	}
 }

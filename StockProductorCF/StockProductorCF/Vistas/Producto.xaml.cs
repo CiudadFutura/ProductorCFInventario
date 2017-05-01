@@ -22,6 +22,7 @@ namespace StockProductorCF.Vistas
 		public Producto(CellEntry[] producto, string[] nombresColumnas, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
+			Cabecera.Source = ImageSource.FromResource(string.Format("StockProductorCF.Imagenes.encabezadoProyectos{0}.png", App.SufijoImagen));
 
 			_producto = producto;
 			_servicio = servicio;

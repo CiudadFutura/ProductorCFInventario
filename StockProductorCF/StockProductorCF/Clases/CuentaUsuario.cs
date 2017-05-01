@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xamarin.Auth;
 
@@ -43,7 +44,7 @@ namespace StockProductorCF.Clases
 			return (_cuenta != null && _cuenta.Properties.ContainsKey(llave)) ? _cuenta.Properties[llave] : null;
 		}
 
-		public static void AlmacenarAccesoDatos(string acceso)
+		internal static void AlmacenarAccesoDatos(string acceso)
 		{
 			if(RecuperarValorDeCuentaLocal("accesoDatos") != acceso)
 			{
@@ -53,103 +54,183 @@ namespace StockProductorCF.Clases
 			GuardarValorEnCuentaLocal("accesoDatos", acceso);
 		}
 
-		public static void AlmacenarTokenDeGoogle(string tokenDeAcceso)
+		internal static void AlmacenarTokenDeGoogle(string tokenDeAcceso)
 		{
 			GuardarValorEnCuentaLocal("tokenDeGoogle", tokenDeAcceso);
 		}
 
-		public static void AlmacenarFechaExpiracionToken(DateTime? fechaExpiracion)
+		internal static void AlmacenarFechaExpiracionToken(DateTime? fechaExpiracion)
 		{
 			GuardarValorEnCuentaLocal("fechaExpiracion", fechaExpiracion.ToString());
 		}
 
-		public static void AlmacenarLinkHojaConsulta(string linkHojaConsulta)
+		internal static void AlmacenarLinkHojaConsulta(string linkHojaConsulta)
 		{
 			GuardarValorEnCuentaLocal("linkHojaConsulta", linkHojaConsulta);
 		}
 
-		public static void AlmacenarColumnasParaVer(string columnasParaVer)
+		internal static bool VerificarHojaUsada(string linkHojaConsulta)
+		{
+			return _cuenta != null && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|ver") 
+				&& _cuenta.Properties.ContainsKey(linkHojaConsulta + "|inventario") && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|nombre");
+		}
+
+		internal static bool VerificarHojaUsadaRecuperarColumnas(string linkHojaConsulta)
+		{
+			//Si no hay columnas para esta hoja deducimos que la hoja no se ha usado, si hay, las cargamos.
+			if (!VerificarHojaUsada(linkHojaConsulta))
+				return false;
+			else
+			{
+				AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(linkHojaConsulta + "|ver"));
+				AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(linkHojaConsulta + "|inventario"));
+				return true;
+			}
+		}
+
+		internal static void AlmacenarColumnasParaVerDeHoja(string linkHojaConsulta, string columnasParaVer)
+		{
+			GuardarValorEnCuentaLocal("columnasParaVer", columnasParaVer);
+			GuardarValorEnCuentaLocal(linkHojaConsulta + "|ver", columnasParaVer);
+		}
+
+		internal static void AlmacenarColumnasParaVer(string columnasParaVer)
 		{
 			GuardarValorEnCuentaLocal("columnasParaVer", columnasParaVer);
 		}
 
-		public static void AlmacenarColumnasInventario(string columnasInventario)
+		internal static void AlmacenarColumnasInventarioDeHoja(string linkHojaConsulta, string columnasInventario)
+		{
+			GuardarValorEnCuentaLocal("columnasInventario", columnasInventario);
+			GuardarValorEnCuentaLocal(linkHojaConsulta + "|inventario", columnasInventario);
+		}
+
+		internal static void AlmacenarNombreDeHoja(string linkHojaConsulta, string nombreHojaConsulta)
+		{
+			GuardarValorEnCuentaLocal(linkHojaConsulta + "|nombre", nombreHojaConsulta);
+		}
+
+		internal static void AlmacenarColumnasInventario(string columnasInventario)
 		{
 			GuardarValorEnCuentaLocal("columnasInventario", columnasInventario);
 		}
 
-		public static void AlmacenarNombreUsuarioGoogle(string nombreUsuarioGoogle)
+		internal static void AlmacenarNombreUsuarioGoogle(string nombreUsuarioGoogle)
 		{
 			GuardarValorEnCuentaLocal("nombreUsuarioGoogle", nombreUsuarioGoogle);
 		}
 
-		public static void AlmacenarLinkHojaHistorial(string linkHojaHistorial)
+		internal static void AlmacenarLinkHojaHistorial(string linkHojaHistorial)
 		{
 			GuardarValorEnCuentaLocal("linkHojaHistorial", linkHojaHistorial);
 		}
 
-		public static void AlmacenarTokenDeBaseDeDatos(string tokenDeAcceso)
+		internal static void AlmacenarTokenDeBaseDeDatos(string tokenDeAcceso)
 		{
 			GuardarValorEnCuentaLocal("tokenDeBaseDeDatos", tokenDeAcceso);
 		}
 
-		public static void AlmacenarUsuarioDeBaseDeDatos(string usuario)
+		internal static void AlmacenarUsuarioDeBaseDeDatos(string usuario)
 		{
 			GuardarValorEnCuentaLocal("usuarioDeBaseDeDatos", usuario);
 		}
 
-		public static string ObtenerTokenActualDeGoogle()
+		internal static string ObtenerTokenActualDeGoogle()
 		{
 			return RecuperarValorDeCuentaLocal("tokenDeGoogle");
 		}
 
-		public static DateTime? ObtenerFechaExpiracionToken()
+		internal static DateTime? ObtenerFechaExpiracionToken()
 		{
 			var valor = RecuperarValorDeCuentaLocal("fechaExpiracion");
 			return !string.IsNullOrEmpty(valor) ? Convert.ToDateTime(valor) : (DateTime?)null;
 		}
 
-		public static string ObtenerLinkHojaInventario()
+		internal static string ObtenerLinkHojaConsulta()
 		{
 			return RecuperarValorDeCuentaLocal("linkHojaConsulta");
 		}
 
-		public static string ObtenerColumnasParaVer()
+		internal static string ObtenerColumnasParaVer()
 		{
 			return RecuperarValorDeCuentaLocal("columnasParaVer");
 		}
 
-		public static string ObtenerColumnasInventario()
+		internal static string ObtenerColumnasInventario()
 		{
 			return RecuperarValorDeCuentaLocal("columnasInventario");
 		}
 
-		public static string ObtenerNombreUsuarioGoogle()
+		internal static string ObtenerNombreUsuarioGoogle()
 		{
 			return RecuperarValorDeCuentaLocal("nombreUsuarioGoogle");
 		}
 
-		public static string ObtenerLinkHojaHistorial()
+		internal static string ObtenerLinkHojaHistorial()
 		{
 			return RecuperarValorDeCuentaLocal("linkHojaHistorial");
 		}
 
-		public static string ObtenerTokenActualDeBaseDeDatos()
+		internal static string ObtenerTokenActualDeBaseDeDatos()
 		{
 			return RecuperarValorDeCuentaLocal("tokenDeBaseDeDatos");
 		}
 
-		public static string ObtenerUsuarioDeBaseDeDatos()
+		internal static string ObtenerUsuarioDeBaseDeDatos()
 		{
 			return RecuperarValorDeCuentaLocal("usuarioDeBaseDeDatos");
 		}
 
-		public static string ObtenerAccesoDatos()
+		internal static string ObtenerAccesoDatos()
 		{
 			return RecuperarValorDeCuentaLocal("accesoDatos");
 		}
 
-		public static bool ValidarTokenDeGoogle()
+		internal static string ObtenerNombreHoja(string linkHojaConsulta)
+		{
+			return RecuperarValorDeCuentaLocal(linkHojaConsulta + "|nombre");
+		}
+
+		internal static List<string> ObtenerTodosLosNombresDeHojas()
+		{
+			var nombres = new List<string>();
+
+			RecuperarCuentaLocal();
+			if (_cuenta != null)
+			{
+				foreach(KeyValuePair<string, string> llaveValor in _cuenta.Properties)
+				{
+					if (llaveValor.Key.Contains("|nombre"))
+						nombres.Add(llaveValor.Value);
+				}
+			}
+
+			return nombres;
+		}
+
+		internal static string ObtenerLinkHojaSeleccionada(string nombre)
+		{
+			var link = "";
+			RecuperarCuentaLocal();
+			if (_cuenta != null)
+			{
+				foreach (KeyValuePair<string, string> llaveValor in _cuenta.Properties)
+				{
+					if (llaveValor.Key.Contains("|nombre") && llaveValor.Value.Equals(nombre))
+					{
+						link = llaveValor.Key.Split('|')[0];
+						AlmacenarLinkHojaConsulta(link);
+						AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(link + "|ver"));
+						AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(link + "|inventario"));
+						break;
+					}
+				}
+			}
+
+			return link;
+		}
+
+		internal static bool ValidarTokenDeGoogle()
 		{
 			if (string.IsNullOrEmpty(ObtenerTokenActualDeGoogle()) || ObtenerFechaExpiracionToken() <= DateTime.Now)
 				return false;

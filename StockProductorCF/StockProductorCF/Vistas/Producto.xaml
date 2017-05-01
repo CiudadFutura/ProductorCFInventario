@@ -2,11 +2,14 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="StockProductorCF.Vistas.Producto"
-             Title="Productor de la CF - Inventario">
+						 NavigationPage.HasNavigationBar="false">
 
   <ContentPage.Content>
     <StackLayout Spacing="0" Padding="0">
-      <StackLayout BackgroundColor="Gray" VerticalOptions="Start" HorizontalOptions="Fill">
+			<StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
+				<Image x:Name="Cabecera" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
+			</StackLayout>
+			<StackLayout BackgroundColor="Gray" VerticalOptions="Start" HorizontalOptions="Fill">
         <Label FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center">Detalle del producto</Label>
       </StackLayout>
       <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="Fill">

@@ -1,5 +1,4 @@
 ﻿
-using System;
 using StockProductorCF.Clases;
 using Xamarin.Forms;
 using StockProductorCF.Vistas;
@@ -9,6 +8,8 @@ namespace StockProductorCF
 	public partial class App : Application
 	{
 		public static int AnchoDePantalla;
+		public static int Ancho;
+		public static string SufijoImagen;
 		public App()
 		{
 			InitializeComponent();
@@ -32,7 +33,7 @@ namespace StockProductorCF
 
 		private void AccesoHojaDeCalculoGoogle(string columnasParaVer, string columnasInventario)
 		{
-			var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaInventario();
+			var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaConsulta();
 
 			if (string.IsNullOrEmpty(linkHojaConsulta) || string.IsNullOrEmpty(columnasParaVer) || string.IsNullOrEmpty(columnasInventario) ||
 				!CuentaUsuario.ValidarTokenDeGoogle())
@@ -50,9 +51,13 @@ namespace StockProductorCF
 		}
 
 		[Android.Runtime.Preserve]
-		public static void AlmacenarAnchoPantalla(int ancho)
+		public static void AlmacenarAnchoPantalla(int anchoSobreDensidad, int anchoCrudo)
 		{
-			AnchoDePantalla = ancho;
+			AnchoDePantalla = anchoSobreDensidad;
+			Ancho = anchoCrudo;
+			SufijoImagen = "380";
+			if (anchoCrudo > 1000)
+				SufijoImagen = "1080";
 		}
 
 		protected override void OnStart()

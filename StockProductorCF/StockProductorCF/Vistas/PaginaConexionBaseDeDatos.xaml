@@ -3,10 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:StockProductorCF"
              x:Class="StockProductorCF.Vistas.PaginaConexionBaseDeDatos"
-             Title="Productor de la CF - Inventario">
+						 NavigationPage.HasNavigationBar="false">
 
 	<ContentPage.Content>
 		<StackLayout Spacing="0" Padding="0">
+			<StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
+				<Image x:Name="Cabecera" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
+			</StackLayout>
 			<StackLayout VerticalOptions="EndAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
 				<Label FontSize="18" Text="Usuario" WidthRequest="100" HorizontalTextAlignment="End" VerticalOptions="End" HorizontalOptions="StartAndExpand"/>
 				<Entry FontSize="18" x:Name="Usuario" WidthRequest="250" HorizontalTextAlignment="Start" VerticalOptions="End" HorizontalOptions="EndAndExpand"/>

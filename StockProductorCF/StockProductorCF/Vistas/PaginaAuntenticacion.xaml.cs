@@ -17,6 +17,7 @@ namespace StockProductorCF
 		public PaginaAuntenticacion(bool conexionExistente = false)
 		{
 			InitializeComponent();
+			Cabecera.Source = ImageSource.FromResource(string.Format("StockProductorCF.Imagenes.encabezadoProyectos{0}.png", App.SufijoImagen));
 			CuentaUsuario.AlmacenarAccesoDatos("G");
 			_conexionExistente = conexionExistente; //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros
 
@@ -39,7 +40,9 @@ namespace StockProductorCF
 
 			webView.HeightRequest = 1;
 			webView.Navigated += CuandoNavegaWebView;
-			Content = webView;
+			webView.HorizontalOptions = LayoutOptions.FillAndExpand;
+			webView.VerticalOptions = LayoutOptions.FillAndExpand;
+			Contenedor.Children.Add(webView);
 		}
 
 		private void CuandoNavegaWebView(object sender, WebNavigatedEventArgs e)
@@ -51,7 +54,7 @@ namespace StockProductorCF
 		{
 			if (_conexionExistente) //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros
 			{
-				var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaInventario();
+				var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaConsulta();
 				Navigation.InsertPageBefore(new PaginaGrilla(linkHojaConsulta, null), this);
 			}
 			else

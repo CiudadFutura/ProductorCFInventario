@@ -36,6 +36,7 @@ namespace StockProductorCF.Vistas
 
 			InicializarVariablesGlobales();
 			ObtenerDatosProductosDesdeHCG();
+			ConfigurarSelectorHojas();
 		}
 
 		//Constructor para Base de Datos
@@ -51,6 +52,10 @@ namespace StockProductorCF.Vistas
 
 		private void InicializarVariablesGlobales()
 		{
+			string rutaCabecera = string.Format("StockProductorCF.Imagenes.ciudadFutura{0}.png", App.SufijoImagen);
+			Cabecera.Source = ImageSource.FromResource(rutaCabecera);
+			//Cabecera.WidthRequest = App.AnchoDePantalla;
+
 			var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
 			if (!string.IsNullOrEmpty(columnasParaVer))
 				_listaColumnasParaVer = columnasParaVer.Split(',');
@@ -66,11 +71,11 @@ namespace StockProductorCF.Vistas
 			if (_servicio == null) //El servicio viene nulo cuando se llama directamente desde el lanzador (ya tiene conexión a datos configurada)
 				_servicio = _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActualDeGoogle());
 
-			try
+			if(CuentaUsuario.ValidarTokenDeGoogle())
 			{
 				_celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
 			}
-			catch (Exception)
+			else
 			{
 				//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
 				var paginaAuntenticacion = new PaginaAuntenticacion(true);
@@ -105,6 +110,22 @@ namespace StockProductorCF.Vistas
 			LlenarGrillaDeProductos(productos);
 		}
 
+		private void ConfigurarSelectorHojas()
+		{
+			ListaHojas.IsVisible = true;
+			var nombreHojaActual = CuentaUsuario.ObtenerNombreHoja(_linkHojaConsulta);
+			var nombres = CuentaUsuario.ObtenerTodosLosNombresDeHojas();
+			int i = 0;
+			foreach (string nombre in nombres)
+			{
+				ListaHojas.Items.Add(nombre);
+				if (nombre == nombreHojaActual)
+					ListaHojas.SelectedIndex = i;
+
+				i += 1;
+			}
+		}
+
 		#endregion
 
 		#region Métodos para Base de Datos
@@ -120,7 +141,7 @@ namespace StockProductorCF.Vistas
 				//Parsea el json para obtener la lista de productos
 				var productos = ParsearJSONProductos(jsonProductos);
 
-				_nombresColumnas = new []{"Código", "Nombre", "Stock"};
+				_nombresColumnas = new[] { "Código", "Nombre", "Stock" };
 				FijarProductosYBuscador(productos);
 				LlenarGrillaDeProductos(productos);
 			}
@@ -200,9 +221,9 @@ namespace StockProductorCF.Vistas
 			}
 			else
 			{
-				foreach(string[] producto in _productos)
+				foreach (string[] producto in _productos)
 				{
-					if(producto[0] == codigoProductoSeleccionado)
+					if (producto[0] == codigoProductoSeleccionado)
 					{
 						Navigation.PushAsync(new Producto(producto, _nombresColumnas));
 						break;
@@ -245,7 +266,7 @@ namespace StockProductorCF.Vistas
 			{
 				HorizontalOptions = LayoutOptions.Fill,
 				VerticalOptions = LayoutOptions.Start,
-				BackgroundColor = Color.Gray,
+				BackgroundColor = Color.FromHex("#C0C0C0"),
 				Children =
 								{
 									new Label
@@ -254,7 +275,11 @@ namespace StockProductorCF.Vistas
 										FontSize = 18,
 										HorizontalOptions = LayoutOptions.Center,
 										FontAttributes = FontAttributes.Bold,
-										TextColor = Color.White
+										TextColor = Color.Black,
+										FontFamily = Device.OnPlatform(null,
+																									 "fonts/WINGDING.TTF#Wingdings", // Android
+																									 null
+																									)
 									}
 								}
 			};
@@ -447,6 +472,15 @@ namespace StockProductorCF.Vistas
 
 				LlenarGrillaDeProductos(productos);
 			}
+		}
+
+		[Android.Runtime.Preserve]
+		void CargarHoja(object sender, EventArgs args)
+		{
+			_linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaSeleccionada(ListaHojas.Items[ListaHojas.SelectedIndex]);
+			_listaColumnasParaVer = CuentaUsuario.ObtenerColumnasParaVer().Split(',');
+			_listacolumnasInventario = CuentaUsuario.ObtenerColumnasInventario().Split(',');
+			ObtenerDatosProductosDesdeHCG();
 		}
 
 		#endregion

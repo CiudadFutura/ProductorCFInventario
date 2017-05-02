@@ -26,6 +26,8 @@ namespace StockProductorCF.Droid
 		
 		public static void UpdateIdValues()
 		{
+			global::PCLCrypto.Resource.String.ApplicationName = global::StockProductorCF.Droid.Resource.String.ApplicationName;
+			global::PCLCrypto.Resource.String.Hello = global::StockProductorCF.Droid.Resource.String.Hello;
 			global::Xamarin.Forms.Platform.Android.Resource.Attribute.actionBarSize = global::StockProductorCF.Droid.Resource.Attribute.actionBarSize;
 			global::ZXing.Net.Mobile.Forms.Android.Resource.Layout.zxingscanneractivitylayout = global::StockProductorCF.Droid.Resource.Layout.zxingscanneractivitylayout;
 			global::ZXing.Net.Mobile.Forms.Android.Resource.Layout.zxingscannerfragmentlayout = global::StockProductorCF.Droid.Resource.Layout.zxingscannerfragmentlayout;
@@ -3597,6 +3599,12 @@ namespace StockProductorCF.Droid
 		
 		public partial class String
 		{
+			
+			// aapt resource value: 0x7f07003f
+			public const int ApplicationName = 2131165247;
+			
+			// aapt resource value: 0x7f07003e
+			public const int Hello = 2131165246;
 			
 			// aapt resource value: 0x7f070015
 			public const int abc_action_bar_home_description = 2131165205;

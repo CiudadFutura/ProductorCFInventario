@@ -8,13 +8,18 @@
   <ContentPage.Content>
     <ScrollView>
       <StackLayout Spacing="0" Padding="0">
-        <StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
-          <Image x:Name="Cabecera" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
-        </StackLayout>
-        <StackLayout BackgroundColor="Gray" VerticalOptions="Start" HorizontalOptions="Fill">
-          <Label FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center">Seleccione la fuente de datos</Label>
-        </StackLayout>
-        <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Fill">
+				<RelativeLayout>
+					<Image x:Name="Cabecera" VerticalOptions="Start"/>
+					<BoxView BackgroundColor="#dedede" HeightRequest="26"
+									 RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=Cabecera, Property=Height, Factor=1, Constant=-3}"
+									 RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToView, ElementName=Cabecera, Property=Width, Factor=1, Constant=0}"></BoxView>
+					<Label FontSize="18" FontAttributes="Bold" TextColor="Black"
+								 RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=Cabecera, Property=Height, Factor=1, Constant=-1}"
+								 RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToView, ElementName=Cabecera, Property=Width, Factor=0.5, Constant=-120}">
+						Seleccione la fuente de datos
+					</Label>
+				</RelativeLayout>
+				<StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Fill">
           <Button HorizontalOptions="FillAndExpand" VerticalOptions="Center" Text="Conectar con cuenta de Google" HeightRequest="100" Clicked="ConectarGoogle"/>
         </StackLayout>
         <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Fill">

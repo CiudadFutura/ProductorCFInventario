@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using Google.GData.Client;
 using Xamarin.Forms;
 using ZXing.Net.Mobile.Forms;
 
@@ -13,14 +14,13 @@ namespace StockProductorCF.Vistas
 {
 	public partial class PaginaGrilla : ContentPage
 	{
-		private ServiciosGoogle _servicioGoogle;
+		private readonly ServiciosGoogle _servicioGoogle;
 		private SpreadsheetsService _servicio;
 		private CellFeed _celdas;
 		private string _linkHojaConsulta;
 		private string[] _nombresColumnas;
 		private string[] _listaColumnasParaVer;
 		private string[] _listacolumnasInventario;
-		private bool _seleccionoItem;
 		private ViewCell _ultimoItemSeleccionado;
 		private List<string[]> _productos;
 
@@ -115,8 +115,8 @@ namespace StockProductorCF.Vistas
 			ListaHojas.IsVisible = true;
 			var nombreHojaActual = CuentaUsuario.ObtenerNombreHoja(_linkHojaConsulta);
 			var nombres = CuentaUsuario.ObtenerTodosLosNombresDeHojas();
-			int i = 0;
-			foreach (string nombre in nombres)
+			var i = 0;
+			foreach (var nombre in nombres)
 			{
 				ListaHojas.Items.Add(nombre);
 				if (nombre == nombreHojaActual)
@@ -132,7 +132,9 @@ namespace StockProductorCF.Vistas
 
 		private async void ObtenerProductosDesdeBD()
 		{
-			var url = string.Format(@"http://169.254.80.80/PruebaMision/Service.asmx/RecuperarProductos?token={0}", CuentaUsuario.ObtenerTokenActualDeBaseDeDatos());
+			var url = $@"http://169.254.80.80/PruebaMision/Service.asmx/RecuperarProductos?token={
+					CuentaUsuario.ObtenerTokenActualDeBaseDeDatos()
+				}";
 
 			using (var cliente = new HttpClient())
 			{
@@ -147,28 +149,25 @@ namespace StockProductorCF.Vistas
 			}
 		}
 
-		private List<string[]> ParsearJSONProductos(string jsonProductos)
+		private static List<string[]> ParsearJSONProductos(string jsonProductos)
 		{
 			jsonProductos = jsonProductos.Replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<string xmlns=\"http://tempuri.org/\">[{", "")
 				.Replace("}]</string>", "")
 				.Replace("},{", "|");
 			var arregloProductos = jsonProductos.Split('|');
 			var productos = new List<string[]>();
-			string[] producto;
-			string[] temporal;
-			string stock;
 
-			foreach (string datos in arregloProductos)
+			foreach (var datos in arregloProductos)
 			{
-				temporal = datos.Split(',');
+				var temporal = datos.Split(',');
 
 				//Si el precio es diferente de 0.0 lo agregamos
 				if (temporal[1].Split(':')[1].TrimStart('"').TrimEnd('"') != "0.0")
 				{
-					producto = new string[3];
+					var producto = new string[3];
 					producto[0] = temporal[0].Split(':')[1].TrimStart('"').TrimEnd('"');
 					producto[1] = temporal[2].Split(':')[1].TrimStart('"').TrimEnd('"');
-					stock = temporal[18].Split(':')[1].TrimStart('"').TrimEnd('"');
+					var stock = temporal[18].Split(':')[1].TrimStart('"').TrimEnd('"');
 					producto[2] = stock == "null" ? "0" : stock;
 
 					productos.Add(producto);
@@ -181,7 +180,7 @@ namespace StockProductorCF.Vistas
 		#endregion
 
 		#region Métodos comunes
-
+		
 		private void FijarAnchoDeBotones()
 		{
 			//Ancho de botones
@@ -203,7 +202,7 @@ namespace StockProductorCF.Vistas
 		{
 			if (CuentaUsuario.ObtenerAccesoDatos() == "G")
 			{
-				int fila = -1;
+				var fila = -1;
 				var productoSeleccionado = new CellEntry[_celdas.ColCount.Count];
 
 				//Obtener el arreglo del producto para enviar
@@ -221,13 +220,11 @@ namespace StockProductorCF.Vistas
 			}
 			else
 			{
-				foreach (string[] producto in _productos)
+				foreach (var producto in _productos)
 				{
-					if (producto[0] == codigoProductoSeleccionado)
-					{
-						Navigation.PushAsync(new Producto(producto, _nombresColumnas));
-						break;
-					}
+					if (producto[0] != codigoProductoSeleccionado) continue;
+					Navigation.PushAsync(new Producto(producto, _nombresColumnas));
+					break;
 				}
 
 			}
@@ -235,17 +232,14 @@ namespace StockProductorCF.Vistas
 
 		private StackLayout ConstruirVistaDeLista(List<string[]> productos)
 		{
-			List<ClaseProducto> listaProductos = new List<ClaseProducto>();
-			ClaseProducto producto;
-			List<string> datosParaVer;
-			foreach (string[] datosProducto in productos)
+			var listaProductos = new List<ClaseProducto>();
+			foreach (var datosProducto in productos)
 			{
-				datosParaVer = new List<string>();
+				var datosParaVer = new List<string>();
 				var i = 0;
-				string textoDato;
-				foreach (string dato in datosProducto)
+				foreach (var dato in datosProducto)
 				{
-					textoDato = "";
+					var textoDato = "";
 
 					if (_listaColumnasParaVer != null && _listaColumnasParaVer[i] == "1")
 					{
@@ -258,15 +252,15 @@ namespace StockProductorCF.Vistas
 					i = i + 1;
 				}
 
-				producto = new ClaseProducto(datosProducto[0], datosParaVer);
+				var producto = new ClaseProducto(datosProducto[0], datosParaVer);
 				listaProductos.Add(producto);
 			}
 
-			StackLayout Encabezado = new StackLayout
+			var encabezado = new StackLayout
 			{
 				HorizontalOptions = LayoutOptions.Fill,
 				VerticalOptions = LayoutOptions.Start,
-				BackgroundColor = Color.FromHex("#C0C0C0"),
+				BackgroundColor = Color.FromHex("#C0BFBF"),
 				Children =
 								{
 									new Label
@@ -284,7 +278,7 @@ namespace StockProductorCF.Vistas
 								}
 			};
 
-			ListView vista = new ListView
+			var vista = new ListView
 			{
 				RowHeight = 60,
 				SeparatorColor = Color.Black,
@@ -293,7 +287,7 @@ namespace StockProductorCF.Vistas
 				ItemsSource = listaProductos,
 				ItemTemplate = new DataTemplate(() =>
 				{
-					Label nombreProducto = new Label
+					var nombreProducto = new Label
 					{
 						FontSize = 16,
 						FontAttributes = FontAttributes.Bold,
@@ -302,7 +296,7 @@ namespace StockProductorCF.Vistas
 					};
 					nombreProducto.SetBinding(Label.TextProperty, "Nombre");
 
-					Label datos = new Label()
+					var datos = new Label()
 					{
 						FontSize = 15,
 						TextColor = Color.Black,
@@ -310,13 +304,13 @@ namespace StockProductorCF.Vistas
 					};
 					datos.SetBinding(Label.TextProperty, "Datos");
 
-					BoxView cuadradito = new BoxView()
+					var cuadradito = new BoxView()
 					{
 						WidthRequest = 5,
 						BackgroundColor = Color.Red
 					};
 
-					BoxView separador = new BoxView()
+					var separador = new BoxView()
 					{
 						WidthRequest = 1,
 						BackgroundColor = Color.FromHex("#E0E0E0"),
@@ -349,7 +343,7 @@ namespace StockProductorCF.Vistas
 						}
 					};
 
-					celda.SetBinding(ViewCell.ClassIdProperty, "ID");
+					celda.SetBinding(ClassIdProperty, "ID");
 					celda.Tapped += (sender, args) =>
 					{
 						if (_ultimoItemSeleccionado != null)
@@ -372,7 +366,7 @@ namespace StockProductorCF.Vistas
 				HorizontalOptions = LayoutOptions.Fill,
 				Children =
 								{
-									Encabezado,
+									encabezado,
 									vista
 								}
 			};
@@ -380,14 +374,11 @@ namespace StockProductorCF.Vistas
 
 		private void FijarProductosYBuscador(List<string[]> productos)
 		{
-			//Si hay más de 50 productos se muestra el buscador
-			if (productos.Count > 50)
-			{
-				//Almacena la lista de productos en la variable global que usará el buscador
-				_productos = productos;
-
-				Buscador.IsVisible = true;
-			}
+			//Si hay más de 25 productos se muestra el buscador
+			if (productos.Count <= 25) return;
+			//Almacena la lista de productos en la variable global que usará el buscador
+			_productos = productos;
+			Buscador.IsVisible = true;
 		}
 
 		#endregion
@@ -395,15 +386,14 @@ namespace StockProductorCF.Vistas
 		#region Eventos
 
 		[Android.Runtime.Preserve]
-		void AccederDatos(object sender, EventArgs args)
+		private void AccederDatos(object sender, EventArgs args)
 		{
 			var paginaAccesoDatos = new AccesoDatos();
-
 			Navigation.PushAsync(paginaAccesoDatos);
 		}
 
 		[Android.Runtime.Preserve]
-		void RefrescarDatos(object sender, EventArgs args)
+		private void RefrescarDatos(object sender, EventArgs args)
 		{
 			//Recarga la grilla.
 			if (!string.IsNullOrEmpty(_linkHojaConsulta))
@@ -413,7 +403,7 @@ namespace StockProductorCF.Vistas
 		}
 
 		[Android.Runtime.Preserve]
-		async void AbrirPaginaEscaner(object sender, EventArgs args)
+		private async void AbrirPaginaEscaner(object sender, EventArgs args)
 		{
 			var paginaEscaner = new ZXingScannerPage();
 
@@ -423,7 +413,7 @@ namespace StockProductorCF.Vistas
 				paginaEscaner.IsScanning = false;
 
 				//Hace autofoco, particularmente para los códigos de barra
-				TimeSpan ts = new TimeSpan(0, 0, 0, 3, 0);
+				var ts = new TimeSpan(0, 0, 0, 3, 0);
 				Device.StartTimer(ts, () =>
 				{
 					if (paginaEscaner.IsScanning)
@@ -443,28 +433,13 @@ namespace StockProductorCF.Vistas
 			await Navigation.PushModalAsync(paginaEscaner);
 		}
 
-		//Al seleccionar un producto (dando click con el dedo en el tile)
 		[Android.Runtime.Preserve]
-		void CargarProducto(object sender, EventArgs args)
-		{
-			if (!_seleccionoItem)
-			{
-				var Id = ((ClaseProducto)((ListView)sender).SelectedItem).ID;
-				IrAlProducto(Id);
-				((ListView)sender).SelectedItem = null;
-				_seleccionoItem = true;
-			}
-			else
-				_seleccionoItem = false;
-		}
-
-		[Android.Runtime.Preserve]
-		void FiltrarProductos(object sender, EventArgs args)
+		private void FiltrarProductos(object sender, EventArgs args)
 		{
 			if (Buscador.Text.Length > 2 || Buscador.Text.Length == 0)
 			{
 				var productos = new List<string[]>();
-				foreach (string[] producto in _productos)
+				foreach (var producto in _productos)
 				{
 					if (producto[1].ToLower().Contains(Buscador.Text.ToLower()))
 						productos.Add(producto);
@@ -475,7 +450,7 @@ namespace StockProductorCF.Vistas
 		}
 
 		[Android.Runtime.Preserve]
-		void CargarHoja(object sender, EventArgs args)
+		private void CargarHoja(object sender, EventArgs args)
 		{
 			_linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaSeleccionada(ListaHojas.Items[ListaHojas.SelectedIndex]);
 			_listaColumnasParaVer = CuentaUsuario.ObtenerColumnasParaVer().Split(',');

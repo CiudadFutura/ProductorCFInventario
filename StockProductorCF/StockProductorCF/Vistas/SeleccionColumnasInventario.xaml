@@ -9,8 +9,8 @@
 			<StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
 				<Image x:Name="Cabecera" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
 			</StackLayout>
-      <StackLayout BackgroundColor="Gray" VerticalOptions="Start" HorizontalOptions="Fill">
-        <Label FontSize="18" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center">Seleccione las columnas de stock</Label>
+			<StackLayout BackgroundColor="#C0BFBF" VerticalOptions="Start" HorizontalOptions="Fill">
+				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center">Seleccione las columnas de stock</Label>
       </StackLayout>
       <ScrollView VerticalOptions="FillAndExpand" HorizontalOptions="Center">
         <StackLayout x:Name="ContenedorColumnas" VerticalOptions="Start" HorizontalOptions="Center" Spacing="0" Padding="0">

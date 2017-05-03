@@ -15,7 +15,7 @@ namespace StockProductorCF.Vistas
 		public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
 		{
 			InitializeComponent();
-			Cabecera.Source = ImageSource.FromResource(string.Format("StockProductorCF.Imagenes.encabezadoProyectos{0}.png", App.SufijoImagen));
+			Cabecera.Source = ImageSource.FromResource($"StockProductorCF.Imagenes.encabezadoProyectos{App.SufijoImagen}.png");
 
 			_servicio = servicio;
 			_listaHojas = listaHojas;
@@ -25,29 +25,25 @@ namespace StockProductorCF.Vistas
 
 		private void CargarListaHojas()
 		{
-			StackLayout itemHoja;
-			Button botonHoja;
-			Button botonReiniciarHoja;
 			foreach (WorksheetEntry hoja in _listaHojas)
 			{
 				if (hoja.Title.Text == "Historial")
 					CuentaUsuario.AlmacenarLinkHojaHistorial(hoja.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null).HRef.ToString());
 
-				itemHoja = new StackLayout
+				var itemHoja = new StackLayout
 				{
 					HorizontalOptions = LayoutOptions.Fill,
 					VerticalOptions = LayoutOptions.Start
 				};
 
-				botonHoja = new Button
+				var botonHoja = new Button
 				{
 					Text = hoja.Title.Text,
 					HorizontalOptions = LayoutOptions.FillAndExpand,
 					VerticalOptions = LayoutOptions.Start,
-					HeightRequest = 55
+					HeightRequest = 55,
+					Resources = new ResourceDictionary {{"Id", hoja.Id}}
 				};
-				botonHoja.Resources = new ResourceDictionary();
-				botonHoja.Resources.Add("Id", hoja.Id);
 				botonHoja.Clicked += EnviarPaginaGrilla;
 
 				itemHoja.Children.Add(botonHoja);
@@ -56,16 +52,15 @@ namespace StockProductorCF.Vistas
 				{
 					botonHoja.HorizontalOptions = LayoutOptions.StartAndExpand;
 
-					botonReiniciarHoja = new Button
+					var botonReiniciarHoja = new Button
 					{
 						Text = "Reiniciar hoja",
 						HorizontalOptions = LayoutOptions.EndAndExpand,
 						VerticalOptions = LayoutOptions.Start,
-						HeightRequest = 55
+						HeightRequest = 55,
+						Resources = new ResourceDictionary {{"Id", hoja.Id}},
+						StyleId = "R"
 					};
-					botonReiniciarHoja.Resources = new ResourceDictionary();
-					botonReiniciarHoja.Resources.Add("Id", hoja.Id);
-					botonReiniciarHoja.StyleId = "R";
 					botonReiniciarHoja.Clicked += EnviarPaginaGrilla;
 
 					itemHoja.Children.Add(botonReiniciarHoja);
@@ -75,12 +70,12 @@ namespace StockProductorCF.Vistas
 			}
 		}
 
-		void EnviarPaginaGrilla(object control, EventArgs args)
+		private void EnviarPaginaGrilla(object control, EventArgs args)
 		{
 			var boton = (Button)control;
 			var hoja = _listaHojas.FindById((AtomId)boton.Resources["Id"]);
 
-			string link = hoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString();
+			var link = hoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString();
 
 			//Se almacena el link para recobrar los datos de stock de la hoja cuando ingrese nuevamente.
 			CuentaUsuario.AlmacenarLinkHojaConsulta(link);

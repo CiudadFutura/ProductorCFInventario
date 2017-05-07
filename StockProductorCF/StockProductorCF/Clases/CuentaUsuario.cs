@@ -6,7 +6,7 @@ using Xamarin.Auth;
 
 namespace StockProductorCF.Clases
 {
-	static public class CuentaUsuario
+	public static class CuentaUsuario
 	{
 		private static Account _cuenta;
 
@@ -196,9 +196,9 @@ namespace StockProductorCF.Clases
 			var nombres = new List<string>();
 
 			RecuperarCuentaLocal();
-			if (_cuenta != null)
+			if(_cuenta != null)
 			{
-				foreach(KeyValuePair<string, string> llaveValor in _cuenta.Properties)
+				foreach(var llaveValor in _cuenta.Properties)
 				{
 					if (llaveValor.Key.Contains("|nombre"))
 						nombres.Add(llaveValor.Value);
@@ -214,7 +214,7 @@ namespace StockProductorCF.Clases
 			RecuperarCuentaLocal();
 			if (_cuenta != null)
 			{
-				foreach (KeyValuePair<string, string> llaveValor in _cuenta.Properties)
+				foreach (var llaveValor in _cuenta.Properties)
 				{
 					if (llaveValor.Key.Contains("|nombre") && llaveValor.Value.Equals(nombre))
 					{
@@ -232,9 +232,8 @@ namespace StockProductorCF.Clases
 
 		internal static bool ValidarTokenDeGoogle()
 		{
-			if (string.IsNullOrEmpty(ObtenerTokenActualDeGoogle()) || ObtenerFechaExpiracionToken() <= DateTime.Now)
+			if(string.IsNullOrEmpty(ObtenerTokenActualDeGoogle()) || ObtenerFechaExpiracionToken() <= DateTime.Now)
 				return false;
-
 			return true;
 		}
 	}

@@ -12,17 +12,17 @@ namespace StockProductorCF.Vistas
 	{
 		private bool[] _signoPositivo;
 		private double[] _movimientos;
-		private CellEntry[] _producto;
+		private readonly CellEntry[] _producto;
 		private string[] _listaColumnasInventario;
-		private string[] _productoString;
-		private SpreadsheetsService _servicio;
-		private string[] _nombresColumnas;
+		private readonly string[] _productoString;
+		private readonly SpreadsheetsService _servicio;
+		private readonly string[] _nombresColumnas;
 		private string _mensaje = "";
 
 		public Producto(CellEntry[] producto, string[] nombresColumnas, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-			Cabecera.Source = ImageSource.FromResource(string.Format("StockProductorCF.Imagenes.encabezadoProyectos{0}.png", App.SufijoImagen));
+			Cabecera.Source = App.ImagenCabeceraCiudadFutura;
 
 			_producto = producto;
 			_servicio = servicio;
@@ -31,7 +31,7 @@ namespace StockProductorCF.Vistas
 			//Almacenar el arreglo de strings para cargar el producto en pantalla
 			_productoString = new string[producto.Length];
 			var i = 0;
-			foreach (CellEntry celda in producto)
+			foreach (var celda in producto)
 			{
 				_productoString.SetValue(celda.InputValue, i);
 				i = i + 1;
@@ -52,13 +52,6 @@ namespace StockProductorCF.Vistas
 
 		private void CargarDatosProductos()
 		{
-			Label nombreCampo;
-			Entry valorCampo;
-			StackLayout campoValor;
-
-			Button botonSigno;
-			Entry movimiento;
-
 			var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
 			_listaColumnasInventario = null;
 			if (!string.IsNullOrEmpty(columnasInventario))
@@ -68,32 +61,32 @@ namespace StockProductorCF.Vistas
 			_movimientos = new double[_productoString.Length];
 			var i = 0;
 
-			foreach (string celda in _productoString)
+			foreach (var celda in _productoString)
 			{
 				if (celda != null && _nombresColumnas[i] != "Usuario-Movimiento")
 				{
-					nombreCampo = new Label()
+					var nombreCampo = new Label
 					{
 						HorizontalOptions = LayoutOptions.EndAndExpand,
 						VerticalOptions = LayoutOptions.Center,
 						HorizontalTextAlignment = TextAlignment.End,
 						FontSize = 16,
-						WidthRequest = 100
+						WidthRequest = 100,
+						Text = _nombresColumnas[i]
 					};
 
-					nombreCampo.Text = _nombresColumnas[i];
 
-					valorCampo = new Entry()
+					var valorCampo = new Entry
 					{
 						HorizontalOptions = LayoutOptions.CenterAndExpand,
 						VerticalOptions = LayoutOptions.Center,
 						HorizontalTextAlignment = TextAlignment.Start,
 						WidthRequest = 210,
-						IsEnabled = false
+						IsEnabled = false,
+						Text = celda
 					};
-					valorCampo.Text = celda;
 
-					campoValor = new StackLayout
+					var campoValor = new StackLayout
 					{
 						HorizontalOptions = LayoutOptions.FillAndExpand,
 						VerticalOptions = LayoutOptions.CenterAndExpand,
@@ -104,7 +97,7 @@ namespace StockProductorCF.Vistas
 
 					ContenedorProducto.Children.Add(campoValor);
 
-					if (celda != null && _listaColumnasInventario != null && _listaColumnasInventario[i] == "1")
+					if(!string.IsNullOrEmpty(celda) && _listaColumnasInventario != null && _listaColumnasInventario[i] == "1")
 					{
 						_signoPositivo.SetValue(true, i);
 
@@ -118,7 +111,7 @@ namespace StockProductorCF.Vistas
 							WidthRequest = 100
 						};
 
-						botonSigno = new Button()
+						var botonSigno = new Button()
 						{
 							Text = "+",
 							HorizontalOptions = LayoutOptions.Start,
@@ -129,7 +122,7 @@ namespace StockProductorCF.Vistas
 
 						botonSigno.Clicked += DefinirSigno;
 
-						movimiento = new Entry()
+						var movimiento = new Entry()
 						{
 							HorizontalOptions = LayoutOptions.StartAndExpand,
 							VerticalOptions = LayoutOptions.Center,
@@ -159,18 +152,18 @@ namespace StockProductorCF.Vistas
 
 		private void DefinirSigno(object sender, EventArgs e)
 		{
-			Button boton = ((Button)sender);
-			int columna = Convert.ToInt32(boton.StyleId);
+			var boton = ((Button)sender);
+			var columna = Convert.ToInt32(boton.StyleId);
 			boton.Text = _signoPositivo[columna] ? "-" : "+";
 			_signoPositivo.SetValue(boton.Text == "+", columna);
 		}
 
 		[Android.Runtime.Preserve]
-		async void GuardarCambios(object sender, EventArgs args)
+		private async void GuardarCambios(object sender, EventArgs args)
 		{
-			foreach (View stackLayout in ContenedorProducto.Children)
+			foreach (var stackLayout in ContenedorProducto.Children)
 			{
-				foreach (View control in ((StackLayout)stackLayout).Children)
+				foreach (var control in ((StackLayout)stackLayout).Children)
 				{
 					if (control.StyleId != null && control.StyleId.Contains("movimiento-"))
 					{
@@ -194,14 +187,12 @@ namespace StockProductorCF.Vistas
 		{
 			_mensaje = "Ha ocurrido un error mientras se guardaba el mocimiento.";
 			var servicioGoogle = new ServiciosGoogle();
-			var multiplicador = 1;
-			var movimiento = 0.00;
-			foreach (CellEntry celda in _producto)
+			foreach (var celda in _producto)
 			{
 				if (_listaColumnasInventario[(int)celda.Column - 1] == "1")
 				{
-					multiplicador = _signoPositivo[(int)celda.Column - 1] ? 1 : -1;
-					movimiento = _movimientos[(int)celda.Column - 1];
+					var multiplicador = _signoPositivo[(int)celda.Column - 1] ? 1 : -1;
+					var movimiento = _movimientos[(int)celda.Column - 1];
 
 					if (movimiento != 0)
 					{
@@ -230,18 +221,16 @@ namespace StockProductorCF.Vistas
 
 		private async void GuardarProductoBaseDeDatos()
 		{
-			var url = @"http://169.254.80.80/PruebaMision/Service.asmx/ActualizarProducto?codigo={0}&movimiento={1}";
+			const string url = @"http://169.254.80.80/PruebaMision/Service.asmx/ActualizarProducto?codigo={0}&movimiento={1}";
 
-			var multiplicador = 1;
-			var movimiento = 0.00;
 			var i = 0;
 			var resultado = "";
-			foreach (string celda in _productoString)
+			foreach (var celda in _productoString)
 			{
 				if (_listaColumnasInventario[i] == "1")
 				{
-					multiplicador = _signoPositivo[i] ? 1 : -1;
-					movimiento = _movimientos[i];
+					var multiplicador = _signoPositivo[i] ? 1 : -1;
+					var movimiento = _movimientos[i];
 
 					if (movimiento != 0)
 					{

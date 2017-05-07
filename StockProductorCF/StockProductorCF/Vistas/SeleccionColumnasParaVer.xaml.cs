@@ -9,17 +9,17 @@ using System.Collections.Generic;
 
 namespace StockProductorCF.Vistas
 {
-	public partial class SeleccionColumnasParaVer : ContentPage
+	public partial class SeleccionColumnasParaVer
 	{
-		private SpreadsheetsService _servicio;
+		private readonly SpreadsheetsService _servicio;
 		private int[] _listaColumnas;
 		private List<CellEntry> _columnas;
-		private string _linkHojaConsulta;
+		private readonly string _linkHojaConsulta;
 
 		public SeleccionColumnasParaVer(string linkHojaConsulta, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-			Cabecera.Source = ImageSource.FromResource(string.Format("StockProductorCF.Imagenes.encabezadoProyectos{0}.png", App.SufijoImagen));
+			Cabecera.Source = App.ImagenCabeceraProyectos;
 
 			_servicio = servicio;
 			_linkHojaConsulta = linkHojaConsulta;

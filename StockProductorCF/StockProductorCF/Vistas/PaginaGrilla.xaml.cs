@@ -6,13 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using Google.GData.Client;
+using Windows.UI.Xaml;
 using Xamarin.Forms;
 using ZXing.Net.Mobile.Forms;
+using DataTemplate = Xamarin.Forms.DataTemplate;
+using TextAlignment = Xamarin.Forms.TextAlignment;
 
 namespace StockProductorCF.Vistas
 {
-	public partial class PaginaGrilla : ContentPage
+	public partial class PaginaGrilla
 	{
 		private readonly ServiciosGoogle _servicioGoogle;
 		private SpreadsheetsService _servicio;
@@ -20,22 +22,25 @@ namespace StockProductorCF.Vistas
 		private string _linkHojaConsulta;
 		private string[] _nombresColumnas;
 		private string[] _listaColumnasParaVer;
-		private string[] _listacolumnasInventario;
+		private string[] _listaColumnasInventario;
 		private ViewCell _ultimoItemSeleccionado;
+		private Color _ultimoColorSeleccionado;
 		private List<string[]> _productos;
+		private bool _esTeclaPar;
+		private bool _esCargaInicial;
+		private ActivityIndicator _indicadorActividad;
 
 		//Constructor para Hoja de cálculo de Google
 		public PaginaGrilla(string linkHojaConsulta, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-			FijarAnchoDeBotones();
 
 			_linkHojaConsulta = linkHojaConsulta;
 			_servicio = servicio;
 			_servicioGoogle = new ServiciosGoogle();
 
 			InicializarVariablesGlobales();
-			ObtenerDatosProductosDesdeHCG();
+			//La carga de productos se realiza cuando se selecciona el índice del selector de hojas.
 			ConfigurarSelectorHojas();
 		}
 
@@ -43,27 +48,11 @@ namespace StockProductorCF.Vistas
 		public PaginaGrilla()
 		{
 			InitializeComponent();
-			FijarAnchoDeBotones();
 			InicializarVariablesGlobales();
 			ObtenerProductosDesdeBD();
 		}
 
 		#region Métodos para Hoja de cálculo de Google
-
-		private void InicializarVariablesGlobales()
-		{
-			string rutaCabecera = string.Format("StockProductorCF.Imagenes.ciudadFutura{0}.png", App.SufijoImagen);
-			Cabecera.Source = ImageSource.FromResource(rutaCabecera);
-			//Cabecera.WidthRequest = App.AnchoDePantalla;
-
-			var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
-			if (!string.IsNullOrEmpty(columnasParaVer))
-				_listaColumnasParaVer = columnasParaVer.Split(',');
-
-			var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
-			if (!string.IsNullOrEmpty(columnasInventario))
-				_listacolumnasInventario = columnasInventario.Split(',');
-		}
 
 		private async void ObtenerDatosProductosDesdeHCG()
 		{
@@ -105,8 +94,7 @@ namespace StockProductorCF.Vistas
 					_nombresColumnas.SetValue(celda.Value, (int)celda.Column - 1);
 				}
 			}
-
-			FijarProductosYBuscador(productos);
+			
 			LlenarGrillaDeProductos(productos);
 		}
 
@@ -120,8 +108,7 @@ namespace StockProductorCF.Vistas
 			{
 				ListaHojas.Items.Add(nombre);
 				if (nombre == nombreHojaActual)
-					ListaHojas.SelectedIndex = i;
-
+					ListaHojas.SelectedIndex = i; //Esto genera la carga inicial de productos.
 				i += 1;
 			}
 		}
@@ -144,7 +131,6 @@ namespace StockProductorCF.Vistas
 				var productos = ParsearJSONProductos(jsonProductos);
 
 				_nombresColumnas = new[] { "Código", "Nombre", "Stock" };
-				FijarProductosYBuscador(productos);
 				LlenarGrillaDeProductos(productos);
 			}
 		}
@@ -180,22 +166,39 @@ namespace StockProductorCF.Vistas
 		#endregion
 
 		#region Métodos comunes
-		
-		private void FijarAnchoDeBotones()
+
+		private void InicializarVariablesGlobales()
 		{
-			//Ancho de botones
-			Datos.WidthRequest = App.AnchoDePantalla / 3;
-			Refrescar.WidthRequest = App.AnchoDePantalla / 3;
-			Escanear.WidthRequest = App.AnchoDePantalla / 3;
+			ConfigurarBotones();
+			Cabecera.Source = App.ImagenCabeceraCiudadFutura;
+
+			var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
+			if (!string.IsNullOrEmpty(columnasParaVer))
+				_listaColumnasParaVer = columnasParaVer.Split(',');
+
+			var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
+			if (!string.IsNullOrEmpty(columnasInventario))
+				_listaColumnasInventario = columnasInventario.Split(',');
+
+			_indicadorActividad = new ActivityIndicator { IsRunning = true, VerticalOptions = LayoutOptions.CenterAndExpand };
 		}
 
-		private void LlenarGrillaDeProductos(List<string[]> productos)
+		private void ConfigurarBotones()
 		{
-			//Se quita lay grilla para recargarla.
-			ContenedorTabla.Children.Clear();
+			Datos.Source = ImageSource.FromResource($"StockProductorCF.Imagenes.accesoDatos{App.Sufijo}.png");
+			Datos.GestureRecognizers.Add(new TapGestureRecognizer(AccederDatos));
+			Refrescar.Source = ImageSource.FromResource($"StockProductorCF.Imagenes.refrescarDatos{App.Sufijo}.png");
+			Refrescar.GestureRecognizers.Add(new TapGestureRecognizer(RefrescarDatos));
+			Escanear.Source = ImageSource.FromResource($"StockProductorCF.Imagenes.escanearCodigo{App.Sufijo}.png");
+			Escanear.GestureRecognizers.Add(new TapGestureRecognizer(AbrirPaginaEscaner));
+		}
+
+		private void LlenarGrillaDeProductos(List<string[]> productos, bool esBusqueda = false)
+		{
 			//Se carga la grilla de productos y se muestra en pantalla.
-			var lista = ConstruirVistaDeLista(productos);
-			ContenedorTabla.Children.Add(lista);
+			ConstruirVistaDeLista(productos);
+			if (!esBusqueda)
+				FijarProductosYBuscador(productos);
 		}
 
 		private void IrAlProducto(string codigoProductoSeleccionado)
@@ -230,7 +233,7 @@ namespace StockProductorCF.Vistas
 			}
 		}
 
-		private StackLayout ConstruirVistaDeLista(List<string[]> productos)
+		private void ConstruirVistaDeLista(List<string[]> productos)
 		{
 			var listaProductos = new List<ClaseProducto>();
 			foreach (var datosProducto in productos)
@@ -243,7 +246,7 @@ namespace StockProductorCF.Vistas
 
 					if (_listaColumnasParaVer != null && _listaColumnasParaVer[i] == "1")
 					{
-						if (_listacolumnasInventario[i] == "1")
+						if (_listaColumnasInventario[i] == "1")
 							textoDato += _nombresColumnas[i] + " : ";
 
 						textoDato += dato;
@@ -258,22 +261,21 @@ namespace StockProductorCF.Vistas
 
 			var encabezado = new StackLayout
 			{
-				HorizontalOptions = LayoutOptions.Fill,
+				HorizontalOptions = LayoutOptions.FillAndExpand,
 				VerticalOptions = LayoutOptions.Start,
-				BackgroundColor = Color.FromHex("#C0BFBF"),
+				BackgroundColor = Color.FromHex("#C0C0C0"),
+				HeightRequest = productos.Count <= 25 ? 30 : 50,
 				Children =
 								{
 									new Label
 									{
-										Text = "Productos",
-										FontSize = 18,
-										HorizontalOptions = LayoutOptions.Center,
+										Text = "    PRODUCTOS                      INFO + STOCK",
+										FontSize = 13,
+										HorizontalOptions = LayoutOptions.Start,
 										FontAttributes = FontAttributes.Bold,
 										TextColor = Color.Black,
-										FontFamily = Device.OnPlatform(null,
-																									 "fonts/WINGDING.TTF#Wingdings", // Android
-																									 null
-																									)
+										VerticalTextAlignment = TextAlignment.Center,
+										VerticalOptions = LayoutOptions.Center
 									}
 								}
 			};
@@ -281,8 +283,7 @@ namespace StockProductorCF.Vistas
 			var vista = new ListView
 			{
 				RowHeight = 60,
-				SeparatorColor = Color.Black,
-				VerticalOptions = LayoutOptions.FillAndExpand,
+				VerticalOptions = LayoutOptions.StartAndExpand,
 				HorizontalOptions = LayoutOptions.Fill,
 				ItemsSource = listaProductos,
 				ItemTemplate = new DataTemplate(() =>
@@ -290,86 +291,77 @@ namespace StockProductorCF.Vistas
 					var nombreProducto = new Label
 					{
 						FontSize = 16,
+						TextColor = Color.FromHex("#1D1D1B"),
 						FontAttributes = FontAttributes.Bold,
 						VerticalOptions = LayoutOptions.CenterAndExpand,
-						WidthRequest = 110
+						WidthRequest = 130
 					};
 					nombreProducto.SetBinding(Label.TextProperty, "Nombre");
 
-					var datos = new Label()
+					var datos = new Label
 					{
 						FontSize = 15,
-						TextColor = Color.Black,
-						VerticalOptions = LayoutOptions.CenterAndExpand
+						TextColor = Color.FromHex("#1D1D1B"),
+						VerticalOptions = LayoutOptions.CenterAndExpand,
+						WidthRequest = App.AnchoDePantalla - 132
 					};
 					datos.SetBinding(Label.TextProperty, "Datos");
 
-					var cuadradito = new BoxView()
+					var separador = new BoxView
 					{
-						WidthRequest = 5,
-						BackgroundColor = Color.Red
-					};
-
-					var separador = new BoxView()
-					{
-						WidthRequest = 1,
-						BackgroundColor = Color.FromHex("#E0E0E0"),
+						WidthRequest = 2,
+						BackgroundColor = Color.FromHex("#FFFFFF"),
 						HeightRequest = 55
 					};
-
-					// Return an assembled ViewCell.
+					
 					var celda = new ViewCell
 					{
 						View = new StackLayout
 						{
 							Padding = 2,
 							Orientation = StackOrientation.Horizontal,
-							BackgroundColor = Color.White,
 							Children =
 										{
-											cuadradito,
 											nombreProducto,
 											separador,
 											new StackLayout
 											{
 												Orientation = StackOrientation.Vertical,
 												Spacing = 0,
-												Children =
-												{
-													datos
-												}
+												Children = { datos }
 											}
 										}
 						}
 					};
-
-					celda.SetBinding(ClassIdProperty, "ID");
+					
 					celda.Tapped += (sender, args) =>
 					{
 						if (_ultimoItemSeleccionado != null)
-							_ultimoItemSeleccionado.View.BackgroundColor = Color.White;
-						IrAlProducto(((ViewCell)sender).ClassId);
+							_ultimoItemSeleccionado.View.BackgroundColor = _ultimoColorSeleccionado;
+						IrAlProducto(((ClaseProducto)((ViewCell)sender).BindingContext).Id);
+						_ultimoColorSeleccionado = celda.View.BackgroundColor;
 						celda.View.BackgroundColor = Color.Silver;
-						_ultimoItemSeleccionado = ((ViewCell)sender);
+						_ultimoItemSeleccionado = (ViewCell)sender;
+					};
+
+					celda.Appearing += (sender, args) =>
+					{
+						var viewCell = (ViewCell)sender;
+						if (viewCell.View != null)
+						{
+							viewCell.View.BackgroundColor = _esTeclaPar ? Color.FromHex("#EDEDED") : Color.FromHex("#E2E2E1");
+						}
+
+						_esTeclaPar = !_esTeclaPar;
 					};
 
 					return celda;
 				})
 			};
 
-			// Build the page.
-			return new StackLayout
-			{
-				Spacing = 0,
-				Padding = 0,
-				VerticalOptions = LayoutOptions.FillAndExpand,
-				HorizontalOptions = LayoutOptions.Fill,
-				Children =
-								{
-									encabezado,
-									vista
-								}
-			};
+			ContenedorTabla.Children.Clear(); //Remueve el Indicador de Actividad.
+			ContenedorTabla.Children.Add(encabezado);
+			ContenedorTabla.Children.Add(vista);
 		}
 
 		private void FijarProductosYBuscador(List<string[]> productos)
@@ -379,6 +371,16 @@ namespace StockProductorCF.Vistas
 			//Almacena la lista de productos en la variable global que usará el buscador
 			_productos = productos;
 			Buscador.IsVisible = true;
+			_esCargaInicial = true;
+			Buscador.Text = "";
+		}
+
+		private void RefrescarUIGrilla()
+		{
+			//Se quita la grilla para recargarla.
+			ContenedorTabla.Children.Clear();
+			Buscador.IsVisible = false;
+			ContenedorTabla.Children.Add(_indicadorActividad);
 		}
 
 		#endregion
@@ -386,58 +388,79 @@ namespace StockProductorCF.Vistas
 		#region Eventos
 
 		[Android.Runtime.Preserve]
-		private void AccederDatos(object sender, EventArgs args)
+		private void AccederDatos(View arg1, object arg2)
 		{
-			var paginaAccesoDatos = new AccesoDatos();
-			Navigation.PushAsync(paginaAccesoDatos);
+			Datos.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(300), () => {
+				var paginaAccesoDatos = new AccesoDatos();
+				Navigation.PushAsync(paginaAccesoDatos);
+				Datos.Opacity = 1f;
+				return false;
+			});
 		}
 
 		[Android.Runtime.Preserve]
-		private void RefrescarDatos(object sender, EventArgs args)
+		private void RefrescarDatos(View arg1, object arg2)
 		{
-			//Recarga la grilla.
-			if (!string.IsNullOrEmpty(_linkHojaConsulta))
-				ObtenerDatosProductosDesdeHCG(); //Hoja de cálculo de Google
-			else
-				ObtenerProductosDesdeBD(); //Base de Datos
+			RefrescarUIGrilla();
+			Refrescar.Opacity = 0.5f;
+
+			Device.StartTimer(TimeSpan.FromMilliseconds(100), () => {
+				if (!string.IsNullOrEmpty(_linkHojaConsulta))
+					ObtenerDatosProductosDesdeHCG(); //Hoja de cálculo de Google
+				else
+					ObtenerProductosDesdeBD(); //Base de Datos
+				Refrescar.Opacity = 1f;
+				return false;
+			});
 		}
-
+		
 		[Android.Runtime.Preserve]
-		private async void AbrirPaginaEscaner(object sender, EventArgs args)
+		private void AbrirPaginaEscaner(View arg1, object arg2)
 		{
-			var paginaEscaner = new ZXingScannerPage();
 
-			paginaEscaner.OnScanResult += (result) =>
-			{
-				// Detiene el escaner
-				paginaEscaner.IsScanning = false;
+			Escanear.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(300), () => {
+				var paginaEscaner = new ZXingScannerPage();
 
-				//Hace autofoco, particularmente para los códigos de barra
-				var ts = new TimeSpan(0, 0, 0, 3, 0);
-				Device.StartTimer(ts, () =>
+				paginaEscaner.OnScanResult += (result) =>
 				{
-					if (paginaEscaner.IsScanning)
-						paginaEscaner.AutoFocus();
-					return true;
-				});
+					// Detiene el escaner
+					paginaEscaner.IsScanning = false;
 
-				// Cierra la página del escaner y llama a la página del producto
-				Device.BeginInvokeOnMainThread(() =>
-				{
-					Navigation.PopModalAsync();
-					IrAlProducto(result.Text);
-				});
-			};
+					//Hace autofoco, particularmente para los códigos de barra
+					var ts = new TimeSpan(0, 0, 0, 3, 0);
+					Device.StartTimer(ts, () =>
+					{
+						if (paginaEscaner.IsScanning)
+							paginaEscaner.AutoFocus();
+						return true;
+					});
 
-			// Abre la página del escaner
-			await Navigation.PushModalAsync(paginaEscaner);
+					// Cierra la página del escaner y llama a la página del producto
+					Device.BeginInvokeOnMainThread(() =>
+					{
+						Navigation.PopModalAsync();
+						IrAlProducto(result.Text);
+					});
+				};
+
+				// Abre la página del escaner
+				Navigation.PushModalAsync(paginaEscaner);
+
+				Escanear.Opacity = 1f;
+				return false;
+			});
+			
 		}
 
 		[Android.Runtime.Preserve]
 		private void FiltrarProductos(object sender, EventArgs args)
 		{
-			if (Buscador.Text.Length > 2 || Buscador.Text.Length == 0)
+			if (Buscador.Text.Length > 2 || Buscador.Text.Length == 0 && !_esCargaInicial)
 			{
+				//Se quita la grilla para recargarla.
+				ContenedorTabla.Children.Clear();
 				var productos = new List<string[]>();
 				foreach (var producto in _productos)
 				{
@@ -445,17 +468,23 @@ namespace StockProductorCF.Vistas
 						productos.Add(producto);
 				}
 
-				LlenarGrillaDeProductos(productos);
+				LlenarGrillaDeProductos(productos, true);
+				_esCargaInicial = false;
 			}
 		}
 
 		[Android.Runtime.Preserve]
 		private void CargarHoja(object sender, EventArgs args)
 		{
-			_linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaSeleccionada(ListaHojas.Items[ListaHojas.SelectedIndex]);
-			_listaColumnasParaVer = CuentaUsuario.ObtenerColumnasParaVer().Split(',');
-			_listacolumnasInventario = CuentaUsuario.ObtenerColumnasInventario().Split(',');
-			ObtenerDatosProductosDesdeHCG();
+			RefrescarUIGrilla();
+
+			Device.StartTimer(TimeSpan.FromMilliseconds(100), () => {
+				_linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaSeleccionada(ListaHojas.Items[ListaHojas.SelectedIndex]);
+				_listaColumnasParaVer = CuentaUsuario.ObtenerColumnasParaVer().Split(',');
+				_listaColumnasInventario = CuentaUsuario.ObtenerColumnasInventario().Split(',');
+				ObtenerDatosProductosDesdeHCG();
+				return false;
+			});
 		}
 
 		#endregion
@@ -469,17 +498,17 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		public ClaseProducto(string id, IList<string> datos)
 		{
-			ID = id;
+			Id = id;
 			Nombre = datos[0];
 			Datos = string.Join(" - ", datos.Skip(1).Take(datos.Count));
 		}
 
 		[Android.Runtime.Preserve]
-		public string ID { private set; get; }
+		public string Id { get; }
 		[Android.Runtime.Preserve]
-		public string Nombre { private set; get; }
+		public string Nombre { get; }
 		[Android.Runtime.Preserve]
-		public string Datos { private set; get; }
-	};
+		public string Datos { get; }
+	}
 
 }

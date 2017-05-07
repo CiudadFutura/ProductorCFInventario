@@ -1,14 +1,13 @@
 ﻿using System;
-using Xamarin.Forms;
 
 namespace StockProductorCF.Vistas
 {
-	public partial class AccesoDatos : ContentPage
+	public partial class AccesoDatos
 	{
 		public AccesoDatos()
 		{
 			InitializeComponent();
-			Cabecera.Source = ImageSource.FromResource($"StockProductorCF.Imagenes.encabezadoProyectos{App.SufijoImagen}.png");
+			Cabecera.Source = App.ImagenCabeceraProyectos;
 		}
 
 		[Android.Runtime.Preserve]

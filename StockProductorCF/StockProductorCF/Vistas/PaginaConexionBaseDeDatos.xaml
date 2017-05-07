@@ -7,11 +7,11 @@
 
 	<ContentPage.Content>
 		<StackLayout Spacing="0" Padding="0">
-			<StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="Start" HorizontalOptions="Fill">
-				<Image x:Name="Cabecera" VerticalOptions="Start" HorizontalOptions="EndAndExpand"/>
+			<StackLayout VerticalOptions="Start" HorizontalOptions="Fill" Spacing="0" Padding="0">
+				<Image x:Name="Cabecera" VerticalOptions="Start" HorizontalOptions="FillAndExpand"/>
 			</StackLayout>
-			<StackLayout BackgroundColor="#C0BFBF" VerticalOptions="Start" HorizontalOptions="Fill">
-				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center">Ingrese usuario y contraseña</Label>
+			<StackLayout BackgroundColor="#C0C0C0" VerticalOptions="Start" HorizontalOptions="Fill">
+				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" HeightRequest="30">Ingrese usuario y contraseña</Label>
 			</StackLayout>
 			<StackLayout VerticalOptions="EndAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
 				<Label FontSize="18" Text="Usuario" WidthRequest="100" HorizontalTextAlignment="End" VerticalOptions="End" HorizontalOptions="StartAndExpand"/>

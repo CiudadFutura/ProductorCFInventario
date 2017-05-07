@@ -1,99 +1,136 @@
 ﻿
-using System;
 using Google.GData.Client;
 using Google.GData.Spreadsheets;
 using Xamarin.Forms;
 using StockProductorCF.Clases;
+using System.Collections.Generic;
 
 namespace StockProductorCF.Vistas
 {
-	public partial class ListaHojasCalculoGoogle : ContentPage
+	public partial class ListaHojasCalculoGoogle
 	{
-		private AtomEntryCollection _listaHojas;
-		private SpreadsheetsService _servicio;
+		private readonly AtomEntryCollection _listaHojas;
+		private readonly SpreadsheetsService _servicio;
+		private bool _esTeclaPar;
 
 		public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
 		{
 			InitializeComponent();
-			Cabecera.Source = ImageSource.FromResource($"StockProductorCF.Imagenes.encabezadoProyectos{App.SufijoImagen}.png");
+			Cabecera.Source = App.ImagenCabeceraProyectos;
 
 			_servicio = servicio;
 			_listaHojas = listaHojas;
 
 			CargarListaHojas();
 		}
-
-		private void CargarListaHojas()
+		
+		private void EnviarPaginaGrilla(string linkHoja, string nombreHoja, bool reiniciaHoja)
 		{
-			foreach (WorksheetEntry hoja in _listaHojas)
-			{
-				if (hoja.Title.Text == "Historial")
-					CuentaUsuario.AlmacenarLinkHojaHistorial(hoja.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null).HRef.ToString());
-
-				var itemHoja = new StackLayout
-				{
-					HorizontalOptions = LayoutOptions.Fill,
-					VerticalOptions = LayoutOptions.Start
-				};
-
-				var botonHoja = new Button
-				{
-					Text = hoja.Title.Text,
-					HorizontalOptions = LayoutOptions.FillAndExpand,
-					VerticalOptions = LayoutOptions.Start,
-					HeightRequest = 55,
-					Resources = new ResourceDictionary {{"Id", hoja.Id}}
-				};
-				botonHoja.Clicked += EnviarPaginaGrilla;
-
-				itemHoja.Children.Add(botonHoja);
-
-				if(CuentaUsuario.VerificarHojaUsada(hoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString()))
-				{
-					botonHoja.HorizontalOptions = LayoutOptions.StartAndExpand;
-
-					var botonReiniciarHoja = new Button
-					{
-						Text = "Reiniciar hoja",
-						HorizontalOptions = LayoutOptions.EndAndExpand,
-						VerticalOptions = LayoutOptions.Start,
-						HeightRequest = 55,
-						Resources = new ResourceDictionary {{"Id", hoja.Id}},
-						StyleId = "R"
-					};
-					botonReiniciarHoja.Clicked += EnviarPaginaGrilla;
-
-					itemHoja.Children.Add(botonReiniciarHoja);
-				}
-
-				ContenedorHojas.Children.Add(itemHoja);
-			}
-		}
-
-		private void EnviarPaginaGrilla(object control, EventArgs args)
-		{
-			var boton = (Button)control;
-			var hoja = _listaHojas.FindById((AtomId)boton.Resources["Id"]);
-
-			var link = hoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString();
-
 			//Se almacena el link para recobrar los datos de stock de la hoja cuando ingrese nuevamente.
-			CuentaUsuario.AlmacenarLinkHojaConsulta(link);
-			CuentaUsuario.AlmacenarNombreDeHoja(link, hoja.Title.Text);
+			CuentaUsuario.AlmacenarLinkHojaConsulta(linkHoja);
+			CuentaUsuario.AlmacenarNombreDeHoja(linkHoja, nombreHoja.Replace("Reiniciar ", ""));
 
 			ContentPage pagina;
 			//Si ya se usó esta hoja alguna vez, carga las columnas ya seleccionadas y envía a Grilla.
 			//Si no o si el botón presionado es el de reiniciar, envía a pantallas de selección de columnas.
-			if (boton.StyleId != "R" && CuentaUsuario.VerificarHojaUsadaRecuperarColumnas(link))
+			if (!reiniciaHoja && CuentaUsuario.VerificarHojaUsadaRecuperarColumnas(linkHoja))
 			{
-				pagina = new PaginaGrilla(link, _servicio);
+				pagina = new PaginaGrilla(linkHoja, _servicio);
 			}
 			else
 			{
-				pagina = new SeleccionColumnasParaVer(link, _servicio);
+				pagina = new SeleccionColumnasParaVer(linkHoja, _servicio);
 			}
 			Navigation.PushAsync(pagina);
-
 		}
+
+		private void CargarListaHojas()
+		{
+			var listaHojas = new List<ClaseHoja>();
+			foreach (WorksheetEntry datosHoja in _listaHojas)
+			{
+				var hoja = new ClaseHoja(datosHoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString(), datosHoja.Title.Text, false);
+				listaHojas.Add(hoja);
+
+				if (CuentaUsuario.VerificarHojaUsada(hoja.Link))
+				{
+					hoja = new ClaseHoja(datosHoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString(), "Reiniciar " + datosHoja.Title.Text, true);
+					listaHojas.Add(hoja);
+				}
+			}
+
+			var vista = new ListView
+			{
+				RowHeight = 60,
+				VerticalOptions = LayoutOptions.StartAndExpand,
+				HorizontalOptions = LayoutOptions.Fill,
+				ItemsSource = listaHojas,
+				ItemTemplate = new DataTemplate(() =>
+				{
+					var nombreHoja = new Label
+					{
+						FontSize = 18,
+						TextColor = Color.FromHex("#1D1D1B"),
+						VerticalOptions = LayoutOptions.CenterAndExpand,
+						HorizontalOptions = LayoutOptions.CenterAndExpand
+					};
+					nombreHoja.SetBinding(Label.TextProperty, "Nombre");
+
+					var celda = new ViewCell
+					{
+						View = new StackLayout
+						{
+							Padding = 2,
+							Orientation = StackOrientation.Horizontal,
+							Children = { nombreHoja }
+						}
+					};
+					
+					celda.Tapped += (sender, args) =>
+					{
+						var hoja = (ClaseHoja)((ViewCell) sender).BindingContext;
+						EnviarPaginaGrilla(hoja.Link, hoja.Nombre, hoja.EsDeReinicio);
+						celda.View.BackgroundColor = Color.Silver;
+					};
+
+					celda.Appearing += (sender, args) =>
+					{
+						var viewCell = (ViewCell)sender;
+						if (viewCell.View != null)
+						{
+							viewCell.View.BackgroundColor = _esTeclaPar ? Color.FromHex("#EDEDED") : Color.FromHex("#E2E2E1");
+							if(((ClaseHoja)((ViewCell)sender).BindingContext).EsDeReinicio)
+								((StackLayout)viewCell.View).Children.Add(new Image { Source = ImageSource.FromResource($"StockProductorCF.Imagenes.{App.Sufijo}.refrescarHoja.png") });
+						}
+						_esTeclaPar = !_esTeclaPar;
+					};
+
+					return celda;
+				})
+			};
+
+			ContenedorHojas.Children.Add(vista);
+		}
+
+	}
+
+	//Clase hoja: utilizada para armar la lista scrolleable de hojas
+	[Android.Runtime.Preserve]
+	public class ClaseHoja
+	{
+		[Android.Runtime.Preserve]
+		public ClaseHoja(string link, string nombre, bool esDeReinicio)
+		{
+			Link = link;
+			Nombre = nombre;
+			EsDeReinicio = esDeReinicio;
+		}
+
+		[Android.Runtime.Preserve]
+		public string Link { get; }
+		[Android.Runtime.Preserve]
+		public string Nombre { get; }
+		[Android.Runtime.Preserve]
+		public bool EsDeReinicio { get; }
 	}
 }

@@ -1,5 +1,4 @@
 ﻿
-using Google.GData.Spreadsheets;
 using StockProductorCF.Clases;
 using StockProductorCF.Servicios;
 using StockProductorCF.Vistas;
@@ -9,15 +8,15 @@ using Xamarin.Forms;
 
 namespace StockProductorCF
 {
-	public partial class PaginaAuntenticacion : ContentPage
+	public partial class PaginaAuntenticacion
 	{
 		private string _clientId = "209664019803-t7i8ejmj640m136bqp3snkn8gil54s6d.apps.googleusercontent.com";
-		private bool _conexionExistente;
+		private readonly bool _conexionExistente;
 
 		public PaginaAuntenticacion(bool conexionExistente = false)
 		{
 			InitializeComponent();
-			Cabecera.Source = ImageSource.FromResource(string.Format("StockProductorCF.Imagenes.encabezadoProyectos{0}.png", App.SufijoImagen));
+			Cabecera.Source = App.ImagenCabeceraProyectos;
 			CuentaUsuario.AlmacenarAccesoDatos("G");
 			_conexionExistente = conexionExistente; //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros
 
@@ -60,9 +59,9 @@ namespace StockProductorCF
 			else
 			{
 				var servicioGoogle = new ServiciosGoogle();
-				SpreadsheetsService servicio = servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(tokenDeAcceso);
+				var servicio = servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(tokenDeAcceso);
 
-				SpreadsheetFeed libros = servicioGoogle.ObtenerListaLibros(servicio);
+				var libros = servicioGoogle.ObtenerListaLibros(servicio);
 
 				var paginaListaLibros = new ListaLibrosGoogle(servicio, libros.Entries);
 
@@ -103,9 +102,9 @@ namespace StockProductorCF
 			}
 		}
 
-		private async void RecuperarNombreUsuarioGoogle(string tokenDeAcceso)
+		private static async void RecuperarNombreUsuarioGoogle(string tokenDeAcceso)
 		{
-			string url = @"https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + tokenDeAcceso;
+			var url = @"https://www.googleapis.com/oauth2/v1/userinfo?access_token=" + tokenDeAcceso;
 
 			using (var cliente = new HttpClient())
 			{

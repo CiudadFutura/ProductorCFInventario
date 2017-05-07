@@ -11,7 +11,7 @@ namespace StockProductorCF.Vistas
 		public PaginaConexionBaseDeDatos()
 		{
 			InitializeComponent();
-			Cabecera.Source = ImageSource.FromResource(string.Format("StockProductorCF.Imagenes.encabezadoProyectos{0}.png", App.SufijoImagen));
+			Cabecera.Source = App.ImagenCabeceraProyectos;
 			CuentaUsuario.AlmacenarAccesoDatos("B");
 			Usuario.Text = CuentaUsuario.ObtenerUsuarioDeBaseDeDatos();
 		}

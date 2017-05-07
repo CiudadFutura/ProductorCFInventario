@@ -8,16 +8,16 @@ using System.Collections.Generic;
 
 namespace StockProductorCF.Vistas
 {
-	public partial class SeleccionColumnasInventario : ContentPage
+	public partial class SeleccionColumnasInventario
 	{
-		private SpreadsheetsService _servicio;
-		private string _linkHojaConsulta;
+		private readonly SpreadsheetsService _servicio;
+		private readonly string _linkHojaConsulta;
 		private int[] _listaColumnas;
 
-		public SeleccionColumnasInventario(List<CellEntry> columnas, string linkHojaConsulta, SpreadsheetsService servicio)
+		public SeleccionColumnasInventario(IReadOnlyCollection<CellEntry> columnas, string linkHojaConsulta, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-			Cabecera.Source = ImageSource.FromResource(string.Format("StockProductorCF.Imagenes.encabezadoProyectos{0}.png", App.SufijoImagen));
+			Cabecera.Source = App.ImagenCabeceraProyectos;
 
 			_servicio = servicio;
 			_linkHojaConsulta = linkHojaConsulta;
@@ -25,17 +25,14 @@ namespace StockProductorCF.Vistas
 			LlenarGrillaColumnasInventario(columnas);
 		}
 
-		private void LlenarGrillaColumnasInventario(List<CellEntry> columnas)
+		private void LlenarGrillaColumnasInventario(IReadOnlyCollection<CellEntry> columnas)
 		{
 			_listaColumnas = Enumerable.Repeat(1, columnas.Count).ToArray();
 
-			StackLayout itemColumna;
-			Label etiquetaColumna;
-			Switch seleccionar;
 			var esGris = false;
-			foreach (CellEntry columna in columnas)
+			foreach (var columna in columnas)
 			{
-				etiquetaColumna = new Label
+				var etiquetaColumna = new Label
 				{
 					TextColor = Color.Black,
 					HorizontalOptions = LayoutOptions.StartAndExpand,
@@ -45,7 +42,7 @@ namespace StockProductorCF.Vistas
 					FontSize = 18
 				};
 
-				seleccionar = new Switch
+				var seleccionar = new Switch
 				{
 					HorizontalOptions = LayoutOptions.Center,
 					VerticalOptions = LayoutOptions.CenterAndExpand,
@@ -53,7 +50,7 @@ namespace StockProductorCF.Vistas
 				};
 				seleccionar.Toggled += AgregarColumna;
 
-				itemColumna = new StackLayout
+				var itemColumna = new StackLayout
 				{
 					HorizontalOptions = LayoutOptions.FillAndExpand,
 					VerticalOptions = LayoutOptions.CenterAndExpand,
@@ -74,7 +71,7 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		private void AgregarColumna(object sender, ToggledEventArgs e)
 		{
-			Switch ficha = (Switch)sender;
+			var ficha = (Switch)sender;
 			_listaColumnas.SetValue(Convert.ToInt32(!e.Value), Convert.ToInt32(ficha.StyleId) - 1);
 		}
 

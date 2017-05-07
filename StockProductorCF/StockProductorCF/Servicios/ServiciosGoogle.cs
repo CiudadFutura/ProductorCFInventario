@@ -13,10 +13,9 @@ namespace StockProductorCF.Servicios
 	{
 		public SpreadsheetsService ObtenerServicioParaConsultaGoogleSpreadsheets(string tokenDeAcceso)
 		{
-			SpreadsheetsService servicio = new SpreadsheetsService("Productor de la Ciudad Futura");
+			var servicio = new SpreadsheetsService("Productor de la Ciudad Futura");
 
-			var parametros = new OAuth2Parameters();
-			parametros.AccessToken = tokenDeAcceso;
+			var parametros = new OAuth2Parameters {AccessToken = tokenDeAcceso};
 			servicio.RequestFactory = new GOAuth2RequestFactory(null, "Productor de la Ciudad Futura", parametros);
 
 			return servicio;
@@ -24,31 +23,26 @@ namespace StockProductorCF.Servicios
 
 		public SpreadsheetFeed ObtenerListaLibros(SpreadsheetsService servicio)
 		{
-			SpreadsheetQuery consulta = new SpreadsheetQuery();
+			var consulta = new SpreadsheetQuery();
 			return servicio.Query(consulta);
 		}
 
-		public WorksheetFeed ObtenerListaHojas(AtomEntry libro, SpreadsheetsService servicio)
+		public WorksheetFeed ObtenerListaHojas(string linkLibro, SpreadsheetsService servicio)
 		{
-			AtomLink link = libro.Links.FindService(GDataSpreadsheetsNameTable.WorksheetRel, null);
-
-			WorksheetQuery consulta = new WorksheetQuery(link.HRef.ToString());
+			var consulta = new WorksheetQuery(linkLibro);
 			return servicio.Query(consulta);
 		}
 
 		public CellFeed ObtenerCeldasDeUnaHoja(string linkHojaConsulta, SpreadsheetsService servicio)
 		{
-			CellQuery consulta = new CellQuery(linkHojaConsulta);
-			CellFeed celdas = servicio.Query(consulta);
+			var consulta = new CellQuery(linkHojaConsulta);
+			var celdas = servicio.Query(consulta);
 
 			return celdas;
 		}
 
 		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, CellEntry[] producto, string[] nombresColumnas, string[] listaColumnasInventario)
 		{
-			var columna = "";
-			var valor = "";
-
 			// Abre la fila
 			var fila = "<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:gsx=\"http://schemas.google.com/spreadsheets/2006/extended\">";
 			// Agrega la fecha
@@ -56,12 +50,12 @@ namespace StockProductorCF.Servicios
 			// Agrega los valores del producto
 			for (var i = 0; i < nombresColumnas.Length; i++)
 			{
+				var valor = producto[i].Value; //Si la columna no es de stock o es la que recibió el movimiento se inserta su valor en el histórico
 				if (listaColumnasInventario[i] == "1" && i + 1 != celdaMovimiento.Column)
-					valor = "-"; // Si la columna es de stock pero no la que recibió el movimiento el valor para el histórico es "-"
-				else
-					valor = producto[i].Value;
+					valor = "-"; //Si la columna es de stock pero no la que recibió el movimiento el valor para el histórico es "-"
 
-				columna = Regex.Replace(nombresColumnas[i].ToLower(), @"\s+", "");
+
+				var columna = Regex.Replace(nombresColumnas[i].ToLower(), @"\s+", "");
 				fila += "<gsx:" + columna + ">" + valor + "</gsx:" + columna + ">";
 			}
 
@@ -79,7 +73,7 @@ namespace StockProductorCF.Servicios
 		public void InsertarHistoricos(SpreadsheetsService servicio, CellEntry celdaMovimiento, double movimiento, CellEntry[] producto, string[] nombresColumnas, string[] listaColumnasInventario)
 		{
 			var url = CuentaUsuario.ObtenerLinkHojaHistorial();
-			var tipoDelContenido = "application/atom+xml";
+			const string tipoDelContenido = "application/atom+xml";
 			var fila = ObtenerHistorico(celdaMovimiento, movimiento, producto, nombresColumnas, listaColumnasInventario);
 			// Convierte el contenido de la fila en stream
 			byte[] filaEnArregloDeBytes = Encoding.UTF8.GetBytes(fila);

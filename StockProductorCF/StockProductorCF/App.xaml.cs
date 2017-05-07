@@ -5,11 +5,14 @@ using StockProductorCF.Vistas;
 
 namespace StockProductorCF
 {
-	public partial class App : Application
+	public partial class App
 	{
 		public static int AnchoDePantalla;
 		public static int Ancho;
-		public static string SufijoImagen;
+		public static string Sufijo;
+		public static ImageSource ImagenCabeceraCiudadFutura;
+		public static ImageSource ImagenCabeceraProyectos;
+
 		public App()
 		{
 			InitializeComponent();
@@ -55,25 +58,13 @@ namespace StockProductorCF
 		{
 			AnchoDePantalla = anchoSobreDensidad;
 			Ancho = anchoCrudo;
-			SufijoImagen = "380";
+			
+			Sufijo = "380";
 			if (anchoCrudo > 1000)
-				SufijoImagen = "1080";
-		}
+				Sufijo = "1080";
 
-		protected override void OnStart()
-		{
-			// Handle when your app starts
+			ImagenCabeceraCiudadFutura = ImageSource.FromResource($"StockProductorCF.Imagenes.ciudadFutura{Sufijo}.png");
+			ImagenCabeceraProyectos = ImageSource.FromResource($"StockProductorCF.Imagenes.encabezadoProyectos{Sufijo}.png");
 		}
-
-		protected override void OnSleep()
-		{
-			// Handle when your app sleeps
-		}
-
-		protected override void OnResume()
-		{
-			// Handle when your app resumes
-		}
-
 	}
 }

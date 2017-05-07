@@ -6,21 +6,21 @@
 
 	<ContentPage.Content>
 		<StackLayout Spacing="0" Padding="0">
-			<RelativeLayout>
+			<RelativeLayout VerticalOptions="Start">
 				<Image x:Name="Cabecera" VerticalOptions="Start" HorizontalOptions="FillAndExpand"/>
 				<Picker x:Name="ListaHojas" RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=1, Constant=-120}" 
 								RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToView, ElementName=Cabecera, Property=Height, Factor=.5, Constant=-30}"
-								IsVisible="False" WidthRequest="120" HeightRequest="60" SelectedIndexChanged="CargarHoja"></Picker>
+								IsVisible="False" WidthRequest="120" HeightRequest="55" SelectedIndexChanged="CargarHoja"></Picker>
 			</RelativeLayout>
 			<StackLayout VerticalOptions="Start" HorizontalOptions="Fill" Spacing="0" Padding="0">
 				<SearchBar x:Name="Buscador" IsVisible="False" HorizontalOptions="Fill" TextChanged="FiltrarProductos" SearchButtonPressed="FiltrarProductos" />
 			</StackLayout>
 			<StackLayout x:Name="ContenedorTabla" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
 			</StackLayout>
-      <StackLayout x:Name="ContenedorBotones" BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
-        <Button x:Name="Datos" VerticalOptions="End" Text="Acceso a datos" HeightRequest="60" Clicked="AccederDatos"/>
-        <Button x:Name="Refrescar" VerticalOptions="End" Text="Refrescar datos" HeightRequest="60" Clicked="RefrescarDatos"/>
-        <Button x:Name="Escanear" VerticalOptions="End" Text="Escanear" HeightRequest="60" Clicked="AbrirPaginaEscaner"/>
+			<StackLayout x:Name="ContenedorBotones" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
+				<Image x:Name="Datos" VerticalOptions="End"/>
+        <Image x:Name="Refrescar" VerticalOptions="End"/>
+        <Image x:Name="Escanear" VerticalOptions="End"/>
       </StackLayout>
     </StackLayout>
   </ContentPage.Content>

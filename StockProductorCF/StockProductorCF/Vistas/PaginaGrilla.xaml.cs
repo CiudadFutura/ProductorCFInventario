@@ -269,7 +269,7 @@ namespace StockProductorCF.Vistas
 								{
 									new Label
 									{
-										Text = "    PRODUCTOS                      INFO + STOCK",
+										Text = "     PRODUCTOS                  INFO + STOCK",
 										FontSize = 13,
 										HorizontalOptions = LayoutOptions.Start,
 										FontAttributes = FontAttributes.Bold,
@@ -294,7 +294,7 @@ namespace StockProductorCF.Vistas
 						TextColor = Color.FromHex("#1D1D1B"),
 						FontAttributes = FontAttributes.Bold,
 						VerticalOptions = LayoutOptions.CenterAndExpand,
-						WidthRequest = 130
+						WidthRequest = 115
 					};
 					nombreProducto.SetBinding(Label.TextProperty, "Nombre");
 
@@ -303,7 +303,7 @@ namespace StockProductorCF.Vistas
 						FontSize = 15,
 						TextColor = Color.FromHex("#1D1D1B"),
 						VerticalOptions = LayoutOptions.CenterAndExpand,
-						WidthRequest = App.AnchoDePantalla - 132
+						WidthRequest = App.AnchoDePantalla - 117
 					};
 					datos.SetBinding(Label.TextProperty, "Datos");
 

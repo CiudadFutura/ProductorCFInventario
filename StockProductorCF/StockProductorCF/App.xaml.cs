@@ -59,7 +59,9 @@ namespace StockProductorCF
 			AnchoDePantalla = anchoSobreDensidad;
 			Ancho = anchoCrudo;
 			
-			Sufijo = "380";
+			Sufijo = "240";
+			if (anchoCrudo > 240)
+				Sufijo = "380";
 			if (anchoCrudo > 1000)
 				Sufijo = "1080";
 

@@ -49,6 +49,10 @@ namespace StockProductorCF.Vistas
 			var listaHojas = new List<ClaseHoja>();
 			foreach (WorksheetEntry datosHoja in _listaHojas)
 			{
+				//Almacenar la hoja para el historial de movimientos
+				if(datosHoja.Title.Text == "Historial")
+					CuentaUsuario.AlmacenarLinkHojaHistorial(datosHoja.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null).HRef.ToString());
+
 				var hoja = new ClaseHoja(datosHoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString(), datosHoja.Title.Text, false);
 				listaHojas.Add(hoja);
 
@@ -100,7 +104,7 @@ namespace StockProductorCF.Vistas
 						{
 							viewCell.View.BackgroundColor = _esTeclaPar ? Color.FromHex("#EDEDED") : Color.FromHex("#E2E2E1");
 							if(((ClaseHoja)((ViewCell)sender).BindingContext).EsDeReinicio)
-								((StackLayout)viewCell.View).Children.Add(new Image { Source = ImageSource.FromResource($"StockProductorCF.Imagenes.{App.Sufijo}.refrescarHoja.png") });
+								((StackLayout)viewCell.View).Children.Add(new Image { Source = ImageSource.FromResource($"StockProductorCF.Imagenes.refrescarHoja{App.Sufijo}.png") });
 						}
 						_esTeclaPar = !_esTeclaPar;
 					};

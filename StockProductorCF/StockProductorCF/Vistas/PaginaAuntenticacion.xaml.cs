@@ -16,7 +16,6 @@ namespace StockProductorCF
 		public PaginaAuntenticacion(bool conexionExistente = false)
 		{
 			InitializeComponent();
-			Cabecera.Source = App.ImagenCabeceraProyectos;
 			CuentaUsuario.AlmacenarAccesoDatos("G");
 			_conexionExistente = conexionExistente; //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros
 
@@ -114,6 +113,12 @@ namespace StockProductorCF
 				CuentaUsuario.AlmacenarNombreUsuarioGoogle(usuario);
 			}
 		}
-	}
 
+		protected override void OnSizeAllocated(double width, double height)
+		{
+			base.OnSizeAllocated(width, height);
+			App.OrientacionApaisada = width > height;
+			Cabecera.Source = App.ObtenerImagenEncabezadoProyectos();
+		}
+	}
 }

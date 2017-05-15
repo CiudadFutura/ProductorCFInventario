@@ -19,7 +19,6 @@ namespace StockProductorCF.Vistas
 		public SeleccionColumnasParaVer(string linkHojaConsulta, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-			Cabecera.Source = App.ImagenCabeceraProyectos;
 
 			_servicio = servicio;
 			_linkHojaConsulta = linkHojaConsulta;
@@ -108,11 +107,18 @@ namespace StockProductorCF.Vistas
 		}
 
 		[Android.Runtime.Preserve]
-		void Listo(object sender, EventArgs e)
+		private void Listo(object sender, EventArgs e)
 		{
 			CuentaUsuario.AlmacenarColumnasParaVerDeHoja(_linkHojaConsulta, string.Join(",", _listaColumnas));
 			var paginaSeleccionColumnasInventario = new SeleccionColumnasInventario(_columnas, _linkHojaConsulta, _servicio);
 			Navigation.PushAsync(paginaSeleccionColumnasInventario);
+		}
+
+		protected override void OnSizeAllocated(double width, double height)
+		{
+			base.OnSizeAllocated(width, height);
+			App.OrientacionApaisada = width > height;
+			Cabecera.Source = App.ObtenerImagenEncabezadoProyectos();
 		}
 	}
 }

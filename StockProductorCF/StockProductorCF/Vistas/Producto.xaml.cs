@@ -22,7 +22,6 @@ namespace StockProductorCF.Vistas
 		public Producto(CellEntry[] producto, string[] nombresColumnas, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-			Cabecera.Source = App.ImagenCabeceraCiudadFutura;
 
 			_producto = producto;
 			_servicio = servicio;
@@ -248,5 +247,11 @@ namespace StockProductorCF.Vistas
 				_mensaje = "Ha ocurrido un error mientras se guardaba el mocimiento.";
 		}
 
+		protected override void OnSizeAllocated(double width, double height)
+		{
+			base.OnSizeAllocated(width, height);
+			App.OrientacionApaisada = width > height;
+			Cabecera.Source = App.ObtenerImagenEncabezadoCiudadFutura();
+		}
 	}
 }

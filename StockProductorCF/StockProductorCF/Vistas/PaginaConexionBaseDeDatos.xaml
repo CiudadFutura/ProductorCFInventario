@@ -8,7 +8,7 @@
 	<ContentPage.Content>
 		<StackLayout Spacing="0" Padding="0">
 			<StackLayout VerticalOptions="Start" HorizontalOptions="Fill" Spacing="0" Padding="0">
-				<Image x:Name="Cabecera" VerticalOptions="Start" HorizontalOptions="FillAndExpand"/>
+				<Image x:Name="Cabecera" VerticalOptions="Start" Aspect="AspectFill"/>
 			</StackLayout>
 			<StackLayout BackgroundColor="#C0C0C0" VerticalOptions="Start" HorizontalOptions="Fill">
 				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" HeightRequest="30">Ingrese usuario y contraseña</Label>

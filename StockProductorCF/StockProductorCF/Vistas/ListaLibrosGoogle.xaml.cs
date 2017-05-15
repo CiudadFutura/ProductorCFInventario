@@ -16,7 +16,6 @@ namespace StockProductorCF.Vistas
 		public ListaLibrosGoogle(SpreadsheetsService servicio, AtomEntryCollection listaLibros)
 		{
 			InitializeComponent();
-			Cabecera.Source = App.ImagenCabeceraProyectos;
 
 			_servicio = servicio;
 			_listaLibros = listaLibros;
@@ -35,7 +34,7 @@ namespace StockProductorCF.Vistas
 		private void CargarListaLibros()
 		{
 			var listaLibros = new List<ClaseLibro>();
-			foreach (SpreadsheetEntry datosLibro in _listaLibros)
+			foreach (var datosLibro in _listaLibros)
 			{
 				var libro = new ClaseLibro(datosLibro.Links.FindService(GDataSpreadsheetsNameTable.WorksheetRel, null).HRef.ToString(), datosLibro.Title.Text);
 				listaLibros.Add(libro);
@@ -90,6 +89,12 @@ namespace StockProductorCF.Vistas
 			ContenedorLibros.Children.Add(vista);
 		}
 
+		protected override void OnSizeAllocated(double width, double height)
+		{
+			base.OnSizeAllocated(width, height);
+			App.OrientacionApaisada = width > height;
+			Cabecera.Source = App.ObtenerImagenEncabezadoProyectos();
+		}
 	}
 
 	//Clase Libro: utilizada para armar la lista scrolleable de libros

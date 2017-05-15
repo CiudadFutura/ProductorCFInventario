@@ -170,7 +170,6 @@ namespace StockProductorCF.Vistas
 		private void InicializarVariablesGlobales()
 		{
 			ConfigurarBotones();
-			Cabecera.Source = App.ImagenCabeceraCiudadFutura;
 
 			var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
 			if (!string.IsNullOrEmpty(columnasParaVer))
@@ -485,6 +484,13 @@ namespace StockProductorCF.Vistas
 				ObtenerDatosProductosDesdeHCG();
 				return false;
 			});
+		}
+
+		protected override void OnSizeAllocated(double width, double height)
+		{
+			base.OnSizeAllocated(width, height);
+			App.OrientacionApaisada = width > height;
+			Cabecera.Source = App.ObtenerImagenEncabezadoCiudadFutura();
 		}
 
 		#endregion

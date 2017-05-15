@@ -7,16 +7,16 @@
 	<ContentPage.Content>
 		<StackLayout Spacing="0" Padding="0">
 			<AbsoluteLayout Padding="0">
-				<Image x:Name="Cabecera"/>
-				<Picker x:Name="ListaHojas" IsVisible="False" SelectedIndexChanged="CargarHoja"
+				<Image x:Name="Cabecera" Aspect="AspectFit"/>
+				<Picker x:Name="ListaHojas" IsVisible="False" SelectedIndexChanged="CargarHoja" 
 								AbsoluteLayout.LayoutBounds="1,.5,120,50" AbsoluteLayout.LayoutFlags="PositionProportional"></Picker>
 			</AbsoluteLayout>
 			<StackLayout VerticalOptions="Start" HorizontalOptions="Fill" Spacing="0" Padding="0">
-				<SearchBar x:Name="Buscador" IsVisible="False" HorizontalOptions="Fill" TextChanged="FiltrarProductos" SearchButtonPressed="FiltrarProductos" />
+				<SearchBar x:Name="Buscador" IsVisible="False" BackgroundColor="#E2E2E1" HorizontalOptions="Fill" TextChanged="FiltrarProductos" SearchButtonPressed="FiltrarProductos" />
 			</StackLayout>
 			<StackLayout x:Name="ContenedorTabla" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
 			</StackLayout>
-			<StackLayout Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End">
+			<StackLayout Spacing="0" Padding="0" Orientation="Horizontal" BackgroundColor="#E2E2E1" HorizontalOptions="Center" VerticalOptions="End">
 				<Image x:Name="Datos"/>
 				<Image x:Name="Refrescar"/>
 				<Image x:Name="Escanear"/>

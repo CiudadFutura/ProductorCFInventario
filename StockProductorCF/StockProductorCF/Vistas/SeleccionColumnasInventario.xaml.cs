@@ -17,7 +17,6 @@ namespace StockProductorCF.Vistas
 		public SeleccionColumnasInventario(IReadOnlyCollection<CellEntry> columnas, string linkHojaConsulta, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-			Cabecera.Source = App.ImagenCabeceraProyectos;
 
 			_servicio = servicio;
 			_linkHojaConsulta = linkHojaConsulta;
@@ -81,6 +80,13 @@ namespace StockProductorCF.Vistas
 			CuentaUsuario.AlmacenarColumnasInventarioDeHoja(_linkHojaConsulta, string.Join(",", _listaColumnas));
 			var paginaGrilla = new PaginaGrilla(_linkHojaConsulta, _servicio);
 			Navigation.PushAsync(paginaGrilla);
+		}
+
+		protected override void OnSizeAllocated(double width, double height)
+		{
+			base.OnSizeAllocated(width, height);
+			App.OrientacionApaisada = width > height;
+			Cabecera.Source = App.ObtenerImagenEncabezadoProyectos();
 		}
 	}
 }

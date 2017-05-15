@@ -16,7 +16,6 @@ namespace StockProductorCF.Vistas
 		public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
 		{
 			InitializeComponent();
-			Cabecera.Source = App.ImagenCabeceraProyectos;
 
 			_servicio = servicio;
 			_listaHojas = listaHojas;
@@ -116,6 +115,12 @@ namespace StockProductorCF.Vistas
 			ContenedorHojas.Children.Add(vista);
 		}
 
+		protected override void OnSizeAllocated(double width, double height)
+		{
+			base.OnSizeAllocated(width, height);
+			App.OrientacionApaisada = width > height;
+			Cabecera.Source = App.ObtenerImagenEncabezadoProyectos();
+		}
 	}
 
 	//Clase hoja: utilizada para armar la lista scrolleable de hojas

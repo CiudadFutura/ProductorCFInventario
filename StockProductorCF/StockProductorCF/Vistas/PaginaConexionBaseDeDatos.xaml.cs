@@ -11,7 +11,6 @@ namespace StockProductorCF.Vistas
 		public PaginaConexionBaseDeDatos()
 		{
 			InitializeComponent();
-			Cabecera.Source = App.ImagenCabeceraProyectos;
 			CuentaUsuario.AlmacenarAccesoDatos("B");
 			Usuario.Text = CuentaUsuario.ObtenerUsuarioDeBaseDeDatos();
 		}
@@ -44,5 +43,11 @@ namespace StockProductorCF.Vistas
 			}
 		}
 
+		protected override void OnSizeAllocated(double width, double height)
+		{
+			base.OnSizeAllocated(width, height);
+			App.OrientacionApaisada = width > height;
+			Cabecera.Source = App.ObtenerImagenEncabezadoProyectos();
+		}
 	}
 }

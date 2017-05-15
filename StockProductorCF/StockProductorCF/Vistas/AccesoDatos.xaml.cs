@@ -7,7 +7,6 @@ namespace StockProductorCF.Vistas
 		public AccesoDatos()
 		{
 			InitializeComponent();
-			Cabecera.Source = App.ImagenCabeceraProyectos;
 		}
 
 		[Android.Runtime.Preserve]
@@ -22,6 +21,13 @@ namespace StockProductorCF.Vistas
 		{
 			var paginaConexionBaseDatos = new PaginaConexionBaseDeDatos();
 			Navigation.PushAsync(paginaConexionBaseDatos);
+		}
+
+		protected override void OnSizeAllocated(double width, double height)
+		{
+			base.OnSizeAllocated(width, height);
+			App.OrientacionApaisada = width > height;
+			Cabecera.Source = App.ObtenerImagenEncabezadoProyectos();
 		}
 	}
 }

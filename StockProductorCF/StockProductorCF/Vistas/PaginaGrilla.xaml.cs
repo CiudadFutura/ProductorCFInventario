@@ -234,6 +234,7 @@ namespace StockProductorCF.Vistas
 
 		private void ConstruirVistaDeLista(List<string[]> productos)
 		{
+			_esTeclaPar = false;
 			var listaProductos = new List<ClaseProducto>();
 			foreach (var datosProducto in productos)
 			{

@@ -12,14 +12,14 @@
 								AbsoluteLayout.LayoutBounds="1,.5,120,50" AbsoluteLayout.LayoutFlags="PositionProportional"></Picker>
 			</AbsoluteLayout>
 			<StackLayout VerticalOptions="Start" HorizontalOptions="Fill" Spacing="0" Padding="0">
-				<SearchBar x:Name="Buscador" IsVisible="False" BackgroundColor="#E2E2E1" HorizontalOptions="Fill" TextChanged="FiltrarProductos" SearchButtonPressed="FiltrarProductos" />
+				<SearchBar x:Name="Buscador" IsVisible="False" BackgroundColor="#EDEDED" HorizontalOptions="Fill" TextChanged="FiltrarProductos" SearchButtonPressed="FiltrarProductos" />
 			</StackLayout>
 			<StackLayout x:Name="ContenedorTabla" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
 			</StackLayout>
-			<StackLayout Spacing="0" Padding="0" Orientation="Horizontal" BackgroundColor="#E2E2E1" HorizontalOptions="Center" VerticalOptions="End">
-				<Image x:Name="Datos"/>
-				<Image x:Name="Refrescar"/>
-				<Image x:Name="Escanear"/>
+			<StackLayout Spacing="0" Padding="0" Orientation="Horizontal" BackgroundColor="#E2E2E1" HorizontalOptions="Fill" VerticalOptions="End">
+				<Image x:Name="Datos" HorizontalOptions="EndAndExpand"/>
+				<Image x:Name="Refrescar" HorizontalOptions="Center"/>
+				<Image x:Name="Escanear" HorizontalOptions="StartAndExpand"/>
       </StackLayout>
     </StackLayout>
   </ContentPage.Content>

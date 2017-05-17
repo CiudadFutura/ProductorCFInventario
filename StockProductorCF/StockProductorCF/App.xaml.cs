@@ -73,6 +73,8 @@ namespace StockProductorCF
 				Sufijo = "380";
 			if (!OrientacionApaisada && anchoCrudo > 1000 || OrientacionApaisada && anchoCrudo > 1780)
 				Sufijo = "1080";
+			if (!OrientacionApaisada && anchoCrudo > 1180 || OrientacionApaisada && anchoCrudo > 1810)
+				Sufijo = "1200";
 
 			ImagenCabeceraCiudadFutura = ImageSource.FromResource($"StockProductorCF.Imagenes.ciudadFutura{Sufijo}.png");
 			ImagenCabeceraCiudadFuturaApaisada = ImageSource.FromResource($"StockProductorCF.Imagenes.ciudadFuturaApaisada{Sufijo}.png");

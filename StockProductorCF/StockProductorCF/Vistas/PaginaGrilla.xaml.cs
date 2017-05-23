@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using Windows.UI.Xaml;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 using ZXing.Net.Mobile.Forms;
 using DataTemplate = Xamarin.Forms.DataTemplate;
@@ -29,6 +29,11 @@ namespace StockProductorCF.Vistas
 		private bool _esTeclaPar;
 		private bool _esCargaInicial;
 		private ActivityIndicator _indicadorActividad;
+		private Image _accesoDatos;
+		private Image _refrescar;
+		private Image _escanearCodigo;
+		private Picker _listaHojas;
+		private double _anchoActual;
 
 		//Constructor para Hoja de cálculo de Google
 		public PaginaGrilla(string linkHojaConsulta, SpreadsheetsService servicio)
@@ -60,7 +65,7 @@ namespace StockProductorCF.Vistas
 			if (_servicio == null) //El servicio viene nulo cuando se llama directamente desde el lanzador (ya tiene conexión a datos configurada)
 				_servicio = _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActualDeGoogle());
 
-			if(CuentaUsuario.ValidarTokenDeGoogle())
+			if (CuentaUsuario.ValidarTokenDeGoogle())
 			{
 				_celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
 			}
@@ -94,21 +99,21 @@ namespace StockProductorCF.Vistas
 					_nombresColumnas.SetValue(celda.Value, (int)celda.Column - 1);
 				}
 			}
-			
+
 			LlenarGrillaDeProductos(productos);
 		}
 
 		private void ConfigurarSelectorHojas()
 		{
-			ListaHojas.IsVisible = true;
+			_listaHojas.IsVisible = true;
 			var nombreHojaActual = CuentaUsuario.ObtenerNombreHoja(_linkHojaConsulta);
 			var nombres = CuentaUsuario.ObtenerTodosLosNombresDeHojas();
 			var i = 0;
 			foreach (var nombre in nombres)
 			{
-				ListaHojas.Items.Add(nombre);
+				_listaHojas.Items.Add(nombre);
 				if (nombre == nombreHojaActual)
-					ListaHojas.SelectedIndex = i; //Esto genera la carga inicial de productos.
+					_listaHojas.SelectedIndex = i; //Esto genera la carga inicial de productos.
 				i += 1;
 			}
 		}
@@ -169,6 +174,19 @@ namespace StockProductorCF.Vistas
 
 		private void InicializarVariablesGlobales()
 		{
+			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProductores));
+			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
+
+			_listaHojas = new Picker
+			{
+				IsVisible = false,
+				WidthRequest = App.AnchoRetratoDePantalla * .29,
+				HorizontalOptions = LayoutOptions.EndAndExpand,
+				VerticalOptions = LayoutOptions.Center
+			};
+			_listaHojas.SelectedIndexChanged += CargarHoja;
+			Cabecera.Children.Add(_listaHojas);
+
 			ConfigurarBotones();
 
 			var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
@@ -184,12 +202,16 @@ namespace StockProductorCF.Vistas
 
 		private void ConfigurarBotones()
 		{
-			Datos.Source = ImageSource.FromResource($"StockProductorCF.Imagenes.accesoDatos{App.Sufijo}.png");
-			Datos.GestureRecognizers.Add(new TapGestureRecognizer(AccederDatos));
-			Refrescar.Source = ImageSource.FromResource($"StockProductorCF.Imagenes.refrescarDatos{App.Sufijo}.png");
-			Refrescar.GestureRecognizers.Add(new TapGestureRecognizer(RefrescarDatos));
-			Escanear.Source = ImageSource.FromResource($"StockProductorCF.Imagenes.escanearCodigo{App.Sufijo}.png");
-			Escanear.GestureRecognizers.Add(new TapGestureRecognizer(AbrirPaginaEscaner));
+			_accesoDatos = App.ObtenerImagen(TipoImagen.BotonAccesoDatos);
+			_accesoDatos.GestureRecognizers.Add(new TapGestureRecognizer(AccederDatos));
+			_refrescar = App.ObtenerImagen(TipoImagen.BotonRefrescarDatos);
+			_refrescar.GestureRecognizers.Add(new TapGestureRecognizer(RefrescarDatos));
+			_escanearCodigo = App.ObtenerImagen(TipoImagen.BotonEscanearCodigo);
+			_escanearCodigo.GestureRecognizers.Add(new TapGestureRecognizer(AbrirPaginaEscaner));
+
+			ContenedorBotones.Children.Add(_accesoDatos);
+			ContenedorBotones.Children.Add(_refrescar);
+			ContenedorBotones.Children.Add(_escanearCodigo);
 		}
 
 		private void LlenarGrillaDeProductos(List<string[]> productos, bool esBusqueda = false)
@@ -200,11 +222,11 @@ namespace StockProductorCF.Vistas
 				FijarProductosYBuscador(productos);
 		}
 
-		private void IrAlProducto(string codigoProductoSeleccionado)
+		private async Task IrAlProducto(string codigoProductoSeleccionado)
 		{
+			var fila = -1;
 			if (CuentaUsuario.ObtenerAccesoDatos() == "G")
 			{
-				var fila = -1;
 				var productoSeleccionado = new CellEntry[_celdas.ColCount.Count];
 
 				//Obtener el arreglo del producto para enviar
@@ -215,24 +237,27 @@ namespace StockProductorCF.Vistas
 					if (celda.Row == fila)
 						productoSeleccionado.SetValue(celda, (int)celda.Column - 1);
 					if (fila > -1 && celda.Row > fila)
+					{
+						await Navigation.PushAsync(new Producto(productoSeleccionado, _nombresColumnas, _servicio));
 						break;
+					}
 				}
-
-				Navigation.PushAsync(new Producto(productoSeleccionado, _nombresColumnas, _servicio));
 			}
 			else
 			{
 				foreach (var producto in _productos)
 				{
 					if (producto[0] != codigoProductoSeleccionado) continue;
-					Navigation.PushAsync(new Producto(producto, _nombresColumnas));
+					await Navigation.PushAsync(new Producto(producto, _nombresColumnas));
 					break;
 				}
-
 			}
+			//Si fila = -1 no se ha encuentrado el código
+			if(fila == -1)
+				await DisplayAlert("Código", "No se ha encontrado un producto para el código escaneado.", "Listo");
 		}
 
-		private void ConstruirVistaDeLista(List<string[]> productos)
+		private void ConstruirVistaDeLista(IReadOnlyCollection<string[]> productos)
 		{
 			_esTeclaPar = false;
 			var listaProductos = new List<ClaseProducto>();
@@ -303,7 +328,7 @@ namespace StockProductorCF.Vistas
 						FontSize = 15,
 						TextColor = Color.FromHex("#1D1D1B"),
 						VerticalOptions = LayoutOptions.CenterAndExpand,
-						WidthRequest = App.AnchoDePantalla - 117
+						WidthRequest = App.AnchoRetratoDePantalla - 117
 					};
 					datos.SetBinding(Label.TextProperty, "Datos");
 
@@ -313,7 +338,7 @@ namespace StockProductorCF.Vistas
 						BackgroundColor = Color.FromHex("#FFFFFF"),
 						HeightRequest = 55
 					};
-					
+
 					var celda = new ViewCell
 					{
 						View = new StackLayout
@@ -333,7 +358,7 @@ namespace StockProductorCF.Vistas
 										}
 						}
 					};
-					
+
 					celda.Tapped += (sender, args) =>
 					{
 						if (_ultimoItemSeleccionado != null)
@@ -390,11 +415,12 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		private void AccederDatos(View arg1, object arg2)
 		{
-			Datos.Opacity = 0.5f;
-			Device.StartTimer(TimeSpan.FromMilliseconds(300), () => {
+			_accesoDatos.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(300), () =>
+			{
 				var paginaAccesoDatos = new AccesoDatos();
 				Navigation.PushAsync(paginaAccesoDatos);
-				Datos.Opacity = 1f;
+				_accesoDatos.Opacity = 1f;
 				return false;
 			});
 		}
@@ -403,24 +429,24 @@ namespace StockProductorCF.Vistas
 		private void RefrescarDatos(View arg1, object arg2)
 		{
 			RefrescarUIGrilla();
-			Refrescar.Opacity = 0.5f;
-
-			Device.StartTimer(TimeSpan.FromMilliseconds(100), () => {
+			_refrescar.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(100), () =>
+			{
 				if (!string.IsNullOrEmpty(_linkHojaConsulta))
 					ObtenerDatosProductosDesdeHCG(); //Hoja de cálculo de Google
 				else
 					ObtenerProductosDesdeBD(); //Base de Datos
-				Refrescar.Opacity = 1f;
+				_refrescar.Opacity = 1f;
 				return false;
 			});
 		}
-		
+
 		[Android.Runtime.Preserve]
 		private void AbrirPaginaEscaner(View arg1, object arg2)
 		{
-
-			Escanear.Opacity = 0.5f;
-			Device.StartTimer(TimeSpan.FromMilliseconds(300), () => {
+			_escanearCodigo.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(300), () =>
+			{
 				var paginaEscaner = new ZXingScannerPage();
 
 				paginaEscaner.OnScanResult += (result) =>
@@ -448,10 +474,10 @@ namespace StockProductorCF.Vistas
 				// Abre la página del escaner
 				Navigation.PushModalAsync(paginaEscaner);
 
-				Escanear.Opacity = 1f;
+				_escanearCodigo.Opacity = 1f;
 				return false;
 			});
-			
+
 		}
 
 		[Android.Runtime.Preserve]
@@ -478,8 +504,9 @@ namespace StockProductorCF.Vistas
 		{
 			RefrescarUIGrilla();
 
-			Device.StartTimer(TimeSpan.FromMilliseconds(100), () => {
-				_linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaSeleccionada(ListaHojas.Items[ListaHojas.SelectedIndex]);
+			Device.StartTimer(TimeSpan.FromMilliseconds(100), () =>
+			{
+				_linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaSeleccionada(_listaHojas.Items[_listaHojas.SelectedIndex]);
 				_listaColumnasParaVer = CuentaUsuario.ObtenerColumnasParaVer().Split(',');
 				_listaColumnasInventario = CuentaUsuario.ObtenerColumnasInventario().Split(',');
 				ObtenerDatosProductosDesdeHCG();
@@ -487,16 +514,17 @@ namespace StockProductorCF.Vistas
 			});
 		}
 
-		protected override void OnSizeAllocated(double width, double height)
+		protected override void OnSizeAllocated(double ancho, double alto)
 		{
-			base.OnSizeAllocated(width, height);
-			App.OrientacionApaisada = width > height;
-			Cabecera.Source = App.ObtenerImagenEncabezadoCiudadFutura();
+			base.OnSizeAllocated(ancho, alto);
+			if (_anchoActual == ancho) return;
+			SombraEncabezado.WidthRequest = ancho > alto ? App.AnchoApaisadoDePantalla : App.AnchoRetratoDePantalla;
+			_anchoActual = ancho;
 		}
 
 		#endregion
 
-	}
+		}
 
 	//Clase Producto: utilizada para armar la lista scrolleable de productos
 	[Android.Runtime.Preserve]

@@ -7,8 +7,10 @@
 
 	<ContentPage.Content>
 		<StackLayout Spacing="0" Padding="0">
-			<StackLayout VerticalOptions="Start" HorizontalOptions="Fill" Spacing="0" Padding="0">
-				<Image x:Name="Cabecera" VerticalOptions="Start" Aspect="AspectFill"/>
+			<StackLayout x:Name="Cabecera" BackgroundColor="#D21721" Spacing="0" Padding="0">
+			</StackLayout>
+			<StackLayout Spacing="0" Padding="0" Orientation="Horizontal">
+				<Image x:Name="SombraEncabezado" HorizontalOptions="FillAndExpand" Aspect="AspectFill"></Image>
 			</StackLayout>
 			<StackLayout BackgroundColor="#C0C0C0" VerticalOptions="Start" HorizontalOptions="Fill">
 				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" HeightRequest="30">Ingrese usuario y contraseña</Label>
@@ -21,7 +23,7 @@
 				<Label FontSize="18" Text="Contraseña" WidthRequest="100" HorizontalTextAlignment="End" VerticalOptions="End" HorizontalOptions="StartAndExpand"/>
 				<Entry FontSize="18" x:Name="Contrasena" WidthRequest="250" HorizontalTextAlignment="Start" VerticalOptions="End" HorizontalOptions="EndAndExpand"/>
 			</StackLayout>
-			<StackLayout BackgroundColor="#c41d23" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
+			<StackLayout BackgroundColor="#D21721" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
 				<Button HorizontalOptions="FillAndExpand" VerticalOptions="Center" Text="Conectar" HeightRequest="60" Clicked="Conectar"/>
 			</StackLayout>
 		</StackLayout>

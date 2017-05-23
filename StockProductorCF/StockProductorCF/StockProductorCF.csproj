@@ -138,18 +138,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Imagenes\accesoDatos1080.png" />
-    <EmbeddedResource Include="Imagenes\ciudadFutura1080.png" />
-    <EmbeddedResource Include="Imagenes\encabezadoProyectos1080.png" />
-    <EmbeddedResource Include="Imagenes\escanearCodigo1080.png" />
-    <EmbeddedResource Include="Imagenes\refrescarDatos1080.png" />
-    <EmbeddedResource Include="Imagenes\refrescarHoja1080.png" />
-    <EmbeddedResource Include="Imagenes\accesoDatos380.png" />
-    <EmbeddedResource Include="Imagenes\ciudadFutura380.png" />
-    <EmbeddedResource Include="Imagenes\encabezadoProyectos380.png" />
-    <EmbeddedResource Include="Imagenes\escanearCodigo380.png" />
-    <EmbeddedResource Include="Imagenes\refrescarDatos380.png" />
-    <EmbeddedResource Include="Imagenes\refrescarHoja380.png" />
+    <EmbeddedResource Include="Imagenes\refrescarHoja.png" />
     <EmbeddedResource Include="Vistas\PaginaGrilla.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
       <SubType>Designer</SubType>
@@ -204,37 +193,18 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Imagenes\accesoDatos240.png" />
-    <EmbeddedResource Include="Imagenes\ciudadFutura240.png" />
-    <EmbeddedResource Include="Imagenes\encabezadoProyectos240.png" />
-    <EmbeddedResource Include="Imagenes\escanearCodigo240.png" />
-    <EmbeddedResource Include="Imagenes\refrescarDatos240.png" />
+    <EmbeddedResource Include="Imagenes\encabezadoProductores.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Imagenes\refrescarHoja240.png" />
+    <EmbeddedResource Include="Imagenes\encabezadoProyectos.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Imagenes\ciudadFuturaApaisada1080.png" />
+    <EmbeddedResource Include="Imagenes\accesoDatos.png" />
+    <EmbeddedResource Include="Imagenes\escanearCodigo.png" />
+    <EmbeddedResource Include="Imagenes\refrescarDatos.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Imagenes\encabezadoProyectosApaisada1080.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Imagenes\ciudadFuturaApaisada240.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Imagenes\encabezadoProyectosApaisada240.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Imagenes\ciudadFutura1200.png" />
-    <EmbeddedResource Include="Imagenes\ciudadFuturaApaisada1200.png" />
-    <EmbeddedResource Include="Imagenes\encabezadoProyectos1200.png" />
-    <EmbeddedResource Include="Imagenes\encabezadoProyectosApaisada1200.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Imagenes\accesoDatos1200.png" />
-    <EmbeddedResource Include="Imagenes\escanearCodigo1200.png" />
-    <EmbeddedResource Include="Imagenes\refrescarDatos1200.png" />
+    <EmbeddedResource Include="Imagenes\sombraEncabezado.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\..\packages\Xamarin.Forms.2.3.3.193\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets" Condition="Exists('..\..\packages\Xamarin.Forms.2.3.3.193\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets')" />

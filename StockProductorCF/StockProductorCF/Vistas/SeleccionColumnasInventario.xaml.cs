@@ -13,11 +13,13 @@ namespace StockProductorCF.Vistas
 		private readonly SpreadsheetsService _servicio;
 		private readonly string _linkHojaConsulta;
 		private int[] _listaColumnas;
+		private double _anchoActual;
 
 		public SeleccionColumnasInventario(IReadOnlyCollection<CellEntry> columnas, string linkHojaConsulta, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-
+			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_linkHojaConsulta = linkHojaConsulta;
 
@@ -82,11 +84,13 @@ namespace StockProductorCF.Vistas
 			Navigation.PushAsync(paginaGrilla);
 		}
 
-		protected override void OnSizeAllocated(double width, double height)
+		protected override void OnSizeAllocated(double ancho, double alto)
 		{
-			base.OnSizeAllocated(width, height);
-			App.OrientacionApaisada = width > height;
-			Cabecera.Source = App.ObtenerImagenEncabezadoProyectos();
+			base.OnSizeAllocated(ancho, alto);
+			if (_anchoActual == ancho) return;
+			SombraEncabezado.WidthRequest = ancho > alto ? App.AnchoApaisadoDePantalla : App.AnchoRetratoDePantalla;
+			_anchoActual = ancho;
 		}
+
 	}
 }

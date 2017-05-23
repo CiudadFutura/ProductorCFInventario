@@ -1,12 +1,17 @@
 ﻿using System;
+using Xamarin.Forms;
 
 namespace StockProductorCF.Vistas
 {
 	public partial class AccesoDatos
 	{
+		private double _anchoActual;
+
 		public AccesoDatos()
 		{
 			InitializeComponent();
+			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 		}
 
 		[Android.Runtime.Preserve]
@@ -23,11 +28,12 @@ namespace StockProductorCF.Vistas
 			Navigation.PushAsync(paginaConexionBaseDatos);
 		}
 
-		protected override void OnSizeAllocated(double width, double height)
+		protected override void OnSizeAllocated(double ancho, double alto)
 		{
-			base.OnSizeAllocated(width, height);
-			App.OrientacionApaisada = width > height;
-			Cabecera.Source = App.ObtenerImagenEncabezadoProyectos();
+			base.OnSizeAllocated(ancho, alto);
+			if (_anchoActual == ancho) return;
+			SombraEncabezado.WidthRequest = ancho > alto ? App.AnchoApaisadoDePantalla : App.AnchoRetratoDePantalla;
+			_anchoActual = ancho;
 		}
 	}
 }

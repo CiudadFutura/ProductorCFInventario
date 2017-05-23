@@ -8,7 +8,7 @@ using System.Net.Http;
 
 namespace StockProductorCF.Vistas
 {
-	public partial class Producto : ContentPage
+	public partial class Producto
 	{
 		private bool[] _signoPositivo;
 		private double[] _movimientos;
@@ -18,11 +18,13 @@ namespace StockProductorCF.Vistas
 		private readonly SpreadsheetsService _servicio;
 		private readonly string[] _nombresColumnas;
 		private string _mensaje = "";
+		private double _anchoActual;
 
 		public Producto(CellEntry[] producto, string[] nombresColumnas, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-
+			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProductores));
+			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_producto = producto;
 			_servicio = servicio;
 			_nombresColumnas = nombresColumnas;
@@ -42,7 +44,8 @@ namespace StockProductorCF.Vistas
 		public Producto(string[] productoBD, string[] nombresColumnas)
 		{
 			InitializeComponent();
-
+			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProductores));
+			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_productoString = productoBD;
 			_nombresColumnas = nombresColumnas;
 
@@ -247,11 +250,13 @@ namespace StockProductorCF.Vistas
 				_mensaje = "Ha ocurrido un error mientras se guardaba el mocimiento.";
 		}
 
-		protected override void OnSizeAllocated(double width, double height)
+		protected override void OnSizeAllocated(double ancho, double alto)
 		{
-			base.OnSizeAllocated(width, height);
-			App.OrientacionApaisada = width > height;
-			Cabecera.Source = App.ObtenerImagenEncabezadoCiudadFutura();
+			base.OnSizeAllocated(ancho, alto);
+			if (_anchoActual == ancho) return;
+			SombraEncabezado.WidthRequest = ancho > alto ? App.AnchoApaisadoDePantalla : App.AnchoRetratoDePantalla;
+			_anchoActual = ancho;
 		}
+
 	}
 }

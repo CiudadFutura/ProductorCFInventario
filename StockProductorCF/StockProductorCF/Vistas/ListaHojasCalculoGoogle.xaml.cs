@@ -12,17 +12,19 @@ namespace StockProductorCF.Vistas
 		private readonly AtomEntryCollection _listaHojas;
 		private readonly SpreadsheetsService _servicio;
 		private bool _esTeclaPar;
+		private double _anchoActual;
 
 		public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
 		{
 			InitializeComponent();
-
+			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_listaHojas = listaHojas;
 
 			CargarListaHojas();
 		}
-		
+
 		private void EnviarPaginaGrilla(string linkHoja, string nombreHoja, bool reiniciaHoja)
 		{
 			//Se almacena el link para recobrar los datos de stock de la hoja cuando ingrese nuevamente.
@@ -49,7 +51,7 @@ namespace StockProductorCF.Vistas
 			foreach (WorksheetEntry datosHoja in _listaHojas)
 			{
 				//Almacenar la hoja para el historial de movimientos
-				if(datosHoja.Title.Text == "Historial")
+				if (datosHoja.Title.Text == "Historial")
 					CuentaUsuario.AlmacenarLinkHojaHistorial(datosHoja.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null).HRef.ToString());
 
 				var hoja = new ClaseHoja(datosHoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString(), datosHoja.Title.Text, false);
@@ -88,10 +90,10 @@ namespace StockProductorCF.Vistas
 							Children = { nombreHoja }
 						}
 					};
-					
+
 					celda.Tapped += (sender, args) =>
 					{
-						var hoja = (ClaseHoja)((ViewCell) sender).BindingContext;
+						var hoja = (ClaseHoja)((ViewCell)sender).BindingContext;
 						EnviarPaginaGrilla(hoja.Link, hoja.Nombre, hoja.EsDeReinicio);
 						celda.View.BackgroundColor = Color.Silver;
 					};
@@ -102,8 +104,16 @@ namespace StockProductorCF.Vistas
 						if (viewCell.View != null)
 						{
 							viewCell.View.BackgroundColor = _esTeclaPar ? Color.FromHex("#EDEDED") : Color.FromHex("#E2E2E1");
-							if(((ClaseHoja)((ViewCell)sender).BindingContext).EsDeReinicio)
-								((StackLayout)viewCell.View).Children.Add(new Image { Source = ImageSource.FromResource($"StockProductorCF.Imagenes.refrescarHoja{App.Sufijo}.png") });
+							if (((ClaseHoja) ((ViewCell) sender).BindingContext).EsDeReinicio)
+							{
+								((StackLayout)viewCell.View).Children.Add(new Image
+								{
+									VerticalOptions = LayoutOptions.Center,
+									HorizontalOptions = LayoutOptions.End,
+									Source = ImageSource.FromResource("StockProductorCF.Imagenes.refrescarHoja.png"),
+									HeightRequest = App.AnchoRetratoDePantalla * .09259
+								});
+							}
 						}
 						_esTeclaPar = !_esTeclaPar;
 					};
@@ -115,11 +125,12 @@ namespace StockProductorCF.Vistas
 			ContenedorHojas.Children.Add(vista);
 		}
 
-		protected override void OnSizeAllocated(double width, double height)
+		protected override void OnSizeAllocated(double ancho, double alto)
 		{
-			base.OnSizeAllocated(width, height);
-			App.OrientacionApaisada = width > height;
-			Cabecera.Source = App.ObtenerImagenEncabezadoProyectos();
+			base.OnSizeAllocated(ancho, alto);
+			if (_anchoActual == ancho) return;
+			SombraEncabezado.WidthRequest = ancho > alto ? App.AnchoApaisadoDePantalla : App.AnchoRetratoDePantalla;
+			_anchoActual = ancho;
 		}
 	}
 
@@ -142,4 +153,5 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		public bool EsDeReinicio { get; }
 	}
+
 }

@@ -12,11 +12,13 @@ namespace StockProductorCF.Vistas
 		private readonly AtomEntryCollection _listaLibros;
 		private readonly SpreadsheetsService _servicio;
 		private bool _esTeclaPar;
+		private double _anchoActual;
 
 		public ListaLibrosGoogle(SpreadsheetsService servicio, AtomEntryCollection listaLibros)
 		{
 			InitializeComponent();
-
+			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_listaLibros = listaLibros;
 
@@ -89,11 +91,12 @@ namespace StockProductorCF.Vistas
 			ContenedorLibros.Children.Add(vista);
 		}
 
-		protected override void OnSizeAllocated(double width, double height)
+		protected override void OnSizeAllocated(double ancho, double alto)
 		{
-			base.OnSizeAllocated(width, height);
-			App.OrientacionApaisada = width > height;
-			Cabecera.Source = App.ObtenerImagenEncabezadoProyectos();
+			base.OnSizeAllocated(ancho, alto);
+			if (_anchoActual == ancho) return;
+			SombraEncabezado.WidthRequest = ancho > alto ? App.AnchoApaisadoDePantalla : App.AnchoRetratoDePantalla;
+			_anchoActual = ancho;
 		}
 	}
 

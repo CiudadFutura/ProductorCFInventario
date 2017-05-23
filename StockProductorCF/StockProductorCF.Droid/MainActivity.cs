@@ -19,8 +19,7 @@ namespace StockProductorCF.Droid
 
 			Xamarin.Forms.Forms.Init(this, bundle);
 
-			App.AlmacenarAnchoPantalla((int)(Resources.DisplayMetrics.WidthPixels / Resources.DisplayMetrics.Density), Resources.DisplayMetrics.WidthPixels,
-				Resources.DisplayMetrics.HeightPixels);
+			App.AlmacenarAnchoPantalla(Resources.DisplayMetrics.Density, Resources.DisplayMetrics.WidthPixels, Resources.DisplayMetrics.HeightPixels);
 
 			LoadApplication(new App());
 		}

@@ -222,7 +222,7 @@ namespace StockProductorCF.Vistas
 				FijarProductosYBuscador(productos);
 		}
 
-		private async Task IrAlProducto(string codigoProductoSeleccionado)
+		private async void IrAlProducto(string codigoProductoSeleccionado)
 		{
 			var fila = -1;
 			if (CuentaUsuario.ObtenerAccesoDatos() == "G")
@@ -514,11 +514,22 @@ namespace StockProductorCF.Vistas
 			});
 		}
 
-		protected override void OnSizeAllocated(double ancho, double alto)
+		protected override async void OnSizeAllocated(double ancho, double alto)
 		{
 			base.OnSizeAllocated(ancho, alto);
 			if (_anchoActual == ancho) return;
-			SombraEncabezado.WidthRequest = ancho > alto ? App.AnchoApaisadoDePantalla : App.AnchoRetratoDePantalla;
+			if (ancho > alto)
+			{
+				if(_anchoActual != 0)
+					await GrupoEncabezado.TranslateTo(0, -100, 1000);
+				GrupoEncabezado.IsVisible = false;
+			}
+			else
+			{
+				GrupoEncabezado.IsVisible = true;
+				if (_anchoActual != 0)
+					await GrupoEncabezado.TranslateTo(0, 0, 1000);
+			}
 			_anchoActual = ancho;
 		}
 

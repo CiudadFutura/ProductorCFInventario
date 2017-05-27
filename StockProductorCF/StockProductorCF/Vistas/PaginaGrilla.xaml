@@ -5,11 +5,13 @@
 						 NavigationPage.HasNavigationBar="false">
 
 	<ContentPage.Content>
-		<StackLayout Spacing="0" Padding="0">
-			<StackLayout x:Name="Cabecera" BackgroundColor="#D21721" Spacing="0" Padding="0" Orientation="Horizontal">
-			</StackLayout>
-			<StackLayout Spacing="0" Padding="0" Orientation="Horizontal">
-				<Image x:Name="SombraEncabezado" HorizontalOptions="FillAndExpand" Aspect="AspectFill"></Image>
+		<StackLayout Spacing="0" Padding="0" BackgroundColor="#EDEDED">
+			<StackLayout x:Name="GrupoEncabezado" Spacing="0" Padding="0">
+				<StackLayout x:Name="Cabecera" BackgroundColor="#D21721" Spacing="0" Padding="0" Orientation="Horizontal">
+				</StackLayout>
+				<StackLayout Spacing="0" Padding="0" Orientation="Horizontal">
+					<Image x:Name="SombraEncabezado" HorizontalOptions="FillAndExpand" Aspect="AspectFill"></Image>
+				</StackLayout>
 			</StackLayout>
 			<StackLayout VerticalOptions="Start" HorizontalOptions="Fill" Spacing="0" Padding="0">
 				<SearchBar x:Name="Buscador" IsVisible="False" BackgroundColor="#EDEDED" HorizontalOptions="Fill" TextChanged="FiltrarProductos" SearchButtonPressed="FiltrarProductos" />

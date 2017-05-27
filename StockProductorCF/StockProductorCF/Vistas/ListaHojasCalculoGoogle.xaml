@@ -5,11 +5,13 @@
 						 NavigationPage.HasNavigationBar="false">
 
 	<ContentPage.Content>
-		<StackLayout Spacing="0" Padding="0">
-			<StackLayout x:Name="Cabecera" BackgroundColor="#D21721" Spacing="0" Padding="0">
-			</StackLayout>
-			<StackLayout Spacing="0" Padding="0" Orientation="Horizontal">
-				<Image x:Name="SombraEncabezado" HorizontalOptions="FillAndExpand" Aspect="AspectFill"></Image>
+		<StackLayout Spacing="0" Padding="0" BackgroundColor="#EDEDED">
+			<StackLayout x:Name="GrupoEncabezado" Spacing="0" Padding="0">
+				<StackLayout x:Name="Cabecera" BackgroundColor="#D21721" Spacing="0" Padding="0">
+				</StackLayout>
+				<StackLayout Spacing="0" Padding="0" Orientation="Horizontal">
+					<Image x:Name="SombraEncabezado" HorizontalOptions="FillAndExpand" Aspect="AspectFill"></Image>
+				</StackLayout>
 			</StackLayout>
 			<StackLayout BackgroundColor="#C0C0C0" VerticalOptions="Start" HorizontalOptions="Fill">
 				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" HeightRequest="30">Seleccione una hoja</Label>

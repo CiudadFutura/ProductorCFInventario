@@ -30,6 +30,8 @@ namespace StockProductorCF.Vistas
 			//Se almacena el link para recobrar los datos de stock de la hoja cuando ingrese nuevamente.
 			CuentaUsuario.AlmacenarLinkHojaConsulta(linkHoja);
 			CuentaUsuario.AlmacenarNombreDeHoja(linkHoja, nombreHoja.Replace("Reiniciar ", ""));
+			//Almacena la hoja de Histórico en el diccionario para cambiarla cuando se cambie la hoja de stock
+			CuentaUsuario.AlmacenarNombreDeHojaHistorica(CuentaUsuario.ObtenerLinkHojaHistorial(), nombreHoja.Replace("Reiniciar ", ""));
 
 			ContentPage pagina;
 			//Si ya se usó esta hoja alguna vez, carga las columnas ya seleccionadas y envía a Grilla.
@@ -125,11 +127,22 @@ namespace StockProductorCF.Vistas
 			ContenedorHojas.Children.Add(vista);
 		}
 
-		protected override void OnSizeAllocated(double ancho, double alto)
+		protected override async void OnSizeAllocated(double ancho, double alto)
 		{
 			base.OnSizeAllocated(ancho, alto);
 			if (_anchoActual == ancho) return;
-			SombraEncabezado.WidthRequest = ancho > alto ? App.AnchoApaisadoDePantalla : App.AnchoRetratoDePantalla;
+			if (ancho > alto)
+			{
+				if (_anchoActual != 0)
+					await GrupoEncabezado.TranslateTo(0, -100, 1000);
+				GrupoEncabezado.IsVisible = false;
+			}
+			else
+			{
+				GrupoEncabezado.IsVisible = true;
+				if (_anchoActual != 0)
+					await GrupoEncabezado.TranslateTo(0, 0, 1000);
+			}
 			_anchoActual = ancho;
 		}
 	}

@@ -4,6 +4,7 @@ using StockProductorCF.Servicios;
 using StockProductorCF.Vistas;
 using System;
 using System.Net.Http;
+using Windows.UI.Xaml;
 using Xamarin.Forms;
 
 namespace StockProductorCF
@@ -20,29 +21,31 @@ namespace StockProductorCF
 			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			CuentaUsuario.AlmacenarAccesoDatos("G");
-			_conexionExistente = conexionExistente; //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros
+			_conexionExistente =
+				conexionExistente; //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros
 
-			var webView = new WebView();
+			var webView = new WebView
+			{
+				VerticalOptions = LayoutOptions.FillAndExpand
+			};
+			webView.Navigated += CuandoNavegaWebView;
 
 			if (!CuentaUsuario.ValidarTokenDeGoogle())
 			{
 				var solicitud =
-								"https://accounts.google.com/o/oauth2/auth?client_id=" + _clientId
-								+ "&scope=https://www.googleapis.com/auth/drive https://spreadsheets.google.com/feeds https://www.googleapis.com/auth/plus.login"
-								+ "&token_uri=https://accounts.google.com/o/oauth2/token"
-								+ "&response_type=token&redirect_uri=http://localhost";
+					"https://accounts.google.com/o/oauth2/auth?client_id=" + _clientId
+					+ "&scope=https://www.googleapis.com/auth/drive https://spreadsheets.google.com/feeds https://www.googleapis.com/auth/plus.login"
+					+ "&token_uri=https://accounts.google.com/o/oauth2/token"
+					+ "&response_type=token&redirect_uri=http://localhost";
 
 				webView.Source = solicitud;
 			}
 			else
 			{
-				webView.Source = "http://localhost/#access_token=" + CuentaUsuario.ObtenerTokenActualDeGoogle() + "&token_type=&expires_in=&noActualizarFecha";
+				webView.Source = "http://localhost/#access_token=" + CuentaUsuario.ObtenerTokenActualDeGoogle() +
+				                 "&token_type=&expires_in=&noActualizarFecha";
 			}
 
-			webView.HeightRequest = 1;
-			webView.Navigated += CuandoNavegaWebView;
-			webView.HorizontalOptions = LayoutOptions.FillAndExpand;
-			webView.VerticalOptions = LayoutOptions.FillAndExpand;
 			Contenedor.Children.Add(webView);
 		}
 
@@ -117,11 +120,22 @@ namespace StockProductorCF
 			}
 		}
 
-		protected override void OnSizeAllocated(double ancho, double alto)
+		protected override async void OnSizeAllocated(double ancho, double alto)
 		{
 			base.OnSizeAllocated(ancho, alto);
 			if (_anchoActual == ancho) return;
-			SombraEncabezado.WidthRequest = ancho > alto ? App.AnchoApaisadoDePantalla : App.AnchoRetratoDePantalla;
+			if (ancho > alto)
+			{
+				if (_anchoActual != 0)
+					await GrupoEncabezado.TranslateTo(0, -100, 1000);
+				GrupoEncabezado.IsVisible = false;
+			}
+			else
+			{
+				GrupoEncabezado.IsVisible = true;
+				if (_anchoActual != 0)
+					await GrupoEncabezado.TranslateTo(0, 0, 1000);
+			}
 			_anchoActual = ancho;
 		}
 	}

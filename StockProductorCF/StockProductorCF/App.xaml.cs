@@ -10,6 +10,7 @@ namespace StockProductorCF
 	{
 		public static double AnchoRetratoDePantalla;
 		public static double AnchoApaisadoDePantalla;
+		public static bool EstaApaisado;
 		public const string RutaImagenSombraEncabezado = "StockProductorCF.Imagenes.sombraEncabezado.png";
 
 		public App()
@@ -58,8 +59,9 @@ namespace StockProductorCF
 		[Android.Runtime.Preserve]
 		public static void AlmacenarAnchoPantalla(double densidad, int anchoEnPixel, int altoEnPixel)
 		{
-			AnchoRetratoDePantalla = anchoEnPixel <= altoEnPixel ? anchoEnPixel / densidad : altoEnPixel / densidad;
-			AnchoApaisadoDePantalla = anchoEnPixel > altoEnPixel ? altoEnPixel / densidad : anchoEnPixel / densidad;
+			EstaApaisado = anchoEnPixel > altoEnPixel;
+			AnchoRetratoDePantalla = EstaApaisado ? altoEnPixel / densidad : anchoEnPixel / densidad;
+			AnchoApaisadoDePantalla = EstaApaisado ? anchoEnPixel / densidad : altoEnPixel / densidad;
 		}
 
 		public static Image ObtenerImagen(TipoImagen tipoImagen, bool apaisada = false)

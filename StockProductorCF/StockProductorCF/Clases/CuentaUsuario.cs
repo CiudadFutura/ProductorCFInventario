@@ -110,6 +110,11 @@ namespace StockProductorCF.Clases
 			GuardarValorEnCuentaLocal(linkHojaConsulta + "|nombre", nombreHojaConsulta);
 		}
 
+		internal static void AlmacenarNombreDeHojaHistorica(string linkHojaConsulta, string nombreHojaConsulta)
+		{
+			GuardarValorEnCuentaLocal(linkHojaConsulta + "|historico", nombreHojaConsulta);
+		}
+
 		internal static void AlmacenarColumnasInventario(string columnasInventario)
 		{
 			GuardarValorEnCuentaLocal("columnasInventario", columnasInventario);
@@ -222,6 +227,14 @@ namespace StockProductorCF.Clases
 						AlmacenarLinkHojaConsulta(link);
 						AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(link + "|ver"));
 						AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(link + "|inventario"));
+						break;
+					}
+				}
+				foreach (var llaveValorH in _cuenta.Properties)
+				{
+					if (llaveValorH.Key.Contains("|historico") && llaveValorH.Value.Equals(nombre))
+					{
+						AlmacenarLinkHojaHistorial(llaveValorH.Key.Split('|')[0]);
 						break;
 					}
 				}

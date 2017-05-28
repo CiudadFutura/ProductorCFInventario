@@ -214,6 +214,9 @@
     <None Include="Assets\AboutAssets.txt" />
   </ItemGroup>
   <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\lanzamiento.png" />
+    <AndroidResource Include="Resources\drawable-xhdpi\lanzamiento.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\lanzamiento.png" />
     <AndroidResource Include="Resources\drawable\icon.png" />
     <AndroidResource Include="Resources\drawable-hdpi\icon.png" />
     <AndroidResource Include="Resources\drawable-xhdpi\icon.png" />

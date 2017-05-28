@@ -61,20 +61,30 @@ namespace StockProductorCF.Vistas
 
 		private async void ObtenerDatosProductosDesdeHCG()
 		{
-
-			if (_servicio == null) //El servicio viene nulo cuando se llama directamente desde el lanzador (ya tiene conexión a datos configurada)
-				_servicio = _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActualDeGoogle());
-
-			if (CuentaUsuario.ValidarTokenDeGoogle())
+			try
 			{
-				_celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
+				IsBusy = true;
+
+				await Task.Run(async () => {
+					if (_servicio == null) //El servicio viene nulo cuando se llama directamente desde el lanzador (ya tiene conexión a datos configurada)
+						_servicio = _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActualDeGoogle());
+
+					if (CuentaUsuario.ValidarTokenDeGoogle())
+					{
+						_celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
+					}
+					else
+					{
+						//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
+						var paginaAuntenticacion = new PaginaAuntenticacion(true);
+						Navigation.InsertPageBefore(paginaAuntenticacion, this);
+						await Navigation.PopAsync();
+					}
+				});
 			}
-			else
+			finally
 			{
-				//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
-				var paginaAuntenticacion = new PaginaAuntenticacion(true);
-				Navigation.InsertPageBefore(paginaAuntenticacion, this);
-				await Navigation.PopAsync();
+				IsBusy = false; //Remueve el Indicador de Actividad.
 			}
 
 			_nombresColumnas = new string[_celdas.ColCount.Count];
@@ -130,13 +140,27 @@ namespace StockProductorCF.Vistas
 
 			using (var cliente = new HttpClient())
 			{
-				//Obtiene json de productos desde el webservice
-				var jsonProductos = await cliente.GetStringAsync(url);
-				//Parsea el json para obtener la lista de productos
-				var productos = ParsearJSONProductos(jsonProductos);
+				List<string[]> productos = null;
+				try
+				{
+					IsBusy = true;
+					
+					await Task.Run(async () => {
+						//Obtiene json de productos desde el webservice
+						var jsonProductos = await cliente.GetStringAsync(url);
+						//Parsea el json para obtener la lista de productos
+						productos = ParsearJSONProductos(jsonProductos);
 
-				_nombresColumnas = new[] { "Código", "Nombre", "Stock" };
-				LlenarGrillaDeProductos(productos);
+						_nombresColumnas = new[] { "Código", "Nombre", "Stock" };
+					});
+				}
+				finally
+				{
+					IsBusy = false;
+				}
+				
+				if(productos != null)
+					LlenarGrillaDeProductos(productos);
 			}
 		}
 
@@ -197,7 +221,14 @@ namespace StockProductorCF.Vistas
 			if (!string.IsNullOrEmpty(columnasInventario))
 				_listaColumnasInventario = columnasInventario.Split(',');
 
-			_indicadorActividad = new ActivityIndicator { IsRunning = true, VerticalOptions = LayoutOptions.CenterAndExpand };
+			_indicadorActividad = new ActivityIndicator
+			{
+				VerticalOptions = LayoutOptions.CenterAndExpand,
+				IsEnabled = true,
+				BindingContext = this
+			};
+			_indicadorActividad.SetBinding(IsVisibleProperty, "IsBusy");
+			_indicadorActividad.SetBinding(ActivityIndicator.IsRunningProperty, "IsBusy");
 		}
 
 		private void ConfigurarBotones()
@@ -384,7 +415,6 @@ namespace StockProductorCF.Vistas
 				})
 			};
 
-			ContenedorTabla.Children.Clear(); //Remueve el Indicador de Actividad.
 			ContenedorTabla.Children.Add(encabezado);
 			ContenedorTabla.Children.Add(vista);
 		}

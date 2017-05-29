@@ -415,6 +415,7 @@ namespace StockProductorCF.Vistas
 				})
 			};
 
+			ContenedorTabla.Children.Clear();
 			ContenedorTabla.Children.Add(encabezado);
 			ContenedorTabla.Children.Add(vista);
 		}

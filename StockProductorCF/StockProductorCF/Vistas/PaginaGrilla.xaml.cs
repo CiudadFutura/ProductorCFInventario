@@ -134,9 +134,13 @@ namespace StockProductorCF.Vistas
 
 		private async void ObtenerProductosDesdeBD()
 		{
-			var url = $@"http://169.254.80.80/PruebaMision/Service.asmx/RecuperarProductos?token={
-					CuentaUsuario.ObtenerTokenActualDeBaseDeDatos()
-				}";
+			//var url = $@"http://169.254.80.80/PruebaMision/Service.asmx/RecuperarProductos?token={
+			//		CuentaUsuario.ObtenerTokenActualDeBaseDeDatos()
+			//	}";
+
+			RefrescarUIGrilla();
+
+			const string url = "http://www.misionantiinflacion.com.ar/api/v1/products?token=05f9a1a6683c2ba246c2b057d0433429a176b674d9a68557ddbdcf33c474aee4";
 
 			using (var cliente = new HttpClient())
 			{
@@ -166,27 +170,25 @@ namespace StockProductorCF.Vistas
 
 		private static List<string[]> ParsearJSONProductos(string jsonProductos)
 		{
-			jsonProductos = jsonProductos.Replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<string xmlns=\"http://tempuri.org/\">[{", "")
-				.Replace("}]</string>", "")
-				.Replace("},{", "|");
+			jsonProductos = jsonProductos.Substring(jsonProductos.IndexOf("\"data\":[{") + 9)
+				.Replace("}]}", "")
+				.Replace("},{\"id\"", "|");
 			var arregloProductos = jsonProductos.Split('|');
 			var productos = new List<string[]>();
 
 			foreach (var datos in arregloProductos)
 			{
-				var temporal = datos.Split(',');
+				var temporal = datos.Replace(",\"", "|").Split('|');
 
-				//Si el precio es diferente de 0.0 lo agregamos
-				if (temporal[1].Split(':')[1].TrimStart('"').TrimEnd('"') != "0.0")
-				{
-					var producto = new string[3];
-					producto[0] = temporal[0].Split(':')[1].TrimStart('"').TrimEnd('"');
-					producto[1] = temporal[2].Split(':')[1].TrimStart('"').TrimEnd('"');
-					var stock = temporal[18].Split(':')[1].TrimStart('"').TrimEnd('"');
-					producto[2] = stock == "null" ? "0" : stock;
+				//Si el producto no está oculto lo agregamos
+				if (temporal[12].Split(':')[1].TrimStart('"').TrimEnd('"') == "true") continue;
+				var producto = new string[3];
+				producto[0] = temporal[0].Split(':')[1].TrimStart('"').TrimEnd('"'); // ID
+				producto[1] = temporal[2].Split(':')[1].TrimStart('"').TrimEnd('"').Replace("\\\"", "\""); // Nombre
+				var stock = temporal[18].Split(':')[1].TrimStart('"').TrimEnd('"'); // Stock
+				producto[2] = stock == "null" ? "0" : stock;
 
-					productos.Add(producto);
-				}
+				productos.Add(producto);
 			}
 
 			return productos;
@@ -279,6 +281,7 @@ namespace StockProductorCF.Vistas
 				foreach (var producto in _productos)
 				{
 					if (producto[0] != codigoProductoSeleccionado) continue;
+					fila = 0;
 					await Navigation.PushAsync(new Producto(producto, _nombresColumnas));
 					break;
 				}
@@ -315,23 +318,37 @@ namespace StockProductorCF.Vistas
 				listaProductos.Add(producto);
 			}
 
+			var anchoColumnaNombreProd = CuentaUsuario.ObtenerAccesoDatos() == "G" ? 115 : 200;
+
 			var encabezado = new StackLayout
 			{
-				HorizontalOptions = LayoutOptions.FillAndExpand,
+				Orientation = StackOrientation.Horizontal,
 				VerticalOptions = LayoutOptions.Start,
 				BackgroundColor = Color.FromHex("#C0C0C0"),
-				HeightRequest = productos.Count <= 25 ? 30 : 50,
+				HeightRequest = productos.Count <= 25 ? 35 : 50,
 				Children =
 								{
 									new Label
 									{
-										Text = "     PRODUCTOS                  INFO + STOCK",
+										Text = "     PRODUCTOS",
 										FontSize = 13,
 										HorizontalOptions = LayoutOptions.Start,
 										FontAttributes = FontAttributes.Bold,
 										TextColor = Color.Black,
 										VerticalTextAlignment = TextAlignment.Center,
-										VerticalOptions = LayoutOptions.Center
+										VerticalOptions = LayoutOptions.Center,
+										WidthRequest = anchoColumnaNombreProd
+									},
+									new Label
+									{
+										Text = "       INFO + STOCK",
+										FontSize = 13,
+										HorizontalOptions = LayoutOptions.End,
+										FontAttributes = FontAttributes.Bold,
+										TextColor = Color.Black,
+										VerticalTextAlignment = TextAlignment.Center,
+										VerticalOptions = LayoutOptions.Center,
+										WidthRequest = App.AnchoRetratoDePantalla - (anchoColumnaNombreProd + 2)
 									}
 								}
 			};
@@ -350,7 +367,7 @@ namespace StockProductorCF.Vistas
 						TextColor = Color.FromHex("#1D1D1B"),
 						FontAttributes = FontAttributes.Bold,
 						VerticalOptions = LayoutOptions.CenterAndExpand,
-						WidthRequest = 115
+						WidthRequest = anchoColumnaNombreProd
 					};
 					nombreProducto.SetBinding(Label.TextProperty, "Nombre");
 
@@ -359,7 +376,7 @@ namespace StockProductorCF.Vistas
 						FontSize = 15,
 						TextColor = Color.FromHex("#1D1D1B"),
 						VerticalOptions = LayoutOptions.CenterAndExpand,
-						WidthRequest = App.AnchoRetratoDePantalla - 117
+						WidthRequest = App.AnchoRetratoDePantalla - (anchoColumnaNombreProd + 2)
 					};
 					datos.SetBinding(Label.TextProperty, "Datos");
 
@@ -377,16 +394,11 @@ namespace StockProductorCF.Vistas
 							Padding = 2,
 							Orientation = StackOrientation.Horizontal,
 							Children =
-										{
-											nombreProducto,
-											separador,
-											new StackLayout
-											{
-												Orientation = StackOrientation.Vertical,
-												Spacing = 0,
-												Children = { datos }
-											}
-										}
+								{
+									nombreProducto,
+									separador,
+									datos
+								}
 						}
 					};
 

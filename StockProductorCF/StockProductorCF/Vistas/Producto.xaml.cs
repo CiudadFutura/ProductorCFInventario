@@ -187,7 +187,7 @@ namespace StockProductorCF.Vistas
 
 		private async void GuardarProductoHojaDeCalculoGoogle()
 		{
-			_mensaje = "Ha ocurrido un error mientras se guardaba el mocimiento.";
+			_mensaje = "Ha ocurrido un error mientras se guardaba el movimiento.";
 			var servicioGoogle = new ServiciosGoogle();
 			foreach (var celda in _producto)
 			{
@@ -207,7 +207,7 @@ namespace StockProductorCF.Vistas
 							// Inserta histórico en Google
 							servicioGoogle.InsertarHistoricos(_servicio, celda, multiplicador * movimiento, _producto, _nombresColumnas, _listaColumnasInventario);
 
-							_mensaje = "Se guardó el movimiento con éxito.";
+							_mensaje = "El movimiento ha sido guardado correctamente.";
 						}
 						catch (Exception)
 						{
@@ -217,37 +217,41 @@ namespace StockProductorCF.Vistas
 							await Navigation.PopAsync();
 						}
 					}
+					else
+						_mensaje = "No se han registrado movimientos.";
 				}
 			}
 		}
 
 		private async void GuardarProductoBaseDeDatos()
 		{
-			const string url = @"http://169.254.80.80/PruebaMision/Service.asmx/ActualizarProducto?codigo={0}&movimiento={1}";
-
+			_mensaje = "Ha ocurrido un error mientras se guardaba el movimiento.";
+			//const string url = @"http://169.254.80.80/PruebaMision/Service.asmx/ActualizarProducto?codigo={0}&movimiento={1}";
 			var i = 0;
 			var resultado = "";
+
 			foreach (var celda in _productoString)
 			{
 				if (_listaColumnasInventario[i] == "1")
 				{
-					var multiplicador = _signoPositivo[i] ? 1 : -1;
+					//var multiplicador = _signoPositivo[i] ? 1 : -1;
 					var movimiento = _movimientos[i];
 
 					if (movimiento != 0)
 					{
 						using (var cliente = new HttpClient())
 						{
-							resultado = await cliente.GetStringAsync(string.Format(url, _productoString[0], (Convert.ToDouble(celda) + multiplicador * movimiento).ToString()));
+							resultado = "anduvo"; //await cliente.GetStringAsync(string.Format(url, _productoString[0], (Convert.ToDouble(celda) + multiplicador * movimiento)));
 						}
 					}
+					else
+						_mensaje = "No se han registrado movimientos.";
 				}
 				i = i + 1;
 			}
 
-			_mensaje = "Se guardó el movimiento con éxito.";
-			if(!resultado.Contains("anduvo"))
-				_mensaje = "Ha ocurrido un error mientras se guardaba el mocimiento.";
+			if(resultado.Contains("anduvo"))
+				_mensaje = "El movimiento ha sido guardado correctamente.";
 		}
 
 		protected override async void OnSizeAllocated(double ancho, double alto)

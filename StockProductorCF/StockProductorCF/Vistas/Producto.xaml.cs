@@ -12,6 +12,7 @@ namespace StockProductorCF.Vistas
 	{
 		private bool[] _signoPositivo;
 		private double[] _movimientos;
+		private string[] _precios;
 		private readonly CellEntry[] _producto;
 		private string[] _listaColumnasInventario;
 		private readonly string[] _productoString;
@@ -61,6 +62,7 @@ namespace StockProductorCF.Vistas
 
 			_signoPositivo = new bool[_productoString.Length];
 			_movimientos = new double[_productoString.Length];
+			_precios = new string[_productoString.Length];
 			var i = 0;
 
 			foreach (var celda in _productoString)
@@ -74,9 +76,9 @@ namespace StockProductorCF.Vistas
 						HorizontalTextAlignment = TextAlignment.End,
 						FontSize = 16,
 						WidthRequest = 100,
-						Text = _nombresColumnas[i]
+						Text = _nombresColumnas[i],
+						TextColor = Color.Black
 					};
-
 
 					var valorCampo = new Entry
 					{
@@ -85,7 +87,8 @@ namespace StockProductorCF.Vistas
 						HorizontalTextAlignment = TextAlignment.Start,
 						WidthRequest = 210,
 						IsEnabled = false,
-						Text = celda
+						Text = celda,
+						TextColor = Color.Black
 					};
 
 					var campoValor = new StackLayout
@@ -99,21 +102,25 @@ namespace StockProductorCF.Vistas
 
 					ContenedorProducto.Children.Add(campoValor);
 
+					//Si es columna de stock agrega campo movimiento y precio
 					if(!string.IsNullOrEmpty(celda) && _listaColumnasInventario != null && _listaColumnasInventario[i] == "1")
 					{
+						#region Movimiento stock
+
 						_signoPositivo.SetValue(true, i);
 
-						nombreCampo = new Label()
+						nombreCampo = new Label
 						{
 							HorizontalOptions = LayoutOptions.EndAndExpand,
 							VerticalOptions = LayoutOptions.Center,
 							HorizontalTextAlignment = TextAlignment.End,
 							Text = "Movimiento",
 							FontSize = 16,
-							WidthRequest = 100
+							WidthRequest = 100,
+							TextColor = Color.Black
 						};
 
-						var botonSigno = new Button()
+						var botonSigno = new Button
 						{
 							Text = "+",
 							HorizontalOptions = LayoutOptions.Start,
@@ -124,26 +131,66 @@ namespace StockProductorCF.Vistas
 
 						botonSigno.Clicked += DefinirSigno;
 
-						var movimiento = new Entry()
+						valorCampo = new Entry
 						{
 							HorizontalOptions = LayoutOptions.StartAndExpand,
 							VerticalOptions = LayoutOptions.Center,
 							HorizontalTextAlignment = TextAlignment.Start,
-							StyleId = "movimiento-" + i.ToString(),
+							StyleId = "movimiento-" + i,
 							WidthRequest = 100,
 							Keyboard = Keyboard.Numeric
 						};
 
 						campoValor = new StackLayout
 						{
+							BackgroundColor = Color.FromHex("#FFFFFF"),
 							HorizontalOptions = LayoutOptions.FillAndExpand,
 							VerticalOptions = LayoutOptions.CenterAndExpand,
 							Orientation = StackOrientation.Horizontal,
 							HeightRequest = 50,
-							Children = { nombreCampo, botonSigno, movimiento }
+							Children = { nombreCampo, botonSigno, valorCampo }
 						};
 
 						ContenedorProducto.Children.Add(campoValor);
+
+						#endregion
+
+						#region Precio movimiento
+
+						nombreCampo = new Label
+						{
+							HorizontalOptions = LayoutOptions.EndAndExpand,
+							VerticalOptions = LayoutOptions.Center,
+							HorizontalTextAlignment = TextAlignment.End,
+							Text = "Precio Total",
+							FontSize = 16,
+							WidthRequest = 100,
+							TextColor = Color.Black
+						};
+
+						valorCampo = new Entry
+						{
+							HorizontalOptions = LayoutOptions.StartAndExpand,
+							VerticalOptions = LayoutOptions.Center,
+							HorizontalTextAlignment = TextAlignment.Start,
+							StyleId = "precio-" + i,
+							WidthRequest = 100,
+							Keyboard = Keyboard.Numeric
+						};
+
+						campoValor = new StackLayout
+						{
+							BackgroundColor = Color.FromHex("#FFFFFF"),
+							HorizontalOptions = LayoutOptions.FillAndExpand,
+							VerticalOptions = LayoutOptions.CenterAndExpand,
+							Orientation = StackOrientation.Horizontal,
+							HeightRequest = 50,
+							Children = { nombreCampo, valorCampo }
+						};
+
+						ContenedorProducto.Children.Add(campoValor);
+
+						#endregion
 					}
 				}
 
@@ -167,11 +214,22 @@ namespace StockProductorCF.Vistas
 			{
 				foreach (var control in ((StackLayout)stackLayout).Children)
 				{
+					int columna;
+					string valor;
 					if (control.StyleId != null && control.StyleId.Contains("movimiento-"))
 					{
-						var columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
-						var valor = Convert.ToDouble(((Entry)control).Text ?? "0");
-						_movimientos.SetValue(valor, columna);
+						columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
+						valor = ((Entry)control).Text;
+						valor = !string.IsNullOrEmpty(valor) ? valor : "0";
+						_movimientos.SetValue(Convert.ToDouble(valor), columna);
+					}
+
+					if (control.StyleId != null && control.StyleId.Contains("precio-"))
+					{
+						columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
+						valor = ((Entry)control).Text;
+						valor = !string.IsNullOrEmpty(valor) ? valor : "0";
+						_precios.SetValue(valor, columna);
 					}
 				}
 			}
@@ -189,12 +247,14 @@ namespace StockProductorCF.Vistas
 		{
 			_mensaje = "Ha ocurrido un error mientras se guardaba el movimiento.";
 			var servicioGoogle = new ServiciosGoogle();
+			var grabo = false;
 			foreach (var celda in _producto)
 			{
 				if (_listaColumnasInventario[(int)celda.Column - 1] == "1")
 				{
 					var multiplicador = _signoPositivo[(int)celda.Column - 1] ? 1 : -1;
 					var movimiento = _movimientos[(int)celda.Column - 1];
+					var precio = _precios[(int)celda.Column - 1];
 
 					if (movimiento != 0)
 					{
@@ -205,9 +265,9 @@ namespace StockProductorCF.Vistas
 							// Actualiza la celda en Google
 							celda.Update();
 							// Inserta histórico en Google
-							servicioGoogle.InsertarHistoricos(_servicio, celda, multiplicador * movimiento, _producto, _nombresColumnas, _listaColumnasInventario);
-
-							_mensaje = "El movimiento ha sido guardado correctamente.";
+							servicioGoogle.InsertarHistoricos(_servicio, celda, multiplicador * movimiento, precio, _producto, _nombresColumnas, _listaColumnasInventario);
+							
+							grabo = true;
 						}
 						catch (Exception)
 						{
@@ -217,10 +277,9 @@ namespace StockProductorCF.Vistas
 							await Navigation.PopAsync();
 						}
 					}
-					else
-						_mensaje = "No se han registrado movimientos.";
 				}
 			}
+			_mensaje = grabo ? "El movimiento ha sido guardado correctamente." : "No se han registrado movimientos.";
 		}
 
 		private async void GuardarProductoBaseDeDatos()
@@ -228,7 +287,7 @@ namespace StockProductorCF.Vistas
 			_mensaje = "Ha ocurrido un error mientras se guardaba el movimiento.";
 			//const string url = @"http://169.254.80.80/PruebaMision/Service.asmx/ActualizarProducto?codigo={0}&movimiento={1}";
 			var i = 0;
-			var resultado = "";
+			var grabo = false;
 
 			foreach (var celda in _productoString)
 			{
@@ -241,17 +300,14 @@ namespace StockProductorCF.Vistas
 					{
 						using (var cliente = new HttpClient())
 						{
-							resultado = "anduvo"; //await cliente.GetStringAsync(string.Format(url, _productoString[0], (Convert.ToDouble(celda) + multiplicador * movimiento)));
+							grabo = true; //await cliente.GetStringAsync(string.Format(url, _productoString[0], (Convert.ToDouble(celda) + multiplicador * movimiento)));
 						}
 					}
-					else
-						_mensaje = "No se han registrado movimientos.";
 				}
+
 				i = i + 1;
 			}
-
-			if(resultado.Contains("anduvo"))
-				_mensaje = "El movimiento ha sido guardado correctamente.";
+			_mensaje = grabo ? "El movimiento ha sido guardado correctamente." : "No se han registrado movimientos.";
 		}
 
 		protected override async void OnSizeAllocated(double ancho, double alto)

@@ -26,7 +26,6 @@ namespace StockProductorCF.Vistas
 		private ViewCell _ultimoItemSeleccionado;
 		private Color _ultimoColorSeleccionado;
 		private List<string[]> _productos;
-		private bool _esTeclaPar;
 		private bool _esCargaInicial;
 		private ActivityIndicator _indicadorActividad;
 		private Image _accesoDatos;
@@ -266,10 +265,12 @@ namespace StockProductorCF.Vistas
 				foreach (CellEntry celda in _celdas.Entries)
 				{
 					if (celda.Column == 1 && celda.Value == codigoProductoSeleccionado)
-						fila = (int)celda.Row;
+						fila = (int) celda.Row;
 					if (celda.Row == fila)
-						productoSeleccionado.SetValue(celda, (int)celda.Column - 1);
-					if (fila > -1 && celda.Row > fila)
+						productoSeleccionado.SetValue(celda, (int) celda.Column - 1);
+
+					//Si encontró producto (fila > -1) y ya pasó alpróximo producto (celda.Row > fila) o es el último producto (celda.Column == _celdas.ColCount.Count)
+					if (fila > -1 && (celda.Row > fila || celda.Column == _celdas.ColCount.Count))
 					{
 						await Navigation.PushAsync(new Producto(productoSeleccionado, _nombresColumnas, _servicio));
 						break;
@@ -293,7 +294,7 @@ namespace StockProductorCF.Vistas
 
 		private void ConstruirVistaDeLista(IReadOnlyCollection<string[]> productos)
 		{
-			_esTeclaPar = false;
+			var esTeclaPar = false;
 			var listaProductos = new List<ClaseProducto>();
 			foreach (var datosProducto in productos)
 			{
@@ -314,8 +315,9 @@ namespace StockProductorCF.Vistas
 					i = i + 1;
 				}
 
-				var producto = new ClaseProducto(datosProducto[0], datosParaVer);
+				var producto = new ClaseProducto(datosProducto[0], datosParaVer, esTeclaPar);
 				listaProductos.Add(producto);
+				esTeclaPar = !esTeclaPar;
 			}
 
 			var anchoColumnaNombreProd = CuentaUsuario.ObtenerAccesoDatos() == "G" ? 115 : 200;
@@ -387,20 +389,15 @@ namespace StockProductorCF.Vistas
 						HeightRequest = 55
 					};
 
-					var celda = new ViewCell
+					var tecla = new StackLayout
 					{
-						View = new StackLayout
-						{
-							Padding = 2,
-							Orientation = StackOrientation.Horizontal,
-							Children =
-								{
-									nombreProducto,
-									separador,
-									datos
-								}
-						}
+						Padding = 2,
+						Orientation = StackOrientation.Horizontal,
+						Children = { nombreProducto, separador, datos }
 					};
+					tecla.SetBinding(BackgroundColorProperty, "ColorFondo");
+
+					var celda = new ViewCell { View = tecla };
 
 					celda.Tapped += (sender, args) =>
 					{
@@ -410,17 +407,6 @@ namespace StockProductorCF.Vistas
 						_ultimoColorSeleccionado = celda.View.BackgroundColor;
 						celda.View.BackgroundColor = Color.Silver;
 						_ultimoItemSeleccionado = (ViewCell)sender;
-					};
-
-					celda.Appearing += (sender, args) =>
-					{
-						var viewCell = (ViewCell)sender;
-						if (viewCell.View != null)
-						{
-							viewCell.View.BackgroundColor = _esTeclaPar ? Color.FromHex("#EDEDED") : Color.FromHex("#E2E2E1");
-						}
-
-						_esTeclaPar = !_esTeclaPar;
 					};
 
 					return celda;
@@ -585,11 +571,12 @@ namespace StockProductorCF.Vistas
 	public class ClaseProducto
 	{
 		[Android.Runtime.Preserve]
-		public ClaseProducto(string id, IList<string> datos)
+		public ClaseProducto(string id, IList<string> datos, bool esTeclaPar)
 		{
 			Id = id;
 			Nombre = datos[0];
 			Datos = string.Join(" - ", datos.Skip(1).Take(datos.Count));
+			ColorFondo = esTeclaPar ? Color.FromHex("#EDEDED") : Color.FromHex("#E2E2E1");
 		}
 
 		[Android.Runtime.Preserve]
@@ -598,6 +585,8 @@ namespace StockProductorCF.Vistas
 		public string Nombre { get; }
 		[Android.Runtime.Preserve]
 		public string Datos { get; }
+		[Android.Runtime.Preserve]
+		public Color ColorFondo { get; }
 	}
 
 }

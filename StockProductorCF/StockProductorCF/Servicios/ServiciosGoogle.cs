@@ -41,7 +41,7 @@ namespace StockProductorCF.Servicios
 			return celdas;
 		}
 
-		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, CellEntry[] producto, string[] nombresColumnas, string[] listaColumnasInventario)
+		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, string precio, CellEntry[] producto, string[] nombresColumnas, string[] listaColumnasInventario)
 		{
 			// Abre la fila
 			var fila = "<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:gsx=\"http://schemas.google.com/spreadsheets/2006/extended\">";
@@ -54,13 +54,14 @@ namespace StockProductorCF.Servicios
 				if (listaColumnasInventario[i] == "1" && i + 1 != celdaMovimiento.Column)
 					valor = "-"; //Si la columna es de stock pero no la que recibió el movimiento el valor para el histórico es "-"
 
-
 				var columna = Regex.Replace(nombresColumnas[i].ToLower(), @"\s+", "");
 				fila += "<gsx:" + columna + ">" + valor + "</gsx:" + columna + ">";
 			}
 
 			// Agrega el movimiento
 			fila += "<gsx:movimiento>" + movimiento + "</gsx:movimiento>";
+			// Agrega el precio
+			fila += "<gsx:precio>" + precio + "</gsx:precio>";
 			// Agrega el usuario
 			var usuario = CuentaUsuario.ObtenerNombreUsuarioGoogle() ?? "";
 			fila += "<gsx:usuario>" + usuario + "</gsx:usuario>";
@@ -70,11 +71,12 @@ namespace StockProductorCF.Servicios
 			return fila;
 		}
 
-		public void InsertarHistoricos(SpreadsheetsService servicio, CellEntry celdaMovimiento, double movimiento, CellEntry[] producto, string[] nombresColumnas, string[] listaColumnasInventario)
+		public void InsertarHistoricos(SpreadsheetsService servicio, CellEntry celdaMovimiento, double movimiento, string precio, CellEntry[] producto, 
+			string[] nombresColumnas, string[] listaColumnasInventario)
 		{
 			var url = CuentaUsuario.ObtenerLinkHojaHistorial();
 			const string tipoDelContenido = "application/atom+xml";
-			var fila = ObtenerHistorico(celdaMovimiento, movimiento, producto, nombresColumnas, listaColumnasInventario);
+			var fila = ObtenerHistorico(celdaMovimiento, movimiento, precio, producto, nombresColumnas, listaColumnasInventario);
 			// Convierte el contenido de la fila en stream
 			byte[] filaEnArregloDeBytes = Encoding.UTF8.GetBytes(fila);
 			MemoryStream filaEnStream = new MemoryStream(filaEnArregloDeBytes);

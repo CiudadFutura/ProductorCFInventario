@@ -45,6 +45,9 @@
       <DependentUpon>AccesoDatos.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Vistas\ListaHojasHistoricoGoogle.xaml.cs">
+      <DependentUpon>ListaHojasHistoricoGoogle.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Vistas\ListaHojasCalculoGoogle.xaml.cs">
       <DependentUpon>ListaHojasCalculoGoogle.xaml</DependentUpon>
     </Compile>
@@ -205,6 +208,16 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Imagenes\sombraEncabezado.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Vistas\ListaHojasHistoricoGoogle.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Imagenes\hojaHistoricos.png" />
+    <EmbeddedResource Include="Imagenes\hojaInventario.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\..\packages\Xamarin.Forms.2.3.3.193\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets" Condition="Exists('..\..\packages\Xamarin.Forms.2.3.3.193\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets')" />

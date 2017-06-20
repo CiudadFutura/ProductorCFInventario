@@ -11,7 +11,6 @@ namespace StockProductorCF.Vistas
 	{
 		private readonly AtomEntryCollection _listaHojas;
 		private readonly SpreadsheetsService _servicio;
-		private bool _esTeclaPar;
 		private double _anchoActual;
 
 		public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
@@ -25,45 +24,46 @@ namespace StockProductorCF.Vistas
 			CargarListaHojas();
 		}
 
-		private void EnviarPaginaGrilla(string linkHoja, string nombreHoja, bool reiniciaHoja)
+		private void EnviarPagina(string linkHoja, string nombreHoja, bool reiniciaHoja)
 		{
 			//Se almacena el link para recobrar los datos de stock de la hoja cuando ingrese nuevamente.
 			CuentaUsuario.AlmacenarLinkHojaConsulta(linkHoja);
 			CuentaUsuario.AlmacenarNombreDeHoja(linkHoja, nombreHoja.Replace("Reiniciar ", ""));
-			//Almacena la hoja de Histórico en el diccionario para cambiarla cuando se cambie la hoja de stock
-			CuentaUsuario.AlmacenarNombreDeHojaHistorica(CuentaUsuario.ObtenerLinkHojaHistorial(), nombreHoja.Replace("Reiniciar ", ""));
 
 			ContentPage pagina;
-			//Si ya se usó esta hoja alguna vez, carga las columnas ya seleccionadas y envía a Grilla.
-			//Si no o si el botón presionado es el de reiniciar, envía a pantallas de selección de columnas.
+			//Si ya se usó esta hoja alguna vez y si el botón presionado NO es el de reiniciar, carga las columnas ya seleccionadas y envía a Grilla.
+			//Si no (alguna de las dos condiciones) envía a pantallas de selección de histórico y columnas.
 			if (!reiniciaHoja && CuentaUsuario.VerificarHojaUsadaRecuperarColumnas(linkHoja))
-			{
 				pagina = new PaginaGrilla(linkHoja, _servicio);
-			}
 			else
-			{
-				pagina = new SeleccionColumnasParaVer(linkHoja, _servicio);
-			}
+				pagina = new ListaHojasHistoricoGoogle(_servicio, _listaHojas, nombreHoja.Replace("Reiniciar ", ""));
+
 			Navigation.PushAsync(pagina);
 		}
 
 		private void CargarListaHojas()
 		{
 			var listaHojas = new List<ClaseHoja>();
+			var esTeclaPar = false;
 			foreach (WorksheetEntry datosHoja in _listaHojas)
 			{
-				//Almacenar la hoja para el historial de movimientos
-				if (datosHoja.Title.Text == "Historial")
-					CuentaUsuario.AlmacenarLinkHojaHistorial(datosHoja.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null).HRef.ToString());
-
-				var hoja = new ClaseHoja(datosHoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString(), datosHoja.Title.Text, false);
+				var linkHoja = datosHoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString();
+				var linkHistoricos = datosHoja.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null).HRef.ToString();
+				var estaUsada = CuentaUsuario.VerificarHojaUsada(linkHoja);
+				var esHistorico = CuentaUsuario.VerificarHojaHistoricosUsada(linkHistoricos);
+				//Agrega hoja (tecla) para potencial hoja de stock.
+				//Si ya está siendo usada le agrega ícono.
+				//Si en cambio es hoja de Históricos le pone el ícono correspondiente.
+				//Nunca es hoja en uso de stock y de históricos; es una, otra o ninguna.
+				var hoja = new ClaseHoja(linkHoja, datosHoja.Title.Text, false, estaUsada, esHistorico, esTeclaPar);
 				listaHojas.Add(hoja);
+				esTeclaPar = !esTeclaPar;
 
-				if (CuentaUsuario.VerificarHojaUsada(hoja.Link))
-				{
-					hoja = new ClaseHoja(datosHoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString(), "Reiniciar " + datosHoja.Title.Text, true);
-					listaHojas.Add(hoja);
-				}
+				if (!estaUsada) continue;
+				//Si la hoja está siendo usada, agrega hoja (tecla) para reiniciar (con ícono).
+				hoja = new ClaseHoja(datosHoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString(), "Reiniciar " + datosHoja.Title.Text, true, false, false, esTeclaPar);
+				listaHojas.Add(hoja);
+				esTeclaPar = !esTeclaPar;
 			}
 
 			var vista = new ListView
@@ -83,41 +83,30 @@ namespace StockProductorCF.Vistas
 					};
 					nombreHoja.SetBinding(Label.TextProperty, "Nombre");
 
-					var celda = new ViewCell
+					var icono = new Image
 					{
-						View = new StackLayout
-						{
-							Padding = 2,
-							Orientation = StackOrientation.Horizontal,
-							Children = { nombreHoja }
-						}
+						VerticalOptions = LayoutOptions.Center,
+						HorizontalOptions = LayoutOptions.End,
+						HeightRequest = App.AnchoRetratoDePantalla * .09259
 					};
+					icono.SetBinding(Image.SourceProperty, "ArchivoIcono");
+					icono.SetBinding(IsVisibleProperty, "TieneImagen");
 
+					var tecla = new StackLayout
+					{
+						Padding = 7,
+						Orientation = StackOrientation.Horizontal,
+						Children = {nombreHoja, icono}
+					};
+					tecla.SetBinding(BackgroundColorProperty, "ColorFondo");
+
+					var celda = new ViewCell { View = tecla };
+					
 					celda.Tapped += (sender, args) =>
 					{
 						var hoja = (ClaseHoja)((ViewCell)sender).BindingContext;
-						EnviarPaginaGrilla(hoja.Link, hoja.Nombre, hoja.EsDeReinicio);
+						EnviarPagina(hoja.Link, hoja.Nombre, hoja.EsDeReinicio);
 						celda.View.BackgroundColor = Color.Silver;
-					};
-
-					celda.Appearing += (sender, args) =>
-					{
-						var viewCell = (ViewCell)sender;
-						if (viewCell.View != null)
-						{
-							viewCell.View.BackgroundColor = _esTeclaPar ? Color.FromHex("#EDEDED") : Color.FromHex("#E2E2E1");
-							if (((ClaseHoja) ((ViewCell) sender).BindingContext).EsDeReinicio)
-							{
-								((StackLayout)viewCell.View).Children.Add(new Image
-								{
-									VerticalOptions = LayoutOptions.Center,
-									HorizontalOptions = LayoutOptions.End,
-									Source = ImageSource.FromResource("StockProductorCF.Imagenes.refrescarHoja.png"),
-									HeightRequest = App.AnchoRetratoDePantalla * .09259
-								});
-							}
-						}
-						_esTeclaPar = !_esTeclaPar;
 					};
 
 					return celda;
@@ -152,11 +141,15 @@ namespace StockProductorCF.Vistas
 	public class ClaseHoja
 	{
 		[Android.Runtime.Preserve]
-		public ClaseHoja(string link, string nombre, bool esDeReinicio)
+		public ClaseHoja(string link, string nombre, bool esDeReinicio, bool esInventario, bool esHistorico, bool esTeclaPar)
 		{
 			Link = link;
 			Nombre = nombre;
 			EsDeReinicio = esDeReinicio;
+			TieneImagen = esDeReinicio || esInventario || esHistorico;
+			var nombreArchivoIcono = esDeReinicio ? "refrescarHoja" : esInventario ? "hojaInventario" : "hojaHistoricos";
+			ArchivoIcono = ImageSource.FromResource($"StockProductorCF.Imagenes.{nombreArchivoIcono}.png");
+			ColorFondo = esTeclaPar ? Color.FromHex("#EDEDED") : Color.FromHex("#E2E2E1");
 		}
 
 		[Android.Runtime.Preserve]
@@ -165,6 +158,12 @@ namespace StockProductorCF.Vistas
 		public string Nombre { get; }
 		[Android.Runtime.Preserve]
 		public bool EsDeReinicio { get; }
+		[Android.Runtime.Preserve]
+		public bool TieneImagen { get; }
+		[Android.Runtime.Preserve]
+		public ImageSource ArchivoIcono { get; }
+		[Android.Runtime.Preserve]
+		public Color ColorFondo { get; }
 	}
 
 }

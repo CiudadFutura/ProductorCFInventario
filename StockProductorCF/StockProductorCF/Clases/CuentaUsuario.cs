@@ -75,17 +75,20 @@ namespace StockProductorCF.Clases
 				&& _cuenta.Properties.ContainsKey(linkHojaConsulta + "|inventario") && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|nombre");
 		}
 
+		internal static bool VerificarHojaHistoricosUsada(string linkHoja)
+		{
+			return _cuenta != null && _cuenta.Properties.ContainsKey(linkHoja + "|historico");
+		}
+
 		internal static bool VerificarHojaUsadaRecuperarColumnas(string linkHojaConsulta)
 		{
 			//Si no hay columnas para esta hoja deducimos que la hoja no se ha usado, si hay, las cargamos.
 			if (!VerificarHojaUsada(linkHojaConsulta))
 				return false;
-			else
-			{
-				AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(linkHojaConsulta + "|ver"));
-				AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(linkHojaConsulta + "|inventario"));
-				return true;
-			}
+			
+			AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(linkHojaConsulta + "|ver"));
+			AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(linkHojaConsulta + "|inventario"));
+			return true;
 		}
 
 		internal static void AlmacenarColumnasParaVerDeHoja(string linkHojaConsulta, string columnasParaVer)
@@ -105,14 +108,14 @@ namespace StockProductorCF.Clases
 			GuardarValorEnCuentaLocal(linkHojaConsulta + "|inventario", columnasInventario);
 		}
 
-		internal static void AlmacenarNombreDeHoja(string linkHojaConsulta, string nombreHojaConsulta)
+		internal static void AlmacenarNombreDeHoja(string linkHojaConsulta, string nombreHoja)
 		{
-			GuardarValorEnCuentaLocal(linkHojaConsulta + "|nombre", nombreHojaConsulta);
+			GuardarValorEnCuentaLocal(linkHojaConsulta + "|nombre", nombreHoja);
 		}
 
-		internal static void AlmacenarNombreDeHojaHistorica(string linkHojaConsulta, string nombreHojaConsulta)
+		internal static void AlmacenarNombreDeHojaHistoricos(string linkHojaHistoricos, string nombreHojaConsulta)
 		{
-			GuardarValorEnCuentaLocal(linkHojaConsulta + "|historico", nombreHojaConsulta);
+			GuardarValorEnCuentaLocal(linkHojaHistoricos + "|historico", nombreHojaConsulta);
 		}
 
 		internal static void AlmacenarColumnasInventario(string columnasInventario)

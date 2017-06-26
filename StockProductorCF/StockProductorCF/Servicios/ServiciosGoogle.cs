@@ -41,7 +41,8 @@ namespace StockProductorCF.Servicios
 			return celdas;
 		}
 
-		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, string precio, CellEntry[] producto, string[] nombresColumnas, string[] listaColumnasInventario)
+		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, string precio, string puntoVenta, CellEntry[] producto, 
+			string[] nombresColumnas, string[] listaColumnasInventario)
 		{
 			// Abre la fila
 			var fila = "<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:gsx=\"http://schemas.google.com/spreadsheets/2006/extended\">";
@@ -61,6 +62,9 @@ namespace StockProductorCF.Servicios
 			// Agrega el movimiento
 			fila += "<gsx:movimiento>" + movimiento + "</gsx:movimiento>";
 			// Agrega el precio
+			if(puntoVenta != "No")
+				fila += "<gsx:puntoventa>" + puntoVenta + "</gsx:puntoventa>";
+			// Agrega el punto de venta
 			fila += "<gsx:precio>" + precio + "</gsx:precio>";
 			// Agrega el usuario
 			var usuario = CuentaUsuario.ObtenerNombreUsuarioGoogle() ?? "";
@@ -71,12 +75,12 @@ namespace StockProductorCF.Servicios
 			return fila;
 		}
 
-		public void InsertarHistoricos(SpreadsheetsService servicio, CellEntry celdaMovimiento, double movimiento, string precio, CellEntry[] producto, 
+		public void InsertarHistoricos(SpreadsheetsService servicio, CellEntry celdaMovimiento, double movimiento, string precio, string puntoVenta, CellEntry[] producto, 
 			string[] nombresColumnas, string[] listaColumnasInventario)
 		{
-			var url = CuentaUsuario.ObtenerLinkHojaHistorial();
+			var url = CuentaUsuario.ObtenerLinkHojaHistoricos();
 			const string tipoDelContenido = "application/atom+xml";
-			var fila = ObtenerHistorico(celdaMovimiento, movimiento, precio, producto, nombresColumnas, listaColumnasInventario);
+			var fila = ObtenerHistorico(celdaMovimiento, movimiento, precio, puntoVenta, producto, nombresColumnas, listaColumnasInventario);
 			// Convierte el contenido de la fila en stream
 			byte[] filaEnArregloDeBytes = Encoding.UTF8.GetBytes(fila);
 			MemoryStream filaEnStream = new MemoryStream(filaEnArregloDeBytes);

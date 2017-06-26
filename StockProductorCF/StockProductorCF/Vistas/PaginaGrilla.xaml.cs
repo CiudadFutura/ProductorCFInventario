@@ -205,7 +205,7 @@ namespace StockProductorCF.Vistas
 			_listaHojas = new Picker
 			{
 				IsVisible = false,
-				WidthRequest = App.AnchoRetratoDePantalla * .29,
+				WidthRequest = App.AnchoRetratoDePantalla * .3,
 				HorizontalOptions = LayoutOptions.EndAndExpand,
 				VerticalOptions = LayoutOptions.Center
 			};

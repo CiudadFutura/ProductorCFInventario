@@ -59,13 +59,10 @@ namespace StockProductorCF.Vistas
 
 		private void LlenarGrillaColumnasParaVer(List<CellEntry> columnas)
 		{
-			StackLayout itemColumna;
-			Label etiquetaColumna;
-			Switch seleccionar;
 			var esGris = false;
-			foreach (CellEntry columna in columnas)
+			foreach (var columna in columnas)
 			{
-				etiquetaColumna = new Label
+				var etiquetaColumna = new Label
 				{
 					TextColor = Color.Black,
 					HorizontalOptions = LayoutOptions.StartAndExpand,
@@ -75,7 +72,7 @@ namespace StockProductorCF.Vistas
 					FontSize = 18
 				};
 
-				seleccionar = new Switch
+				var seleccionar = new Switch
 				{
 					HorizontalOptions = LayoutOptions.End,
 					VerticalOptions = LayoutOptions.Center,
@@ -83,7 +80,7 @@ namespace StockProductorCF.Vistas
 				};
 				seleccionar.Toggled += AgregarColumna;
 
-				itemColumna = new StackLayout
+				var itemColumna = new StackLayout
 				{
 					HorizontalOptions = LayoutOptions.FillAndExpand,
 					VerticalOptions = LayoutOptions.CenterAndExpand,
@@ -104,7 +101,7 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		private void AgregarColumna(object sender, ToggledEventArgs e)
 		{
-			Switch ficha = (Switch)sender;
+			var ficha = (Switch)sender;
 			_listaColumnas.SetValue(Convert.ToInt32(!e.Value), Convert.ToInt32(ficha.StyleId) - 1);
 		}
 

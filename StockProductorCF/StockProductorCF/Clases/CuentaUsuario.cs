@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Google.GData.Spreadsheets;
 using Xamarin.Auth;
 
 namespace StockProductorCF.Clases
@@ -38,6 +39,16 @@ namespace StockProductorCF.Clases
 			AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
 		}
 
+		internal static void RemoverValorEnCuentaLocal(string llave)
+		{
+			RecuperarCuentaLocal();
+
+			if (_cuenta == null) return;
+			_cuenta.Properties.Remove(llave); //Si existe la cuenta, remueve el valor de la cuenta
+			//Almacena la cuenta local
+			AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
+		}
+
 		private static string RecuperarValorDeCuentaLocal(string llave)
 		{
 			RecuperarCuentaLocal();
@@ -69,28 +80,6 @@ namespace StockProductorCF.Clases
 			GuardarValorEnCuentaLocal("linkHojaConsulta", linkHojaConsulta);
 		}
 
-		internal static bool VerificarHojaUsada(string linkHojaConsulta)
-		{
-			return _cuenta != null && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|ver") 
-				&& _cuenta.Properties.ContainsKey(linkHojaConsulta + "|inventario") && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|nombre");
-		}
-
-		internal static bool VerificarHojaHistoricosUsada(string linkHoja)
-		{
-			return _cuenta != null && _cuenta.Properties.ContainsKey(linkHoja + "|historico");
-		}
-
-		internal static bool VerificarHojaUsadaRecuperarColumnas(string linkHojaConsulta)
-		{
-			//Si no hay columnas para esta hoja deducimos que la hoja no se ha usado, si hay, las cargamos.
-			if (!VerificarHojaUsada(linkHojaConsulta))
-				return false;
-			
-			AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(linkHojaConsulta + "|ver"));
-			AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(linkHojaConsulta + "|inventario"));
-			return true;
-		}
-
 		internal static void AlmacenarColumnasParaVerDeHoja(string linkHojaConsulta, string columnasParaVer)
 		{
 			GuardarValorEnCuentaLocal("columnasParaVer", columnasParaVer);
@@ -108,19 +97,29 @@ namespace StockProductorCF.Clases
 			GuardarValorEnCuentaLocal(linkHojaConsulta + "|inventario", columnasInventario);
 		}
 
+		internal static void AlmacenarColumnasInventario(string columnasInventario)
+		{
+			GuardarValorEnCuentaLocal("columnasInventario", columnasInventario);
+		}
+
 		internal static void AlmacenarNombreDeHoja(string linkHojaConsulta, string nombreHoja)
 		{
 			GuardarValorEnCuentaLocal(linkHojaConsulta + "|nombre", nombreHoja);
 		}
 
-		internal static void AlmacenarNombreDeHojaHistoricos(string linkHojaHistoricos, string nombreHojaConsulta)
+		internal static void AlmacenarLinkHistoricosDeHoja(string linkHojaConsulta, string linkHojaHistoricos)
 		{
-			GuardarValorEnCuentaLocal(linkHojaHistoricos + "|historico", nombreHojaConsulta);
+			GuardarValorEnCuentaLocal(linkHojaConsulta + "|historico", linkHojaHistoricos);
 		}
 
-		internal static void AlmacenarColumnasInventario(string columnasInventario)
+		internal static void AlmacenarPuntosVentaDeHoja(string linkHojaConsulta, string puntosVenta)
 		{
-			GuardarValorEnCuentaLocal("columnasInventario", columnasInventario);
+			GuardarValorEnCuentaLocal(linkHojaConsulta + "|puntosVenta", puntosVenta);
+		}
+
+		public static void AlmacenarNombreHojaPuntosVentaDeHoja(string linkHojaConsulta, string linkHojaPuntosVenta)
+		{
+			GuardarValorEnCuentaLocal(linkHojaConsulta + "|hojaPuntosVenta", linkHojaPuntosVenta);
 		}
 
 		internal static void AlmacenarNombreUsuarioGoogle(string nombreUsuarioGoogle)
@@ -128,9 +127,14 @@ namespace StockProductorCF.Clases
 			GuardarValorEnCuentaLocal("nombreUsuarioGoogle", nombreUsuarioGoogle);
 		}
 
-		internal static void AlmacenarLinkHojaHistorial(string linkHojaHistorial)
+		internal static void AlmacenarLinkHojaHistoricos(string linkHojaHistoricos)
 		{
-			GuardarValorEnCuentaLocal("linkHojaHistorial", linkHojaHistorial);
+			GuardarValorEnCuentaLocal("linkHojaHistoricos", linkHojaHistoricos);
+		}
+
+		internal static void AlmacenarPuntosVenta(string puntosVenta)
+		{
+			GuardarValorEnCuentaLocal("puntosVenta", puntosVenta);
 		}
 
 		internal static void AlmacenarTokenDeBaseDeDatos(string tokenDeAcceso)
@@ -141,6 +145,61 @@ namespace StockProductorCF.Clases
 		internal static void AlmacenarUsuarioDeBaseDeDatos(string usuario)
 		{
 			GuardarValorEnCuentaLocal("usuarioDeBaseDeDatos", usuario);
+		}
+
+		internal static bool VerificarHojaUsada(string linkHojaConsulta)
+		{
+			return _cuenta != null && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|nombre");
+		}
+
+		internal static bool VerificarHojaUsadaConColumnas(string linkHojaConsulta)
+		{
+			return _cuenta != null && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|ver")
+			       && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|inventario") && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|nombre");
+		}
+
+		internal static bool VerificarHojaUsadaPorNombre(string nombreHojaConsulta)
+		{
+			if (_cuenta == null) return false;
+			foreach (var llaveValor in _cuenta.Properties)
+			{
+				if (llaveValor.Key.Contains("|nombre") && llaveValor.Value.Equals(nombreHojaConsulta))
+					return true;
+			}
+			return false;
+		}
+
+		internal static bool VerificarHojaHistoricosUsada(string linkHoja)
+		{
+			if (_cuenta == null) return false;
+			foreach (var llaveValorH in _cuenta.Properties)
+			{
+				if (llaveValorH.Key.Contains("|historico") && llaveValorH.Value.Equals(linkHoja))
+					return true;
+			}
+			return false;
+		}
+
+		internal static bool VerificarHojaPuntosVentaUsada(string linkHoja)
+		{
+			if (_cuenta == null) return false;
+			foreach (var llaveValorH in _cuenta.Properties)
+			{
+				if (llaveValorH.Key.Contains("|hojaPuntosVenta") && llaveValorH.Value.Equals(linkHoja))
+					return true;
+			}
+			return false;
+		}
+
+		internal static bool VerificarHojaUsadaRecuperarColumnas(string linkHojaConsulta)
+		{
+			//Si no hay columnas para esta hoja deducimos que la hoja no se ha usado, si hay, las cargamos.
+			if (!VerificarHojaUsadaConColumnas(linkHojaConsulta))
+				return false;
+
+			AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(linkHojaConsulta + "|ver"));
+			AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(linkHojaConsulta + "|inventario"));
+			return true;
 		}
 
 		internal static string ObtenerTokenActualDeGoogle()
@@ -174,9 +233,14 @@ namespace StockProductorCF.Clases
 			return RecuperarValorDeCuentaLocal("nombreUsuarioGoogle");
 		}
 
-		internal static string ObtenerLinkHojaHistorial()
+		internal static string ObtenerLinkHojaHistoricos()
 		{
-			return RecuperarValorDeCuentaLocal("linkHojaHistorial");
+			return RecuperarValorDeCuentaLocal("linkHojaHistoricos");
+		}
+
+		internal static string ObtenerPuntosVenta()
+		{
+			return RecuperarValorDeCuentaLocal("puntosVenta");
 		}
 
 		internal static string ObtenerTokenActualDeBaseDeDatos()
@@ -216,7 +280,7 @@ namespace StockProductorCF.Clases
 			return nombres;
 		}
 
-		internal static string ObtenerLinkHojaSeleccionada(string nombre)
+		internal static string ObtenerLinkHojaSeleccionada(string nombreHoja)
 		{
 			var link = "";
 			RecuperarCuentaLocal();
@@ -224,20 +288,18 @@ namespace StockProductorCF.Clases
 			{
 				foreach (var llaveValor in _cuenta.Properties)
 				{
-					if (llaveValor.Key.Contains("|nombre") && llaveValor.Value.Equals(nombre))
+					if (llaveValor.Key.Contains("|nombre") && llaveValor.Value.Equals(nombreHoja))
 					{
 						link = llaveValor.Key.Split('|')[0];
 						AlmacenarLinkHojaConsulta(link);
 						AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(link + "|ver"));
 						AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(link + "|inventario"));
-						break;
-					}
-				}
-				foreach (var llaveValorH in _cuenta.Properties)
-				{
-					if (llaveValorH.Key.Contains("|historico") && llaveValorH.Value.Equals(nombre))
-					{
-						AlmacenarLinkHojaHistorial(llaveValorH.Key.Split('|')[0]);
+						AlmacenarLinkHojaHistoricos(RecuperarValorDeCuentaLocal(link + "|historico"));
+						var puntosVentas = RecuperarValorDeCuentaLocal(link + "|puntosVenta"); // Puntos de venta son opcionales
+						if(puntosVentas != null)
+							AlmacenarPuntosVenta(puntosVentas);
+						else
+							RemoverValorEnCuentaLocal("puntosVenta");
 						break;
 					}
 				}
@@ -251,6 +313,24 @@ namespace StockProductorCF.Clases
 			if(string.IsNullOrEmpty(ObtenerTokenActualDeGoogle()) || ObtenerFechaExpiracionToken() <= DateTime.Now)
 				return false;
 			return true;
+		}
+
+		internal static void ReiniciarHoja(string linkHoja)
+		{
+			RemoverValorEnCuentaLocal(linkHoja + "|nombre");
+			RemoverValorEnCuentaLocal(linkHoja + "|historico");
+			RemoverValorEnCuentaLocal(linkHoja + "|puntosVenta");
+			RemoverValorEnCuentaLocal(linkHoja + "|hojaPuntosVenta");
+			RemoverValorEnCuentaLocal(linkHoja + "|ver");
+			RemoverValorEnCuentaLocal(linkHoja + "|inventario");
+
+			//Si es la hoja actual vuela la memoria de uso
+			if (ObtenerLinkHojaConsulta() != linkHoja) return;
+			RemoverValorEnCuentaLocal("linkHojaConsulta");
+			RemoverValorEnCuentaLocal("linkHojaHistoricos");
+			RemoverValorEnCuentaLocal("puntosVenta");
+			RemoverValorEnCuentaLocal("columnasParaVer");
+			RemoverValorEnCuentaLocal("columnasInventario");
 		}
 	}
 }

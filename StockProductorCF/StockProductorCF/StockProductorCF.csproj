@@ -41,6 +41,12 @@
     </Compile>
     <Compile Include="Clases\CuentaUsuario.cs" />
     <Compile Include="Servicios\ServiciosGoogle.cs" />
+    <Compile Include="Vistas\ListaHojasPtosVtaGoogle.xaml.cs">
+      <DependentUpon>ListaHojasPtosVtaGoogle.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Vistas\OpcionPuntosVenta.xaml.cs">
+      <DependentUpon>OpcionPuntosVenta.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Vistas\AccesoDatos.xaml.cs">
       <DependentUpon>AccesoDatos.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -218,6 +224,21 @@
   <ItemGroup>
     <EmbeddedResource Include="Imagenes\hojaHistoricos.png" />
     <EmbeddedResource Include="Imagenes\hojaInventario.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Vistas\OpcionPuntosVenta.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Vistas\ListaHojasPtosVtaGoogle.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Imagenes\hojaPtoVta.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="..\..\packages\Xamarin.Forms.2.3.3.193\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets" Condition="Exists('..\..\packages\Xamarin.Forms.2.3.3.193\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+Xamarin.iOS10+xamarinmac20\Xamarin.Forms.targets')" />

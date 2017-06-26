@@ -21,8 +21,7 @@ namespace StockProductorCF
 			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			CuentaUsuario.AlmacenarAccesoDatos("G");
-			_conexionExistente =
-				conexionExistente; //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros
+			_conexionExistente = conexionExistente; //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros
 
 			var webView = new WebView
 			{

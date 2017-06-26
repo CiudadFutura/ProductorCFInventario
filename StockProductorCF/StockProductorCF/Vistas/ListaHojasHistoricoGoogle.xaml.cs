@@ -12,28 +12,26 @@ namespace StockProductorCF.Vistas
 		private readonly AtomEntryCollection _listaHojas;
 		private readonly SpreadsheetsService _servicio;
 		private double _anchoActual;
-		private readonly string _nombreHojaExistenciaSeleccionada;
 
-		public ListaHojasHistoricoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas, string nombreHojaExistenciaSeleccionada)
+		public ListaHojasHistoricoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
 		{
 			InitializeComponent();
 			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_listaHojas = listaHojas;
-			_nombreHojaExistenciaSeleccionada = nombreHojaExistenciaSeleccionada;
 
 			CargarListaHojas();
 		}
 
-		private void EnviarPaginaColumnas(string linkHoja)
+		private void EnviarPaginaPuntosVenta(string linkHoja)
 		{
 			//Almacenar la hoja para el historial de movimientos
-			CuentaUsuario.AlmacenarLinkHojaHistorial(linkHoja);
+			CuentaUsuario.AlmacenarLinkHojaHistoricos(linkHoja);
 			//Almacena la hoja de Histórico en el diccionario para cambiarla cuando se cambie la hoja de stock
-			CuentaUsuario.AlmacenarNombreDeHojaHistoricos(linkHoja, _nombreHojaExistenciaSeleccionada);
+			CuentaUsuario.AlmacenarLinkHistoricosDeHoja(CuentaUsuario.ObtenerLinkHojaConsulta(), linkHoja);
 
-			ContentPage pagina = new SeleccionColumnasParaVer(CuentaUsuario.ObtenerLinkHojaConsulta(), _servicio);
+			ContentPage pagina = new OpcionPuntosVenta(_servicio, _listaHojas);
 			Navigation.PushAsync(pagina);
 		}
 
@@ -45,11 +43,13 @@ namespace StockProductorCF.Vistas
 			{
 				var linkHoja = datosHoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString();
 				var linkHistoricos = datosHoja.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null).HRef.ToString();
-				var estaUsada = CuentaUsuario.VerificarHojaUsada(linkHoja);
+				var estaSeleccionada = CuentaUsuario.ObtenerLinkHojaConsulta() == linkHoja; // Tiene que ser la actualmente seleccionada
+				var estaUsada = CuentaUsuario.VerificarHojaUsada(linkHoja); // Tiene que haber sido seleccionada alguna vez.
 				var esHistorico = CuentaUsuario.VerificarHojaHistoricosUsada(linkHistoricos);
+				var esPuntosVenta = CuentaUsuario.VerificarHojaPuntosVentaUsada(linkHoja);
 
-				if (estaUsada) continue; //Si la hoja está siendo usada para inventario no la exponemos para históricos.
-				var hoja = new ClaseHoja(linkHistoricos, datosHoja.Title.Text, false, false, esHistorico, esTeclaPar);
+				if (estaSeleccionada || estaUsada) continue; //Si la hoja está siendo usada para inventario o fue seleccionada en el paso anterior no la exponemos para históricos.
+				var hoja = new ClaseHoja(linkHistoricos, datosHoja.Title.Text, false, false, esHistorico, esPuntosVenta, esTeclaPar);
 				listaHojas.Add(hoja);
 				esTeclaPar = !esTeclaPar;
 			}
@@ -93,7 +93,7 @@ namespace StockProductorCF.Vistas
 					celda.Tapped += (sender, args) =>
 					{
 						var hoja = (ClaseHoja)((ViewCell)sender).BindingContext;
-						EnviarPaginaColumnas(hoja.Link);
+						EnviarPaginaPuntosVenta(hoja.Link);
 						celda.View.BackgroundColor = Color.Silver;
 					};
 

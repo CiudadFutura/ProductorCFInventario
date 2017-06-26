@@ -13,8 +13,10 @@ namespace StockProductorCF.Vistas
 		private bool[] _signoPositivo;
 		private double[] _movimientos;
 		private string[] _precios;
+		private string[] _puntosVenta;
 		private readonly CellEntry[] _producto;
 		private string[] _listaColumnasInventario;
+		private string[] _listaPuntosVenta;
 		private readonly string[] _productoString;
 		private readonly SpreadsheetsService _servicio;
 		private readonly string[] _nombresColumnas;
@@ -60,11 +62,20 @@ namespace StockProductorCF.Vistas
 			if (!string.IsNullOrEmpty(columnasInventario))
 				_listaColumnasInventario = columnasInventario.Split(',');
 
+			//Obtener, si existen, los puntos de venta.
+			var puntosVentaTexto = CuentaUsuario.ObtenerPuntosVenta();
+			_listaPuntosVenta = null;
+			if (!string.IsNullOrEmpty(puntosVentaTexto))
+				_listaPuntosVenta = puntosVentaTexto.Split('|');
+
 			_signoPositivo = new bool[_productoString.Length];
 			_movimientos = new double[_productoString.Length];
 			_precios = new string[_productoString.Length];
+			_puntosVenta = new string[_productoString.Length];
 			var i = 0;
 
+			var anchoEtiqueta = App.AnchoRetratoDePantalla / 3 - 10;
+			var anchoCampo = App.AnchoRetratoDePantalla / 3 * 2 - 30;
 			foreach (var celda in _productoString)
 			{
 				if (celda != null && _nombresColumnas[i] != "Usuario-Movimiento")
@@ -75,7 +86,7 @@ namespace StockProductorCF.Vistas
 						VerticalOptions = LayoutOptions.Center,
 						HorizontalTextAlignment = TextAlignment.End,
 						FontSize = 16,
-						WidthRequest = 100,
+						WidthRequest = anchoEtiqueta,
 						Text = _nombresColumnas[i],
 						TextColor = Color.Black
 					};
@@ -85,7 +96,7 @@ namespace StockProductorCF.Vistas
 						HorizontalOptions = LayoutOptions.CenterAndExpand,
 						VerticalOptions = LayoutOptions.Center,
 						HorizontalTextAlignment = TextAlignment.Start,
-						WidthRequest = 210,
+						WidthRequest = anchoCampo,
 						IsEnabled = false,
 						Text = celda,
 						TextColor = Color.Black
@@ -116,16 +127,18 @@ namespace StockProductorCF.Vistas
 							HorizontalTextAlignment = TextAlignment.End,
 							Text = "Movimiento",
 							FontSize = 16,
-							WidthRequest = 100,
+							WidthRequest = anchoEtiqueta - 13,
 							TextColor = Color.Black
 						};
 
 						var botonSigno = new Button
 						{
 							Text = "+",
-							HorizontalOptions = LayoutOptions.Start,
+							HorizontalOptions = LayoutOptions.Center,
 							VerticalOptions = LayoutOptions.Center,
 							FontSize = 25,
+							HeightRequest = 60,
+							WidthRequest = 60,
 							StyleId = i.ToString()
 						};
 
@@ -137,7 +150,7 @@ namespace StockProductorCF.Vistas
 							VerticalOptions = LayoutOptions.Center,
 							HorizontalTextAlignment = TextAlignment.Start,
 							StyleId = "movimiento-" + i,
-							WidthRequest = 100,
+							WidthRequest = anchoCampo - 55,
 							Keyboard = Keyboard.Numeric
 						};
 
@@ -164,17 +177,17 @@ namespace StockProductorCF.Vistas
 							HorizontalTextAlignment = TextAlignment.End,
 							Text = "Precio Total",
 							FontSize = 16,
-							WidthRequest = 100,
+							WidthRequest = anchoEtiqueta,
 							TextColor = Color.Black
 						};
 
 						valorCampo = new Entry
 						{
-							HorizontalOptions = LayoutOptions.StartAndExpand,
+							HorizontalOptions = LayoutOptions.CenterAndExpand,
 							VerticalOptions = LayoutOptions.Center,
 							HorizontalTextAlignment = TextAlignment.Start,
 							StyleId = "precio-" + i,
-							WidthRequest = 100,
+							WidthRequest = anchoCampo - 55,
 							Keyboard = Keyboard.Numeric
 						};
 
@@ -190,6 +203,45 @@ namespace StockProductorCF.Vistas
 
 						ContenedorProducto.Children.Add(campoValor);
 
+						#endregion
+
+						#region Punto de venta
+						if(_listaPuntosVenta != null) { 
+							nombreCampo = new Label
+							{
+								HorizontalOptions = LayoutOptions.EndAndExpand,
+								VerticalOptions = LayoutOptions.Center,
+								HorizontalTextAlignment = TextAlignment.End,
+								Text = "Punto de venta",
+								FontSize = 16,
+								WidthRequest = anchoEtiqueta,
+								TextColor = Color.Black
+							};
+
+							var puntoVenta = new Picker
+							{
+								HorizontalOptions = LayoutOptions.CenterAndExpand,
+								VerticalOptions = LayoutOptions.Center,
+								StyleId = "punto-" + i,
+								WidthRequest = anchoCampo - 55
+							};
+							foreach (var punto in _listaPuntosVenta)
+							{
+								puntoVenta.Items.Add(punto);
+							}
+
+							campoValor = new StackLayout
+							{
+								BackgroundColor = Color.FromHex("#FFFFFF"),
+								HorizontalOptions = LayoutOptions.FillAndExpand,
+								VerticalOptions = LayoutOptions.CenterAndExpand,
+								Orientation = StackOrientation.Horizontal,
+								HeightRequest = 50,
+								Children = { nombreCampo, puntoVenta }
+							};
+
+							ContenedorProducto.Children.Add(campoValor);
+						}
 						#endregion
 					}
 				}
@@ -228,8 +280,16 @@ namespace StockProductorCF.Vistas
 					{
 						columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
 						valor = ((Entry)control).Text;
-						valor = !string.IsNullOrEmpty(valor) ? valor : "0";
+						valor = !string.IsNullOrEmpty(valor) ? valor : "-";
 						_precios.SetValue(valor, columna);
+					}
+
+					if (_listaPuntosVenta != null && control.StyleId != null && control.StyleId.Contains("punto-"))
+					{
+						columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
+						var combo = (Picker)control;
+						valor = combo.SelectedIndex != -1 ? combo.Items[combo.SelectedIndex] : "-";
+						_puntosVenta.SetValue(valor, columna);
 					}
 				}
 			}
@@ -255,6 +315,7 @@ namespace StockProductorCF.Vistas
 					var multiplicador = _signoPositivo[(int)celda.Column - 1] ? 1 : -1;
 					var movimiento = _movimientos[(int)celda.Column - 1];
 					var precio = _precios[(int)celda.Column - 1];
+					var puntoVenta = _listaPuntosVenta != null ? _puntosVenta[(int)celda.Column - 1] : "No";
 
 					if (movimiento != 0)
 					{
@@ -265,7 +326,7 @@ namespace StockProductorCF.Vistas
 							// Actualiza la celda en Google
 							celda.Update();
 							// Inserta histórico en Google
-							servicioGoogle.InsertarHistoricos(_servicio, celda, multiplicador * movimiento, precio, _producto, _nombresColumnas, _listaColumnasInventario);
+							servicioGoogle.InsertarHistoricos(_servicio, celda, multiplicador * movimiento, precio, puntoVenta, _producto, _nombresColumnas, _listaColumnasInventario);
 							
 							grabo = true;
 						}

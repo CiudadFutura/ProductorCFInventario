@@ -67,6 +67,9 @@ namespace StockProductorCF.Vistas
 			var esTeclaPar = false;
 			foreach (var datosHoja in _listaHojas)
 			{
+				//Sólo lista hojas que contengan la palabra App (es el sufijo que tendrán las hojas para carga de movimientos, las otras son para cálculos y análisis).
+				if (!datosHoja.Title.Text.Contains("App")) break;
+
 				var linkHoja = datosHoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString();
 				var linkHistoricos = datosHoja.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null).HRef.ToString();
 				var estaSeleccionada = CuentaUsuario.ObtenerLinkHojaConsulta() == linkHoja; // Tiene que ser la actualmente seleccionada

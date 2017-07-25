@@ -47,7 +47,8 @@ namespace StockProductorCF.Servicios
 			// Abre la fila
 			var fila = "<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:gsx=\"http://schemas.google.com/spreadsheets/2006/extended\">";
 			// Agrega la fecha
-			fila += "<gsx:fecha>" + DateTime.Now.ToString("dd/MM/yyyy HH:mm") + "</gsx:fecha>";
+			var culture = new System.Globalization.CultureInfo("es-AR");
+			fila += "<gsx:fecha>" + DateTime.Now.ToString("MMMM yyyy", culture) + "</gsx:fecha>";
 			// Agrega los valores del producto
 			for (var i = 0; i < nombresColumnas.Length; i++)
 			{

@@ -42,10 +42,10 @@ namespace StockProductorCF.Vistas
 			_linkHojaConsulta = linkHojaConsulta;
 			_servicio = servicio;
 			_servicioGoogle = new ServiciosGoogle();
-
+			
 			InicializarVariablesGlobales();
-			//La carga de productos se realiza cuando se selecciona el índice del selector de hojas.
 			ConfigurarSelectorHojas();
+			//La carga de los productos se realiza en el OnAppearing
 		}
 
 		//Constructor para Base de Datos
@@ -114,6 +114,14 @@ namespace StockProductorCF.Vistas
 
 		private void ConfigurarSelectorHojas()
 		{
+			_listaHojas = new Picker
+			{
+				IsVisible = false,
+				WidthRequest = App.AnchoRetratoDePantalla * .3,
+				HorizontalOptions = LayoutOptions.EndAndExpand,
+				VerticalOptions = LayoutOptions.Center
+			};
+
 			_listaHojas.IsVisible = true;
 			var nombreHojaActual = CuentaUsuario.ObtenerNombreHoja(_linkHojaConsulta);
 			var nombres = CuentaUsuario.ObtenerTodosLosNombresDeHojas();
@@ -122,9 +130,12 @@ namespace StockProductorCF.Vistas
 			{
 				_listaHojas.Items.Add(nombre);
 				if (nombre == nombreHojaActual)
-					_listaHojas.SelectedIndex = i; //Esto genera la carga inicial de productos.
+					_listaHojas.SelectedIndex = i;
 				i += 1;
 			}
+
+			_listaHojas.SelectedIndexChanged += CargarHoja;
+			Cabecera.Children.Add(_listaHojas);
 		}
 
 		#endregion
@@ -201,16 +212,6 @@ namespace StockProductorCF.Vistas
 		{
 			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProductores));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
-
-			_listaHojas = new Picker
-			{
-				IsVisible = false,
-				WidthRequest = App.AnchoRetratoDePantalla * .3,
-				HorizontalOptions = LayoutOptions.EndAndExpand,
-				VerticalOptions = LayoutOptions.Center
-			};
-			_listaHojas.SelectedIndexChanged += CargarHoja;
-			Cabecera.Children.Add(_listaHojas);
 
 			ConfigurarBotones();
 
@@ -290,6 +291,7 @@ namespace StockProductorCF.Vistas
 			//Si fila = -1 no se ha encuentrado el código
 			if(fila == -1)
 				await DisplayAlert("Código", "No se ha encontrado un producto para el código escaneado.", "Listo");
+
 		}
 
 		private void ConstruirVistaDeLista(IReadOnlyCollection<string[]> productos)
@@ -437,6 +439,21 @@ namespace StockProductorCF.Vistas
 			ContenedorTabla.Children.Add(_indicadorActividad);
 		}
 
+		private void RefrescarDatos()
+		{
+			RefrescarUIGrilla();
+			_refrescar.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(100), () =>
+			{
+				if (!string.IsNullOrEmpty(_linkHojaConsulta))
+					ObtenerDatosProductosDesdeHCG(); //Hoja de cálculo de Google
+				else
+					ObtenerProductosDesdeBD(); //Base de Datos
+				_refrescar.Opacity = 1f;
+				return false;
+			});
+		}
+
 		#endregion
 
 		#region Eventos
@@ -457,17 +474,7 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		private void RefrescarDatos(View arg1, object arg2)
 		{
-			RefrescarUIGrilla();
-			_refrescar.Opacity = 0.5f;
-			Device.StartTimer(TimeSpan.FromMilliseconds(100), () =>
-			{
-				if (!string.IsNullOrEmpty(_linkHojaConsulta))
-					ObtenerDatosProductosDesdeHCG(); //Hoja de cálculo de Google
-				else
-					ObtenerProductosDesdeBD(); //Base de Datos
-				_refrescar.Opacity = 1f;
-				return false;
-			});
+			RefrescarDatos();
 		}
 
 		[Android.Runtime.Preserve]
@@ -562,9 +569,15 @@ namespace StockProductorCF.Vistas
 			_anchoActual = ancho;
 		}
 
+		//Cuando carga la página y cuando vuelve de registrar un movimiento.
+		protected override void OnAppearing()
+		{
+			RefrescarDatos();
+		}
+
 		#endregion
 
-		}
+	}
 
 	//Clase Producto: utilizada para armar la lista scrolleable de productos
 	[Android.Runtime.Preserve]

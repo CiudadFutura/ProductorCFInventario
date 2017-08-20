@@ -12,13 +12,13 @@
 				<Image x:Name="SombraEncabezado" HorizontalOptions="FillAndExpand" Aspect="AspectFill"></Image>
 			</StackLayout>
 			<StackLayout BackgroundColor="#C0C0C0" VerticalOptions="Start" HorizontalOptions="Fill">
-				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" HeightRequest="30">¿Configurar puntos de ventas?</Label>
+				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" HeightRequest="30">¿Configurar lugar de compra o venta?</Label>
 			</StackLayout>
 			<StackLayout Orientation="Horizontal" VerticalOptions="FillAndExpand" HorizontalOptions="Fill">
-				<Button HorizontalOptions="FillAndExpand" VerticalOptions="End" Text="Sí, poseo 1 hoja con lista de puntos de venta" HeightRequest="100" Clicked="SeleccionarHojaPtosVtas"/>
+				<Button HorizontalOptions="FillAndExpand" VerticalOptions="End" Text="Sí, poseo 1 hoja con lista de lugares" HeightRequest="100" Clicked="SeleccionarHojaPtosVtas"/>
 			</StackLayout>
 			<StackLayout Orientation="Horizontal" VerticalOptions="FillAndExpand" HorizontalOptions="Fill">
-				<Button HorizontalOptions="FillAndExpand" VerticalOptions="Start" Text="No, no quiero configurarla" HeightRequest="100" Clicked="IrSeleccionColumnas"/>
+				<Button HorizontalOptions="FillAndExpand" VerticalOptions="Start" Text="No, no quiero configurarlo" HeightRequest="100" Clicked="IrSeleccionColumnas"/>
 			</StackLayout>
 		</StackLayout>
 	</ContentPage.Content>

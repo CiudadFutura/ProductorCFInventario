@@ -41,14 +41,13 @@ namespace StockProductorCF.Servicios
 			return celdas;
 		}
 
-		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, string precio, string puntoVenta, CellEntry[] producto, 
+		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, string precio, string lugar, CellEntry[] producto, 
 			string[] nombresColumnas, string[] listaColumnasInventario)
 		{
 			// Abre la fila
 			var fila = "<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:gsx=\"http://schemas.google.com/spreadsheets/2006/extended\">";
 			// Agrega la fecha
-			var culture = new System.Globalization.CultureInfo("es-AR");
-			fila += "<gsx:fecha>" + DateTime.Now.ToString("MMMM yyyy", culture) + "</gsx:fecha>";
+			fila += "<gsx:fecha>" + DateTime.Now.ToString("MM-yyyy") + "</gsx:fecha>";
 			// Agrega los valores del producto
 			for (var i = 0; i < nombresColumnas.Length; i++)
 			{
@@ -60,14 +59,17 @@ namespace StockProductorCF.Servicios
 				fila += "<gsx:" + columna + ">" + valor + "</gsx:" + columna + ">";
 			}
 
-			// Agrega el movimiento
-			fila += "<gsx:movimiento>" + movimiento + "</gsx:movimiento>";
-			// Agrega el precio
-			if(puntoVenta != "No")
-				fila += "<gsx:puntoventa>" + puntoVenta + "</gsx:puntoventa>";
-			// Agrega el punto de venta
-			fila += "<gsx:precio>" + precio + "</gsx:precio>";
-			// Agrega el usuario
+			// Agrega el Movimiento
+			fila += "<gsx:cantidad>" + movimiento + "</gsx:cantidad>";
+			// Agrega el Precio total
+			fila += "<gsx:preciototal>" + precio + "</gsx:preciototal>";
+			// Agrega el Costo unitario
+			double precioNumero;
+			var costoUnitario = movimiento > 0 && double.TryParse(precio, out precioNumero) ? precioNumero / movimiento : 0;
+			fila += "<gsx:costounitario>" + costoUnitario + "</gsx:costounitario>";
+			// Agrega el Lugar (proveedor o punto de venta)
+			fila += "<gsx:lugar>" + lugar + "</gsx:lugar>";
+			// Agrega el Usuario
 			var usuario = CuentaUsuario.ObtenerNombreUsuarioGoogle() ?? "";
 			fila += "<gsx:usuario>" + usuario + "</gsx:usuario>";
 			// Cierra la fila

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Google.GData.Spreadsheets;
 using Xamarin.Auth;
 
 namespace StockProductorCF.Clases
@@ -49,7 +48,7 @@ namespace StockProductorCF.Clases
 			AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
 		}
 
-		private static string RecuperarValorDeCuentaLocal(string llave)
+		public static string RecuperarValorDeCuentaLocal(string llave)
 		{
 			RecuperarCuentaLocal();
 			return (_cuenta != null && _cuenta.Properties.ContainsKey(llave)) ? _cuenta.Properties[llave] : null;
@@ -117,7 +116,7 @@ namespace StockProductorCF.Clases
 			GuardarValorEnCuentaLocal(linkHojaConsulta + "|puntosVenta", puntosVenta);
 		}
 
-		public static void AlmacenarNombreHojaPuntosVentaDeHoja(string linkHojaConsulta, string linkHojaPuntosVenta)
+		public static void AlmacenarLinkHojaPuntosVentaDeHoja(string linkHojaConsulta, string linkHojaPuntosVenta)
 		{
 			GuardarValorEnCuentaLocal(linkHojaConsulta + "|hojaPuntosVenta", linkHojaPuntosVenta);
 		}

@@ -33,6 +33,7 @@ namespace StockProductorCF.Vistas
 		private Image _escanearCodigo;
 		private Picker _listaHojas;
 		private double _anchoActual;
+		private LugaresCompraVenta _lugares;
 
 		//Constructor para Hoja de cálculo de Google
 		public PaginaGrilla(string linkHojaConsulta, SpreadsheetsService servicio)
@@ -40,11 +41,16 @@ namespace StockProductorCF.Vistas
 			InitializeComponent();
 
 			_linkHojaConsulta = linkHojaConsulta;
-			_servicio = servicio;
 			_servicioGoogle = new ServiciosGoogle();
+			//El servicio viene nulo cuando se llama directamente desde el lanzador (ya tiene conexión a datos configurada)
+			_servicio = servicio ?? _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActualDeGoogle());
+			_lugares = new LugaresCompraVenta();
 			
 			InicializarVariablesGlobales();
 			ConfigurarSelectorHojas();
+			//Se actualizan los valores de Lugares en la carga inicial
+			RefrescarLugaresComprasVentas();
+			
 			//La carga de los productos se realiza en el OnAppearing
 		}
 
@@ -65,13 +71,8 @@ namespace StockProductorCF.Vistas
 				IsBusy = true;
 
 				await Task.Run(async () => {
-					if (_servicio == null) //El servicio viene nulo cuando se llama directamente desde el lanzador (ya tiene conexión a datos configurada)
-						_servicio = _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActualDeGoogle());
-
 					if (CuentaUsuario.ValidarTokenDeGoogle())
-					{
 						_celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
-					}
 					else
 					{
 						//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
@@ -324,6 +325,7 @@ namespace StockProductorCF.Vistas
 
 			var anchoColumnaNombreProd = CuentaUsuario.ObtenerAccesoDatos() == "G" ? 115 : 200;
 
+			var titulo = _nombresColumnas != null && _nombresColumnas.Length > 1 ? _nombresColumnas[1].ToUpper() : "PRODUCTO";
 			var encabezado = new StackLayout
 			{
 				Orientation = StackOrientation.Horizontal,
@@ -334,7 +336,7 @@ namespace StockProductorCF.Vistas
 								{
 									new Label
 									{
-										Text = "     PRODUCTOS",
+										Text = "     " + titulo,
 										FontSize = 13,
 										HorizontalOptions = LayoutOptions.Start,
 										FontAttributes = FontAttributes.Bold,
@@ -345,7 +347,7 @@ namespace StockProductorCF.Vistas
 									},
 									new Label
 									{
-										Text = "       INFO + STOCK",
+										Text = "       INFO",
 										FontSize = 13,
 										HorizontalOptions = LayoutOptions.End,
 										FontAttributes = FontAttributes.Bold,
@@ -475,6 +477,21 @@ namespace StockProductorCF.Vistas
 		private void RefrescarDatos(View arg1, object arg2)
 		{
 			RefrescarDatos();
+			//Refresca los lugares (compra o venta) sólo cuando presionamos el botón de refrescar
+			RefrescarLugaresComprasVentas();
+		}
+
+		private async void RefrescarLugaresComprasVentas()
+		{
+			if (CuentaUsuario.ValidarTokenDeGoogle())
+				_lugares.ObtenerActualizarLugares(_linkHojaConsulta, _servicio);
+			else
+			{
+				//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
+				var paginaAuntenticacion = new PaginaAuntenticacion(true);
+				Navigation.InsertPageBefore(paginaAuntenticacion, this);
+				await Navigation.PopAsync();
+			}
 		}
 
 		[Android.Runtime.Preserve]

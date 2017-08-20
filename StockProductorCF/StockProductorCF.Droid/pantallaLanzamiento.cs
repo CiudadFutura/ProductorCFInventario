@@ -5,7 +5,7 @@ using Android.Content.PM;
 using Android.OS;
 using StockProductorCF.Droid;
 
-[Activity(Label = "Inventario Productor Ciudad Futura", MainLauncher = true, NoHistory = true, Theme = "@style/Theme.Lanzamiento", 
+[Activity(Label = "Productor Ciudad Futura", MainLauncher = true, NoHistory = true, Theme = "@style/Theme.Lanzamiento", 
     ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
 public class pantallaLanzamiento : Activity
 {

@@ -13,10 +13,10 @@ namespace StockProductorCF.Vistas
 		private bool[] _signoPositivo;
 		private double[] _movimientos;
 		private string[] _precios;
-		private string[] _puntosVenta;
+		private string[] _lugares;
 		private readonly CellEntry[] _producto;
 		private string[] _listaColumnasInventario;
-		private string[] _listaPuntosVenta;
+		private string[] _listaLugares;
 		private readonly string[] _productoString;
 		private readonly SpreadsheetsService _servicio;
 		private readonly string[] _nombresColumnas;
@@ -64,14 +64,14 @@ namespace StockProductorCF.Vistas
 
 			//Obtener, si existen, los puntos de venta.
 			var puntosVentaTexto = CuentaUsuario.ObtenerPuntosVenta();
-			_listaPuntosVenta = null;
+			_listaLugares = null;
 			if (!string.IsNullOrEmpty(puntosVentaTexto))
-				_listaPuntosVenta = puntosVentaTexto.Split('|');
+				_listaLugares = puntosVentaTexto.Split('|');
 
 			_signoPositivo = new bool[_productoString.Length];
 			_movimientos = new double[_productoString.Length];
 			_precios = new string[_productoString.Length];
-			_puntosVenta = new string[_productoString.Length];
+			_lugares = new string[_productoString.Length];
 			var i = 0;
 
 			var anchoEtiqueta = App.AnchoRetratoDePantalla / 3 - 10;
@@ -206,7 +206,7 @@ namespace StockProductorCF.Vistas
 						#endregion
 
 						#region Punto de venta
-						if(_listaPuntosVenta != null) { 
+						if(_listaLugares != null) { 
 							nombreCampo = new Label
 							{
 								HorizontalOptions = LayoutOptions.EndAndExpand,
@@ -225,7 +225,7 @@ namespace StockProductorCF.Vistas
 								StyleId = "punto-" + i,
 								WidthRequest = anchoCampo - 55
 							};
-							foreach (var punto in _listaPuntosVenta)
+							foreach (var punto in _listaLugares)
 							{
 								puntoVenta.Items.Add(punto);
 							}
@@ -284,12 +284,12 @@ namespace StockProductorCF.Vistas
 						_precios.SetValue(valor, columna);
 					}
 
-					if (_listaPuntosVenta != null && control.StyleId != null && control.StyleId.Contains("punto-"))
+					if (_listaLugares != null && control.StyleId != null && control.StyleId.Contains("punto-"))
 					{
 						columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
 						var combo = (Picker)control;
 						valor = combo.SelectedIndex != -1 ? combo.Items[combo.SelectedIndex] : "-";
-						_puntosVenta.SetValue(valor, columna);
+						_lugares.SetValue(valor, columna);
 					}
 				}
 			}
@@ -315,7 +315,7 @@ namespace StockProductorCF.Vistas
 					var multiplicador = _signoPositivo[(int)celda.Column - 1] ? 1 : -1;
 					var movimiento = _movimientos[(int)celda.Column - 1];
 					var precio = _precios[(int)celda.Column - 1];
-					var puntoVenta = _listaPuntosVenta != null ? _puntosVenta[(int)celda.Column - 1] : "No";
+					var lugar = _listaLugares != null ? _lugares[(int)celda.Column - 1] : "No";
 
 					if (movimiento != 0)
 					{
@@ -326,7 +326,7 @@ namespace StockProductorCF.Vistas
 							// Actualiza la celda en Google
 							celda.Update();
 							// Inserta histórico en Google
-							servicioGoogle.InsertarHistoricos(_servicio, celda, multiplicador * movimiento, precio, puntoVenta, _producto, _nombresColumnas, _listaColumnasInventario);
+							servicioGoogle.InsertarHistoricos(_servicio, celda, multiplicador * movimiento, precio, lugar, _producto, _nombresColumnas, _listaColumnasInventario);
 							
 							grabo = true;
 						}

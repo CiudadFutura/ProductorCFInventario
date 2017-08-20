@@ -14,7 +14,7 @@
 				</StackLayout>
 			</StackLayout>
 			<StackLayout BackgroundColor="#C0C0C0" VerticalOptions="Start" HorizontalOptions="Fill">
-				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" HeightRequest="30">Seleccione la hoja de puntos de venta</Label>
+				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" HeightRequest="30">Seleccione la hoja de lugares</Label>
 			</StackLayout>
 			<StackLayout x:Name="ContenedorHojas" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
 			</StackLayout>

@@ -4,8 +4,6 @@ using Google.GData.Spreadsheets;
 using Xamarin.Forms;
 using StockProductorCF.Clases;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using StockProductorCF.Servicios;
 
 namespace StockProductorCF.Vistas
 {
@@ -13,7 +11,6 @@ namespace StockProductorCF.Vistas
 	{
 		private readonly AtomEntryCollection _listaHojas;
 		private readonly SpreadsheetsService _servicio;
-		private CellFeed _celdas;
 		private double _anchoActual;
 
 		public ListaHojasPtosVtaGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
@@ -27,38 +24,29 @@ namespace StockProductorCF.Vistas
 			CargarListaHojas();
 		}
 
-		private void EnviarPaginaSeleccionColumnas(string linkHoja)
+		private async void EnviarPaginaSeleccionColumnas(string linkHoja)
 		{
-			//Se almacena el link para recobrar los datos de puntos de venta de la hoja cuando ingrese nuevamente.
-			ObtenerPuntosVenta(linkHoja);
-			var puntosVentaTexto = "";
-			foreach (CellEntry celda in _celdas.Entries)
+			if (!CuentaUsuario.ValidarTokenDeGoogle())
 			{
-				if(celda.Row != 1)
-					puntosVentaTexto += celda.Value + "|";
-			}
-
-			CuentaUsuario.AlmacenarPuntosVenta(puntosVentaTexto.TrimEnd('|'));
-			CuentaUsuario.AlmacenarPuntosVentaDeHoja(CuentaUsuario.ObtenerLinkHojaConsulta(), puntosVentaTexto.TrimEnd('|'));
-			CuentaUsuario.AlmacenarNombreHojaPuntosVentaDeHoja(CuentaUsuario.ObtenerLinkHojaConsulta(), linkHoja);
-
-			ContentPage pagina = new SeleccionColumnasParaVer(CuentaUsuario.ObtenerLinkHojaConsulta(), _servicio);
-			Navigation.PushAsync(pagina);
-		}
-
-		private async void ObtenerPuntosVenta(string linkHoja)
-		{
-			if (CuentaUsuario.ValidarTokenDeGoogle())
-			{
-				_celdas = new ServiciosGoogle().ObtenerCeldasDeUnaHoja(linkHoja, _servicio);
-			}
-			else
-			{
-				//Si la pantalla anterior se quedó abierta un largo tiempo y se venció el token, se cierra y refresca el token
 				var paginaAuntenticacion = new PaginaAuntenticacion(true);
 				Navigation.InsertPageBefore(paginaAuntenticacion, this);
 				await Navigation.PopAsync();
 			}
+			//Se almacena el link para recobrar los datos de puntos de venta de la hoja cuando ingrese nuevamente.
+			//ObtenerPuntosVenta(linkHoja);
+			//var puntosVentaTexto = "";
+			//foreach (CellEntry celda in _celdas.Entries)
+			//{
+			//if(celda.Row != 1)
+			//puntosVentaTexto += celda.Value + "|";
+			//}
+
+			//CuentaUsuario.AlmacenarPuntosVenta(puntosVentaTexto.TrimEnd('|'));
+			//CuentaUsuario.AlmacenarPuntosVentaDeHoja(CuentaUsuario.ObtenerLinkHojaConsulta(), puntosVentaTexto.TrimEnd('|'));
+			CuentaUsuario.AlmacenarLinkHojaPuntosVentaDeHoja(CuentaUsuario.ObtenerLinkHojaConsulta(), linkHoja);
+
+			ContentPage pagina = new SeleccionColumnasParaVer(CuentaUsuario.ObtenerLinkHojaConsulta(), _servicio);
+			await Navigation.PushAsync(pagina);
 		}
 
 		private void CargarListaHojas()

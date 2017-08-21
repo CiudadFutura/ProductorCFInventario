@@ -45,8 +45,8 @@ namespace StockProductorCF.Vistas
 			//El servicio viene nulo cuando se llama directamente desde el lanzador (ya tiene conexión a datos configurada)
 			_servicio = servicio ?? _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActualDeGoogle());
 			_lugares = new LugaresCompraVenta();
-			
-			InicializarVariablesGlobales();
+
+			InicializarValoresGenerales();
 			ConfigurarSelectorHojas();
 			//Se actualizan los valores de Lugares en la carga inicial
 			RefrescarLugaresComprasVentas();
@@ -58,7 +58,7 @@ namespace StockProductorCF.Vistas
 		public PaginaGrilla()
 		{
 			InitializeComponent();
-			InicializarVariablesGlobales();
+			InicializarValoresGenerales();
 			ObtenerProductosDesdeBD();
 		}
 
@@ -209,7 +209,7 @@ namespace StockProductorCF.Vistas
 
 		#region Métodos comunes
 
-		private void InicializarVariablesGlobales()
+		private void InicializarValoresGenerales()
 		{
 			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProductores));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);

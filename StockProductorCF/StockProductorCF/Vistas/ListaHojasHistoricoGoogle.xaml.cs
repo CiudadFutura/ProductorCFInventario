@@ -24,12 +24,14 @@ namespace StockProductorCF.Vistas
 			CargarListaHojas();
 		}
 
-		private void EnviarPaginaPuntosVenta(string linkHoja)
+		private void EnviarPaginaPuntosVenta(string linkHoja, string linkHojaCeldas)
 		{
 			//Almacenar la hoja para el historial de movimientos
 			CuentaUsuario.AlmacenarLinkHojaHistoricos(linkHoja);
 			//Almacena la hoja de Histórico en el diccionario para cambiarla cuando se cambie la hoja de stock
 			CuentaUsuario.AlmacenarLinkHistoricosDeHoja(CuentaUsuario.ObtenerLinkHojaConsulta(), linkHoja);
+			//Almacena la hoja de Histórico (celdas) en el diccionario para cambiarla cuando se cambie la hoja de stock
+			CuentaUsuario.AlmacenarLinkHistoricosCeldasDeHoja(CuentaUsuario.ObtenerLinkHojaConsulta(), linkHojaCeldas);
 
 			ContentPage pagina = new OpcionPuntosVenta(_servicio, _listaHojas);
 			Navigation.PushAsync(pagina);
@@ -52,7 +54,7 @@ namespace StockProductorCF.Vistas
 				var esPuntosVenta = CuentaUsuario.VerificarHojaPuntosVentaUsada(linkHoja);
 
 				if (estaSeleccionada || estaUsada) continue; //Si la hoja está siendo usada para inventario o fue seleccionada en el paso anterior no la exponemos para históricos.
-				var hoja = new ClaseHoja(linkHistoricos, datosHoja.Title.Text, false, false, esHistorico, esPuntosVenta, esTeclaPar);
+				var hoja = new ClaseHoja(linkHistoricos, datosHoja.Title.Text, false, false, esHistorico, esPuntosVenta, esTeclaPar, linkHoja);
 				listaHojas.Add(hoja);
 				esTeclaPar = !esTeclaPar;
 			}
@@ -96,7 +98,7 @@ namespace StockProductorCF.Vistas
 					celda.Tapped += (sender, args) =>
 					{
 						var hoja = (ClaseHoja)((ViewCell)sender).BindingContext;
-						EnviarPaginaPuntosVenta(hoja.Link);
+						EnviarPaginaPuntosVenta(hoja.Link, hoja.LinkHistoricoCeldas);
 						celda.View.BackgroundColor = Color.Silver;
 					};
 

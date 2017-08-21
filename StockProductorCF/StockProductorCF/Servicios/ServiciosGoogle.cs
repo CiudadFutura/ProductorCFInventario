@@ -62,16 +62,22 @@ namespace StockProductorCF.Servicios
 			// Agrega el Movimiento
 			fila += "<gsx:cantidad>" + movimiento + "</gsx:cantidad>";
 			// Agrega el Precio total
-			fila += "<gsx:preciototal>" + precio + "</gsx:preciototal>";
-			// Agrega el Costo unitario
 			double precioNumero;
-			var costoUnitario = movimiento > 0 && double.TryParse(precio, out precioNumero) ? precioNumero / movimiento : 0;
+			if(!double.TryParse(precio, out precioNumero))
+				precioNumero = 0;
+			fila += "<gsx:preciototal>" + Math.Abs(precioNumero) + "</gsx:preciototal>";
+			// Agrega el Costo unitario
+			var costoUnitario = movimiento != 0 ? Math.Abs(precioNumero) / Math.Abs(movimiento) : 0;
 			fila += "<gsx:costounitario>" + costoUnitario + "</gsx:costounitario>";
 			// Agrega el Lugar (proveedor o punto de venta)
 			fila += "<gsx:lugar>" + lugar + "</gsx:lugar>";
 			// Agrega el Usuario
-			var usuario = CuentaUsuario.ObtenerNombreUsuarioGoogle() ?? "";
+			var usuario = CuentaUsuario.ObtenerNombreUsuarioGoogle() ?? "-";
 			fila += "<gsx:usuario>" + usuario + "</gsx:usuario>";
+			// Agrega Eliminado
+			fila += "<gsx:eliminado>-</gsx:eliminado>";
+			// Agrega Eliminado por
+			fila += "<gsx:eliminadopor>-</gsx:eliminadopor>";
 			// Cierra la fila
 			fila += "</entry>";
 
@@ -85,8 +91,8 @@ namespace StockProductorCF.Servicios
 			const string tipoDelContenido = "application/atom+xml";
 			var fila = ObtenerHistorico(celdaMovimiento, movimiento, precio, puntoVenta, producto, nombresColumnas, listaColumnasInventario);
 			// Convierte el contenido de la fila en stream
-			byte[] filaEnArregloDeBytes = Encoding.UTF8.GetBytes(fila);
-			MemoryStream filaEnStream = new MemoryStream(filaEnArregloDeBytes);
+			var filaEnArregloDeBytes = Encoding.UTF8.GetBytes(fila);
+			var filaEnStream = new MemoryStream(filaEnArregloDeBytes);
 			// Inserta la fila en la hoja Historial (Google)
 			servicio.Insert(new Uri(url), filaEnStream, tipoDelContenido, "");
 		}

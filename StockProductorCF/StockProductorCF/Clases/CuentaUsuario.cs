@@ -111,6 +111,11 @@ namespace StockProductorCF.Clases
 			GuardarValorEnCuentaLocal(linkHojaConsulta + "|historico", linkHojaHistoricos);
 		}
 
+		internal static void AlmacenarLinkHistoricosCeldasDeHoja(string linkHojaConsulta, string linkHojaHistoricosCeldas)
+		{
+			GuardarValorEnCuentaLocal(linkHojaConsulta + "|historicoCeldas", linkHojaHistoricosCeldas);
+		}
+
 		internal static void AlmacenarPuntosVentaDeHoja(string linkHojaConsulta, string puntosVenta)
 		{
 			GuardarValorEnCuentaLocal(linkHojaConsulta + "|puntosVenta", puntosVenta);
@@ -237,6 +242,11 @@ namespace StockProductorCF.Clases
 			return RecuperarValorDeCuentaLocal("linkHojaHistoricos");
 		}
 
+		internal static string ObtenerLinkHojaHistoricosCeldas(string link)
+		{
+			return RecuperarValorDeCuentaLocal(link + "|historicoCeldas");
+		}
+
 		internal static string ObtenerPuntosVenta()
 		{
 			return RecuperarValorDeCuentaLocal("puntosVenta");
@@ -294,6 +304,7 @@ namespace StockProductorCF.Clases
 						AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(link + "|ver"));
 						AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(link + "|inventario"));
 						AlmacenarLinkHojaHistoricos(RecuperarValorDeCuentaLocal(link + "|historico"));
+						AlmacenarLinkHojaHistoricos(RecuperarValorDeCuentaLocal(link + "|historicoCeldas"));
 						var puntosVentas = RecuperarValorDeCuentaLocal(link + "|puntosVenta"); // Puntos de venta son opcionales
 						if(puntosVentas != null)
 							AlmacenarPuntosVenta(puntosVentas);

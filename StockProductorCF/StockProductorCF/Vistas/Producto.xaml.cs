@@ -26,8 +26,7 @@ namespace StockProductorCF.Vistas
 		public Producto(CellEntry[] producto, string[] nombresColumnas, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProductores));
-			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
+			InicializarValoresGenerales();
 			_producto = producto;
 			_servicio = servicio;
 			_nombresColumnas = nombresColumnas;
@@ -47,12 +46,17 @@ namespace StockProductorCF.Vistas
 		public Producto(string[] productoBD, string[] nombresColumnas)
 		{
 			InitializeComponent();
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProductores));
-			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
+			InicializarValoresGenerales();
 			_productoString = productoBD;
 			_nombresColumnas = nombresColumnas;
 
 			CargarDatosProductos();
+		}
+
+		private void InicializarValoresGenerales()
+		{
+			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProductores));
+			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 		}
 
 		private void CargarDatosProductos()
@@ -253,7 +257,7 @@ namespace StockProductorCF.Vistas
 
 		private void DefinirSigno(object sender, EventArgs e)
 		{
-			var boton = ((Button)sender);
+			var boton = (Button)sender;
 			var columna = Convert.ToInt32(boton.StyleId);
 			boton.Text = _signoPositivo[columna] ? "-" : "+";
 			_signoPositivo.SetValue(boton.Text == "+", columna);
@@ -303,6 +307,18 @@ namespace StockProductorCF.Vistas
 			await DisplayAlert("Producto", _mensaje, "Listo");
 		}
 
+		[Android.Runtime.Preserve]
+		private async void AccederMovimientos(object sender, EventArgs args)
+		{
+			await Navigation.PushAsync(new ProductoMovimientos(_producto, _servicio));
+		}
+
+		[Android.Runtime.Preserve]
+		private async void Volver(object sender, EventArgs args)
+		{
+			await Navigation.PopAsync();
+		}
+
 		private async void GuardarProductoHojaDeCalculoGoogle()
 		{
 			_mensaje = "Ha ocurrido un error mientras se guardaba el movimiento.";
@@ -315,7 +331,7 @@ namespace StockProductorCF.Vistas
 					var multiplicador = _signoPositivo[(int)celda.Column - 1] ? 1 : -1;
 					var movimiento = _movimientos[(int)celda.Column - 1];
 					var precio = _precios[(int)celda.Column - 1];
-					var lugar = _listaLugares != null ? _lugares[(int)celda.Column - 1] : "No";
+					var lugar = _listaLugares != null ? _lugares[(int)celda.Column - 1] : "No tiene configurado.";
 
 					if (movimiento != 0)
 					{
@@ -343,7 +359,7 @@ namespace StockProductorCF.Vistas
 			_mensaje = grabo ? "El movimiento ha sido guardado correctamente." : "No se han registrado movimientos.";
 		}
 
-		private async void GuardarProductoBaseDeDatos()
+		private void GuardarProductoBaseDeDatos()
 		{
 			_mensaje = "Ha ocurrido un error mientras se guardaba el movimiento.";
 			//const string url = @"http://169.254.80.80/PruebaMision/Service.asmx/ActualizarProducto?codigo={0}&movimiento={1}";

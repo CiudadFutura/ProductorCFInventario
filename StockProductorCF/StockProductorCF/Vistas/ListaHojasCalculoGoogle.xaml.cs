@@ -173,7 +173,8 @@ namespace StockProductorCF.Vistas
 	public class ClaseHoja
 	{
 		[Android.Runtime.Preserve]
-		public ClaseHoja(string link, string nombre, bool desvincular, bool esInventario, bool esHistorico, bool esPuntoVenta, bool esTeclaPar)
+		public ClaseHoja(string link, string nombre, bool desvincular, bool esInventario, bool esHistorico, bool esPuntoVenta, bool esTeclaPar, 
+			string linkHistoricoCeldas = null)
 		{
 			Link = link;
 			Nombre = nombre;
@@ -182,6 +183,7 @@ namespace StockProductorCF.Vistas
 			var nombreArchivoIcono = desvincular ? "refrescarHoja" : esInventario ? "hojaInventario" : esHistorico ? "hojaHistoricos" : "hojaPtoVta";
 			ArchivoIcono = ImageSource.FromResource($"StockProductorCF.Imagenes.{nombreArchivoIcono}.png");
 			ColorFondo = esTeclaPar ? Color.FromHex("#EDEDED") : Color.FromHex("#E2E2E1");
+			LinkHistoricoCeldas = linkHistoricoCeldas;
 		}
 
 		[Android.Runtime.Preserve]
@@ -196,6 +198,8 @@ namespace StockProductorCF.Vistas
 		public ImageSource ArchivoIcono { get; }
 		[Android.Runtime.Preserve]
 		public Color ColorFondo { get; }
+		[Android.Runtime.Preserve]
+		public string LinkHistoricoCeldas { get; }
 	}
 
 }

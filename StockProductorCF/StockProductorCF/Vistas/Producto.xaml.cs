@@ -36,7 +36,7 @@ namespace StockProductorCF.Vistas
 			var i = 0;
 			foreach (var celda in producto)
 			{
-				_productoString.SetValue(celda.InputValue, i);
+				_productoString.SetValue(celda.Value, i);
 				i = i + 1;
 			}
 
@@ -335,12 +335,12 @@ namespace StockProductorCF.Vistas
 
 					if (movimiento != 0)
 					{
-						celda.InputValue = (Convert.ToDouble(celda.InputValue) + multiplicador * movimiento).ToString();
+						//celda.InputValue = (Convert.ToDouble(celda.InputValue) + multiplicador * movimiento).ToString();
 
 						try
 						{
 							// Actualiza la celda en Google
-							celda.Update();
+							//celda.Update();
 							// Inserta histórico en Google
 							servicioGoogle.InsertarHistoricos(_servicio, celda, multiplicador * movimiento, precio, lugar, _producto, _nombresColumnas, _listaColumnasInventario);
 							

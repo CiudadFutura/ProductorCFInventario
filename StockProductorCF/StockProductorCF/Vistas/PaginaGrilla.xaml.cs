@@ -323,7 +323,7 @@ namespace StockProductorCF.Vistas
 				esTeclaPar = !esTeclaPar;
 			}
 
-			var anchoColumnaNombreProd = CuentaUsuario.ObtenerAccesoDatos() == "G" ? 115 : 200;
+			var anchoColumnaNombreProd = CuentaUsuario.ObtenerAccesoDatos() == "G" ? 120 : 200;
 
 			var titulo = _nombresColumnas != null && _nombresColumnas.Length > 1 ? _nombresColumnas[1].ToUpper() : "PRODUCTO";
 			var encabezado = new StackLayout
@@ -336,9 +336,9 @@ namespace StockProductorCF.Vistas
 								{
 									new Label
 									{
-										Text = "     " + titulo,
+										Text = "  " + titulo,
 										FontSize = 13,
-										HorizontalOptions = LayoutOptions.Start,
+										HorizontalOptions = LayoutOptions.Center,
 										FontAttributes = FontAttributes.Bold,
 										TextColor = Color.Black,
 										VerticalTextAlignment = TextAlignment.Center,

@@ -304,8 +304,7 @@ namespace StockProductorCF.Clases
 						AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(link + "|ver"));
 						AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(link + "|inventario"));
 						AlmacenarLinkHojaHistoricos(RecuperarValorDeCuentaLocal(link + "|historico"));
-						AlmacenarLinkHojaHistoricos(RecuperarValorDeCuentaLocal(link + "|historicoCeldas"));
-						var puntosVentas = RecuperarValorDeCuentaLocal(link + "|puntosVenta"); // Puntos de venta son opcionales
+					var puntosVentas = RecuperarValorDeCuentaLocal(link + "|puntosVenta"); // Puntos de venta son opcionales
 						if(puntosVentas != null)
 							AlmacenarPuntosVenta(puntosVentas);
 						else
@@ -333,6 +332,7 @@ namespace StockProductorCF.Clases
 			RemoverValorEnCuentaLocal(linkHoja + "|hojaPuntosVenta");
 			RemoverValorEnCuentaLocal(linkHoja + "|ver");
 			RemoverValorEnCuentaLocal(linkHoja + "|inventario");
+			RemoverValorEnCuentaLocal(linkHoja + "|historicoCeldas");
 
 			//Si es la hoja actual vuela la memoria de uso
 			if (ObtenerLinkHojaConsulta() != linkHoja) return;

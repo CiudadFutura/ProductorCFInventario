@@ -17,7 +17,7 @@ namespace StockProductorCF.Vistas
 			InitializeComponent();
 			_servicio = servicio;
 			_listaHojas = listaHojas;
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 		}
 
@@ -25,7 +25,7 @@ namespace StockProductorCF.Vistas
 		private void SeleccionarHojaPtosVtas(object sender, EventArgs args)
 		{
 			var pagina = new ListaHojasPtosVtaGoogle(_servicio, _listaHojas);
-			Navigation.PushAsync(pagina);
+			Navigation.PushAsync(pagina, true);
 		}
 
 		[Android.Runtime.Preserve]
@@ -35,7 +35,7 @@ namespace StockProductorCF.Vistas
 			CuentaUsuario.RemoverValorEnCuentaLocal("puntosVenta");
 
 			ContentPage pagina = new SeleccionColumnasParaVer(CuentaUsuario.ObtenerLinkHojaConsulta(), _servicio);
-			Navigation.PushAsync(pagina);
+			Navigation.PushAsync(pagina, true);
 		}
 
 		protected override void OnSizeAllocated(double ancho, double alto)

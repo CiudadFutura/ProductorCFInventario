@@ -12,7 +12,7 @@ namespace StockProductorCF.Vistas
 	{
 		private bool[] _signoPositivo;
 		private double[] _movimientos;
-		private string[] _precios;
+		private double[] _precios;
 		private string[] _lugares;
 		private readonly CellEntry[] _producto;
 		private string[] _listaColumnasInventario;
@@ -55,7 +55,7 @@ namespace StockProductorCF.Vistas
 
 		private void InicializarValoresGenerales()
 		{
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProductores));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProductores));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 		}
 
@@ -74,7 +74,7 @@ namespace StockProductorCF.Vistas
 
 			_signoPositivo = new bool[_productoString.Length];
 			_movimientos = new double[_productoString.Length];
-			_precios = new string[_productoString.Length];
+			_precios = new double[_productoString.Length];
 			_lugares = new string[_productoString.Length];
 			var i = 0;
 
@@ -276,7 +276,7 @@ namespace StockProductorCF.Vistas
 					{
 						columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
 						valor = ((Entry)control).Text;
-						valor = !string.IsNullOrEmpty(valor) ? valor : "0";
+						valor = !string.IsNullOrEmpty(valor) ? valor.Replace('.',',') : "0"; //Todos los decimales con coma, evita problema de cultura.
 						_movimientos.SetValue(Convert.ToDouble(valor), columna);
 					}
 
@@ -284,8 +284,8 @@ namespace StockProductorCF.Vistas
 					{
 						columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
 						valor = ((Entry)control).Text;
-						valor = !string.IsNullOrEmpty(valor) ? valor : "-";
-						_precios.SetValue(valor, columna);
+						valor = !string.IsNullOrEmpty(valor) ? valor.Replace('.', ',') : "0"; //Todos los decimales con coma, evita problema de cultura.
+						_precios.SetValue(Convert.ToDouble(valor), columna);
 					}
 
 					if (_listaLugares != null && control.StyleId != null && control.StyleId.Contains("punto-"))
@@ -310,7 +310,7 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		private async void AccederMovimientos(object sender, EventArgs args)
 		{
-			await Navigation.PushAsync(new ProductoMovimientos(_producto, _servicio));
+			await Navigation.PushAsync(new ProductoMovimientos(_producto, _servicio), true);
 		}
 
 		[Android.Runtime.Preserve]

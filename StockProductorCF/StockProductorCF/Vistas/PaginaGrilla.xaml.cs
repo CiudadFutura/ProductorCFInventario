@@ -17,7 +17,7 @@ namespace StockProductorCF.Vistas
 	public partial class PaginaGrilla
 	{
 		private readonly ServiciosGoogle _servicioGoogle;
-		private SpreadsheetsService _servicio;
+		private readonly SpreadsheetsService _servicio;
 		private CellFeed _celdas;
 		private string _linkHojaConsulta;
 		private string[] _nombresColumnas;
@@ -33,7 +33,7 @@ namespace StockProductorCF.Vistas
 		private Image _escanearCodigo;
 		private Picker _listaHojas;
 		private double _anchoActual;
-		private LugaresCompraVenta _lugares;
+		private readonly LugaresCompraVenta _lugares;
 
 		//Constructor para Hoja de cálculo de Google
 		public PaginaGrilla(string linkHojaConsulta, SpreadsheetsService servicio)
@@ -211,7 +211,7 @@ namespace StockProductorCF.Vistas
 
 		private void InicializarValoresGenerales()
 		{
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProductores));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProductores));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 
 			ConfigurarBotones();
@@ -236,11 +236,11 @@ namespace StockProductorCF.Vistas
 
 		private void ConfigurarBotones()
 		{
-			_accesoDatos = App.ObtenerImagen(TipoImagen.BotonAccesoDatos);
+			_accesoDatos = App.Instancia.ObtenerImagen(TipoImagen.BotonAccesoDatos);
 			_accesoDatos.GestureRecognizers.Add(new TapGestureRecognizer(AccederDatos));
-			_refrescar = App.ObtenerImagen(TipoImagen.BotonRefrescarDatos);
+			_refrescar = App.Instancia.ObtenerImagen(TipoImagen.BotonRefrescarDatos);
 			_refrescar.GestureRecognizers.Add(new TapGestureRecognizer(RefrescarDatos));
-			_escanearCodigo = App.ObtenerImagen(TipoImagen.BotonEscanearCodigo);
+			_escanearCodigo = App.Instancia.ObtenerImagen(TipoImagen.BotonEscanearCodigo);
 			_escanearCodigo.GestureRecognizers.Add(new TapGestureRecognizer(AbrirPaginaEscaner));
 
 			ContenedorBotones.Children.Add(_accesoDatos);
@@ -274,7 +274,7 @@ namespace StockProductorCF.Vistas
 					//Si encontró producto (fila > -1) y ya pasó alpróximo producto (celda.Row > fila) o es el último producto (celda.Column == _celdas.ColCount.Count)
 					if (fila > -1 && (celda.Row > fila || celda.Column == _celdas.ColCount.Count))
 					{
-						await Navigation.PushAsync(new Producto(productoSeleccionado, _nombresColumnas, _servicio));
+						await Navigation.PushAsync(new Producto(productoSeleccionado, _nombresColumnas, _servicio), true);
 						break;
 					}
 				}
@@ -285,7 +285,7 @@ namespace StockProductorCF.Vistas
 				{
 					if (producto[0] != codigoProductoSeleccionado) continue;
 					fila = 0;
-					await Navigation.PushAsync(new Producto(producto, _nombresColumnas));
+					await Navigation.PushAsync(new Producto(producto, _nombresColumnas), true);
 					break;
 				}
 			}
@@ -467,7 +467,7 @@ namespace StockProductorCF.Vistas
 			Device.StartTimer(TimeSpan.FromMilliseconds(300), () =>
 			{
 				var paginaAccesoDatos = new AccesoDatos();
-				Navigation.PushAsync(paginaAccesoDatos);
+				Navigation.PushAsync(paginaAccesoDatos, true);
 				_accesoDatos.Opacity = 1f;
 				return false;
 			});

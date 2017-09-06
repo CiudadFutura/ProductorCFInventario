@@ -41,7 +41,7 @@ namespace StockProductorCF.Servicios
 			return celdas;
 		}
 
-		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, string precio, string lugar, CellEntry[] producto, 
+		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, double precio, string lugar, CellEntry[] producto, 
 			string[] nombresColumnas, string[] listaColumnasInventario)
 		{
 			// Abre la fila
@@ -62,12 +62,9 @@ namespace StockProductorCF.Servicios
 			// Agrega el Movimiento
 			fila += "<gsx:cantidad>" + movimiento + "</gsx:cantidad>";
 			// Agrega el Precio total
-			double precioNumero;
-			if(!double.TryParse(precio, out precioNumero))
-				precioNumero = 0;
-			fila += "<gsx:preciototal>" + Math.Abs(precioNumero) + "</gsx:preciototal>";
+			fila += "<gsx:preciototal>" + Math.Abs(precio) + "</gsx:preciototal>";
 			// Agrega el Costo unitario
-			var costoUnitario = movimiento != 0 ? Math.Abs(precioNumero) / Math.Abs(movimiento) : 0;
+			var costoUnitario = movimiento != 0 ? Math.Round(Math.Abs(precio / movimiento), 2) : 0;
 			fila += "<gsx:costounitario>" + costoUnitario + "</gsx:costounitario>";
 			// Agrega el Lugar (proveedor o punto de venta)
 			fila += "<gsx:lugar>" + lugar + "</gsx:lugar>";
@@ -84,7 +81,7 @@ namespace StockProductorCF.Servicios
 			return fila;
 		}
 
-		public void InsertarHistoricos(SpreadsheetsService servicio, CellEntry celdaMovimiento, double movimiento, string precio, string puntoVenta, CellEntry[] producto, 
+		public void InsertarHistoricos(SpreadsheetsService servicio, CellEntry celdaMovimiento, double movimiento, double precio, string puntoVenta, CellEntry[] producto, 
 			string[] nombresColumnas, string[] listaColumnasInventario)
 		{
 			var url = CuentaUsuario.ObtenerLinkHojaHistoricos();

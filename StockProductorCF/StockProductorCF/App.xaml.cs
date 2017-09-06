@@ -12,10 +12,12 @@ namespace StockProductorCF
 		public static double AnchoApaisadoDePantalla;
 		public static bool EstaApaisado;
 		public const string RutaImagenSombraEncabezado = "StockProductorCF.Imagenes.sombraEncabezado.png";
+		public static App Instancia;
 
 		public App()
 		{
 			InitializeComponent();
+			Instancia = this;
 
 			var columnasParaVer = CuentaUsuario.ObtenerColumnasParaVer();
 			var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
@@ -64,7 +66,7 @@ namespace StockProductorCF
 			AnchoApaisadoDePantalla = EstaApaisado ? anchoEnPixel / densidad : altoEnPixel / densidad;
 		}
 
-		public static Image ObtenerImagen(TipoImagen tipoImagen, bool apaisada = false)
+		public Image ObtenerImagen(TipoImagen tipoImagen, bool apaisada = false)
 		{
 			LayoutOptions alineacionHorizontal;
 			ImageSource fuenteArchivo;
@@ -104,6 +106,11 @@ namespace StockProductorCF
 				Source = fuenteArchivo,
 				HeightRequest = altoImagen
 			};
+		}
+
+		public void LimpiarNavegadorLuegoIrPagina(ContentPage pagina)
+		{
+			MainPage = new NavigationPage(pagina);
 		}
 
 	}

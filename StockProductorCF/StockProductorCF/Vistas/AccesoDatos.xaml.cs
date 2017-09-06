@@ -10,7 +10,7 @@ namespace StockProductorCF.Vistas
 		public AccesoDatos()
 		{
 			InitializeComponent();
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 		}
 
@@ -18,14 +18,14 @@ namespace StockProductorCF.Vistas
 		private void ConectarGoogle(object sender, EventArgs args)
 		{
 			var paginaAuntenticacion = new PaginaAuntenticacion();
-			Navigation.PushAsync(paginaAuntenticacion);
+			Navigation.PushAsync(paginaAuntenticacion, true);
 		}
 
 		[Android.Runtime.Preserve]
 		private void ConectarBaseDatos(object sender, EventArgs args)
 		{
 			var paginaConexionBaseDatos = new PaginaConexionBaseDeDatos();
-			Navigation.PushAsync(paginaConexionBaseDatos);
+			Navigation.PushAsync(paginaConexionBaseDatos, true);
 		}
 
 		protected override void OnSizeAllocated(double ancho, double alto)

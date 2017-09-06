@@ -12,7 +12,7 @@ namespace StockProductorCF.Vistas
 		public PaginaConexionBaseDeDatos()
 		{
 			InitializeComponent();
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			CuentaUsuario.AlmacenarAccesoDatos("B");
 			Usuario.Text = CuentaUsuario.ObtenerUsuarioDeBaseDeDatos();
@@ -39,7 +39,7 @@ namespace StockProductorCF.Vistas
 				CuentaUsuario.AlmacenarColumnasInventario("0,0,1");
 
 				var paginaGrilla = new PaginaGrilla();
-				await Navigation.PushAsync(paginaGrilla);
+				await Navigation.PushAsync(paginaGrilla, true);
 				//}
 			}
 		}

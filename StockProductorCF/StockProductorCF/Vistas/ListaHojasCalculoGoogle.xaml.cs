@@ -4,7 +4,6 @@ using Google.GData.Spreadsheets;
 using Xamarin.Forms;
 using StockProductorCF.Clases;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace StockProductorCF.Vistas
 {
@@ -17,7 +16,7 @@ namespace StockProductorCF.Vistas
 		public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
 		{
 			InitializeComponent();
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_listaHojas = listaHojas;
@@ -64,7 +63,7 @@ namespace StockProductorCF.Vistas
 
 					pagina = new ListaHojasHistoricoGoogle(_servicio, _listaHojas);
 				}
-				await Navigation.PushAsync(pagina);
+				await Navigation.PushAsync(pagina, true);
 			}
 		}
 

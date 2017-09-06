@@ -20,7 +20,7 @@ namespace StockProductorCF.Vistas
 		public SeleccionColumnasParaVer(string linkHojaConsulta, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_linkHojaConsulta = linkHojaConsulta;
@@ -53,7 +53,7 @@ namespace StockProductorCF.Vistas
 			}
 			catch (Exception)
 			{
-				Navigation.PushAsync(new AccesoDatos());
+				Navigation.PushAsync(new AccesoDatos(), true);
 			}
 		}
 
@@ -110,7 +110,7 @@ namespace StockProductorCF.Vistas
 		{
 			CuentaUsuario.AlmacenarColumnasParaVerDeHoja(_linkHojaConsulta, string.Join(",", _listaColumnas));
 			var paginaSeleccionColumnasInventario = new SeleccionColumnasInventario(_columnas, _linkHojaConsulta, _servicio);
-			Navigation.PushAsync(paginaSeleccionColumnasInventario);
+			Navigation.PushAsync(paginaSeleccionColumnasInventario, true);
 		}
 
 		protected override async void OnSizeAllocated(double ancho, double alto)

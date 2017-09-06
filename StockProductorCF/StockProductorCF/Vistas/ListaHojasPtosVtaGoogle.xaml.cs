@@ -16,7 +16,7 @@ namespace StockProductorCF.Vistas
 		public ListaHojasPtosVtaGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
 		{
 			InitializeComponent();
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_listaHojas = listaHojas;
@@ -32,21 +32,11 @@ namespace StockProductorCF.Vistas
 				Navigation.InsertPageBefore(paginaAuntenticacion, this);
 				await Navigation.PopAsync();
 			}
-			//Se almacena el link para recobrar los datos de puntos de venta de la hoja cuando ingrese nuevamente.
-			//ObtenerPuntosVenta(linkHoja);
-			//var puntosVentaTexto = "";
-			//foreach (CellEntry celda in _celdas.Entries)
-			//{
-			//if(celda.Row != 1)
-			//puntosVentaTexto += celda.Value + "|";
-			//}
 
-			//CuentaUsuario.AlmacenarPuntosVenta(puntosVentaTexto.TrimEnd('|'));
-			//CuentaUsuario.AlmacenarPuntosVentaDeHoja(CuentaUsuario.ObtenerLinkHojaConsulta(), puntosVentaTexto.TrimEnd('|'));
 			CuentaUsuario.AlmacenarLinkHojaPuntosVentaDeHoja(CuentaUsuario.ObtenerLinkHojaConsulta(), linkHoja);
 
 			ContentPage pagina = new SeleccionColumnasParaVer(CuentaUsuario.ObtenerLinkHojaConsulta(), _servicio);
-			await Navigation.PushAsync(pagina);
+			await Navigation.PushAsync(pagina, true);
 		}
 
 		private void CargarListaHojas()

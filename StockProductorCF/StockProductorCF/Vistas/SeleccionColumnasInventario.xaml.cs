@@ -5,6 +5,7 @@ using Xamarin.Forms;
 using StockProductorCF.Clases;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace StockProductorCF.Vistas
 {
@@ -18,7 +19,7 @@ namespace StockProductorCF.Vistas
 		public SeleccionColumnasInventario(IReadOnlyCollection<CellEntry> columnas, string linkHojaConsulta, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_linkHojaConsulta = linkHojaConsulta;
@@ -77,11 +78,11 @@ namespace StockProductorCF.Vistas
 		}
 
 		[Android.Runtime.Preserve]
-		private void Listo(object sender, EventArgs e)
+		private async void Listo(object sender, EventArgs e)
 		{
 			CuentaUsuario.AlmacenarColumnasInventarioDeHoja(_linkHojaConsulta, string.Join(",", _listaColumnas));
 			var paginaGrilla = new PaginaGrilla(_linkHojaConsulta, _servicio);
-			Navigation.PushAsync(paginaGrilla);
+			App.Instancia.LimpiarNavegadorLuegoIrPagina(paginaGrilla);
 		}
 
 		protected override async void OnSizeAllocated(double ancho, double alto)

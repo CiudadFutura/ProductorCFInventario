@@ -49,7 +49,7 @@ namespace StockProductorCF.Vistas
 
 		private void InicializarValoresGenerales()
 		{
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProductores));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProductores));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			if(_productoString.Length > 1)
 				Titulo.Text += " " + _productoString[1];

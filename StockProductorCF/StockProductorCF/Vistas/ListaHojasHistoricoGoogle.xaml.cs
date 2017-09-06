@@ -16,7 +16,7 @@ namespace StockProductorCF.Vistas
 		public ListaHojasHistoricoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
 		{
 			InitializeComponent();
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_listaHojas = listaHojas;
@@ -34,7 +34,7 @@ namespace StockProductorCF.Vistas
 			CuentaUsuario.AlmacenarLinkHistoricosCeldasDeHoja(CuentaUsuario.ObtenerLinkHojaConsulta(), linkHojaCeldas);
 
 			ContentPage pagina = new OpcionPuntosVenta(_servicio, _listaHojas);
-			Navigation.PushAsync(pagina);
+			Navigation.PushAsync(pagina, true);
 		}
 
 		private void CargarListaHojas()

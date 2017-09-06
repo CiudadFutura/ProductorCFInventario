@@ -17,7 +17,7 @@ namespace StockProductorCF.Vistas
 		public ListaLibrosGoogle(SpreadsheetsService servicio, AtomEntryCollection listaLibros)
 		{
 			InitializeComponent();
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_listaLibros = listaLibros;
@@ -30,7 +30,7 @@ namespace StockProductorCF.Vistas
 			var hojas = new ServiciosGoogle().ObtenerListaHojas(linkLibro, _servicio);
 
 			var paginaListaLibros = new ListaHojasCalculoGoogle(_servicio, hojas.Entries);
-			Navigation.PushAsync(paginaListaLibros);
+			Navigation.PushAsync(paginaListaLibros, true);
 		}
 
 		private void CargarListaLibros()

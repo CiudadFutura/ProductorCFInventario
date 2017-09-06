@@ -25,7 +25,7 @@ namespace StockProductorCF.WinPhone
         {
             this.InitializeComponent();
 
-            StockProductorCF.App.AlmacenarAnchoPantalla((int)Window.Current.Bounds.Width, (int)Window.Current.Bounds.Width);
+            StockProductorCF.App.AlmacenarAnchoPantalla(1, (int)Window.Current.Bounds.Width, (int)Window.Current.Bounds.Height);
 
             this.Suspending += this.OnSuspending;
         }

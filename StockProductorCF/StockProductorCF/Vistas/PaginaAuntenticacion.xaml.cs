@@ -4,7 +4,6 @@ using StockProductorCF.Servicios;
 using StockProductorCF.Vistas;
 using System;
 using System.Net.Http;
-using Windows.UI.Xaml;
 using Xamarin.Forms;
 
 namespace StockProductorCF
@@ -18,7 +17,7 @@ namespace StockProductorCF
 		public PaginaAuntenticacion(bool conexionExistente = false)
 		{
 			InitializeComponent();
-			Cabecera.Children.Add(App.ObtenerImagen(TipoImagen.EncabezadoProyectos));
+			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			CuentaUsuario.AlmacenarAccesoDatos("G");
 			_conexionExistente = conexionExistente; //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros

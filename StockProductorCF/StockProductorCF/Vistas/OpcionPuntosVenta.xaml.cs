@@ -34,7 +34,7 @@ namespace StockProductorCF.Vistas
 			//Si no configuro Puntos de venta lo saco de la memoria para que no muestre el campo en Productos.
 			CuentaUsuario.RemoverValorEnCuentaLocal("puntosVenta");
 
-			ContentPage pagina = new SeleccionColumnasParaVer(CuentaUsuario.ObtenerLinkHojaConsulta(), _servicio);
+			ContentPage pagina = new SeleccionColumnasParaVer(_servicio);
 			Navigation.PushAsync(pagina, true);
 		}
 

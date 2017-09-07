@@ -20,8 +20,6 @@ namespace StockProductorCF.Vistas
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_listaHojas = listaHojas;
-
-			CargarListaHojas();
 		}
 
 		private async void EnviarPaginaSeleccionColumnas(string linkHoja)
@@ -35,7 +33,7 @@ namespace StockProductorCF.Vistas
 
 			CuentaUsuario.AlmacenarLinkHojaPuntosVentaDeHoja(CuentaUsuario.ObtenerLinkHojaConsulta(), linkHoja);
 
-			ContentPage pagina = new SeleccionColumnasParaVer(CuentaUsuario.ObtenerLinkHojaConsulta(), _servicio);
+			ContentPage pagina = new SeleccionColumnasParaVer(_servicio);
 			await Navigation.PushAsync(pagina, true);
 		}
 
@@ -128,6 +126,12 @@ namespace StockProductorCF.Vistas
 					await GrupoEncabezado.TranslateTo(0, 0, 1000);
 			}
 			_anchoActual = ancho;
+		}
+
+		//Cuando carga la página y cuando vuelve.
+		protected override void OnAppearing()
+		{
+			CargarListaHojas();
 		}
 	}
 

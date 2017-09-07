@@ -21,24 +21,24 @@ namespace StockProductorCF.Servicios
 			return servicio;
 		}
 
-		public SpreadsheetFeed ObtenerListaLibros(SpreadsheetsService servicio)
+		public AtomEntryCollection ObtenerListaLibros(SpreadsheetsService servicio)
 		{
 			var consulta = new SpreadsheetQuery();
-			return servicio.Query(consulta);
+			var libros = servicio.Query(consulta);
+			return libros.Entries;
 		}
 
-		public WorksheetFeed ObtenerListaHojas(string linkLibro, SpreadsheetsService servicio)
+		public AtomEntryCollection ObtenerListaHojas(string linkLibro, SpreadsheetsService servicio)
 		{
 			var consulta = new WorksheetQuery(linkLibro);
-			return servicio.Query(consulta);
+			var hojas = servicio.Query(consulta);
+			return hojas.Entries;
 		}
 
 		public CellFeed ObtenerCeldasDeUnaHoja(string linkHojaConsulta, SpreadsheetsService servicio)
 		{
 			var consulta = new CellQuery(linkHojaConsulta);
-			var celdas = servicio.Query(consulta);
-
-			return celdas;
+			return servicio.Query(consulta);
 		}
 
 		public string ObtenerHistorico(CellEntry celdaMovimiento, double movimiento, double precio, string lugar, CellEntry[] producto, 

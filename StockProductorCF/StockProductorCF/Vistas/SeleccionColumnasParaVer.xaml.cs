@@ -6,6 +6,7 @@ using StockProductorCF.Servicios;
 using StockProductorCF.Clases;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace StockProductorCF.Vistas
 {
@@ -14,51 +15,78 @@ namespace StockProductorCF.Vistas
 		private readonly SpreadsheetsService _servicio;
 		private int[] _listaColumnas;
 		private List<CellEntry> _columnas;
-		private readonly string _linkHojaConsulta;
+		private string _linkHojaConsulta;
 		private double _anchoActual;
+		private CellFeed _celdas;
+		private readonly ActivityIndicator _indicadorActividad;
 
-		public SeleccionColumnasParaVer(string linkHojaConsulta, SpreadsheetsService servicio)
+		public SeleccionColumnasParaVer(SpreadsheetsService servicio)
 		{
 			InitializeComponent();
 			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
-			_linkHojaConsulta = linkHojaConsulta;
 
-			ObtenerColumnas();
+			_indicadorActividad = new ActivityIndicator
+			{
+				VerticalOptions = LayoutOptions.CenterAndExpand,
+				IsEnabled = true,
+				BindingContext = this
+			};
+			_indicadorActividad.SetBinding(IsVisibleProperty, "IsBusy");
+			_indicadorActividad.SetBinding(ActivityIndicator.IsRunningProperty, "IsBusy");
 		}
 
-		private void ObtenerColumnas()
+		private async void ObtenerColumnas()
 		{
 			try
 			{
-				var celdas = new ServiciosGoogle().ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
+				IsBusy = true;
 
-				_columnas = new List<CellEntry>(); //Columnas para listar en pantalla, si hay una de nombre Usuario - Movimiento se quita.
-
-				foreach (CellEntry celda in celdas.Entries)
+				await Task.Run(async () =>
 				{
-					if (celda.Row == 1)
+					if (CuentaUsuario.ValidarTokenDeGoogle())
 					{
-						_columnas.Add(celda);
+						_linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaConsulta();
+						if (_celdas == null || _celdas.RowCount.Count == 0)
+							_celdas = new ServiciosGoogle().ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
 					}
 					else
 					{
-						break;
+						//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
+						var paginaAuntenticacion = new PaginaAuntenticacion(true);
+						Navigation.InsertPageBefore(paginaAuntenticacion, this);
+						await Navigation.PopAsync();
 					}
-				}
-
-				_listaColumnas = Enumerable.Repeat(1, _columnas.Count).ToArray(); //El arreglo de columnas para ver, todas con valor inicial en 1
-				LlenarGrillaColumnasParaVer(_columnas);
+				});
 			}
-			catch (Exception)
+			finally
 			{
-				Navigation.PushAsync(new AccesoDatos(), true);
+				IsBusy = false; //Remueve el Indicador de Actividad.
 			}
+
+			_columnas = new List<CellEntry>(); //Columnas para listar en pantalla, si hay una de nombre Usuario - Movimiento se quita.
+
+			foreach (CellEntry celda in _celdas.Entries)
+			{
+				if (celda.Row == 1)
+				{
+					_columnas.Add(celda);
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			_listaColumnas = Enumerable.Repeat(1, _columnas.Count).ToArray(); //El arreglo de columnas para ver, todas con valor inicial en 1
+			LlenarGrillaColumnasParaVer(_columnas);
 		}
 
 		private void LlenarGrillaColumnasParaVer(List<CellEntry> columnas)
 		{
+			ContenedorColumnas.Children.Clear();
+
 			var esGris = false;
 			foreach (var columna in columnas)
 			{
@@ -130,6 +158,20 @@ namespace StockProductorCF.Vistas
 					await GrupoEncabezado.TranslateTo(0, 0, 1000);
 			}
 			_anchoActual = ancho;
+		}
+
+		//Cuando carga la página y cuando vuelve.
+		protected override void OnAppearing()
+		{
+			RefrescarDatos();
+		}
+
+		private void RefrescarDatos()
+		{
+			//Se quita la grilla para recargarla.
+			ContenedorColumnas.Children.Clear();
+			ContenedorColumnas.Children.Add(_indicadorActividad);
+			ObtenerColumnas();
 		}
 
 	}

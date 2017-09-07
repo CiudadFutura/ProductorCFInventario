@@ -37,9 +37,8 @@ namespace StockProductorCF.Vistas
 				CuentaUsuario.AlmacenarUsuarioDeBaseDeDatos(Usuario.Text.ToUpper());
 				CuentaUsuario.AlmacenarColumnasParaVer("0,1,1");
 				CuentaUsuario.AlmacenarColumnasInventario("0,0,1");
-
-				var paginaGrilla = new PaginaGrilla();
-				await Navigation.PushAsync(paginaGrilla, true);
+				
+				App.Instancia.LimpiarNavegadorLuegoIrPagina(new PaginaGrilla());
 				//}
 			}
 		}

@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Google.GData.Spreadsheets;
 using Xamarin.Forms;
 using StockProductorCF.Clases;

@@ -4,42 +4,78 @@ using Google.GData.Spreadsheets;
 using Xamarin.Forms;
 using StockProductorCF.Servicios;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using StockProductorCF.Clases;
 
 namespace StockProductorCF.Vistas
 {
 	public partial class ListaLibrosGoogle
 	{
-		private readonly AtomEntryCollection _listaLibros;
+		private AtomEntryCollection _listaLibros;
+		private readonly ServiciosGoogle _servicioGoogle;
 		private readonly SpreadsheetsService _servicio;
 		private bool _esTeclaPar;
 		private double _anchoActual;
+		private readonly ActivityIndicator _indicadorActividad;
 
-		public ListaLibrosGoogle(SpreadsheetsService servicio, AtomEntryCollection listaLibros)
+		public ListaLibrosGoogle(string tokenDeAcceso)
 		{
 			InitializeComponent();
 			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
-			_servicio = servicio;
-			_listaLibros = listaLibros;
 
-			CargarListaLibros();
-		}
+			_servicioGoogle = new ServiciosGoogle();
+			_servicio = _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(tokenDeAcceso);
 
-		private void EnviarListaHojas(string linkLibro)
-		{
-			var hojas = new ServiciosGoogle().ObtenerListaHojas(linkLibro, _servicio);
-
-			var paginaListaLibros = new ListaHojasCalculoGoogle(_servicio, hojas.Entries);
-			Navigation.PushAsync(paginaListaLibros, true);
-		}
-
-		private void CargarListaLibros()
-		{
-			var listaLibros = new List<ClaseLibro>();
-			foreach (var datosLibro in _listaLibros)
+			_indicadorActividad = new ActivityIndicator
 			{
-				var libro = new ClaseLibro(datosLibro.Links.FindService(GDataSpreadsheetsNameTable.WorksheetRel, null).HRef.ToString(), datosLibro.Title.Text);
-				listaLibros.Add(libro);
+				VerticalOptions = LayoutOptions.CenterAndExpand,
+				IsEnabled = true,
+				BindingContext = this
+			};
+			_indicadorActividad.SetBinding(IsVisibleProperty, "IsBusy");
+			_indicadorActividad.SetBinding(ActivityIndicator.IsRunningProperty, "IsBusy");
+		}
+
+		private async void EnviarListaHojas(string linkLibro)
+		{
+			var paginaListaLibros = new ListaHojasCalculoGoogle(_servicio, linkLibro);
+			await Navigation.PushAsync(paginaListaLibros, true);
+		}
+
+		private async void CargarListaLibros()
+		{
+
+			var listaLibros = new List<ClaseLibro>();
+			
+			try
+			{
+				IsBusy = true;
+
+				await Task.Run(async () =>
+				{
+					if (CuentaUsuario.ValidarTokenDeGoogle())
+					{
+						if (_listaLibros == null || _listaLibros.Count == 0)
+							_listaLibros = _servicioGoogle.ObtenerListaLibros(_servicio);
+						foreach (var datosLibro in _listaLibros)
+						{
+							var libro = new ClaseLibro(datosLibro.Links.FindService(GDataSpreadsheetsNameTable.WorksheetRel, null).HRef.ToString(), datosLibro.Title.Text);
+							listaLibros.Add(libro);
+						}
+					}
+					else
+					{
+						//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
+						var paginaAuntenticacion = new PaginaAuntenticacion(true);
+						Navigation.InsertPageBefore(paginaAuntenticacion, this);
+						await Navigation.PopAsync();
+					}
+				});
+			}
+			finally
+			{
+				IsBusy = false; //Remueve el Indicador de Actividad.
 			}
 
 			var vista = new ListView
@@ -88,6 +124,7 @@ namespace StockProductorCF.Vistas
 				})
 			};
 
+			ContenedorLibros.Children.Clear();
 			ContenedorLibros.Children.Add(vista);
 		}
 
@@ -108,6 +145,20 @@ namespace StockProductorCF.Vistas
 					await GrupoEncabezado.TranslateTo(0, 0, 1000);
 			}
 			_anchoActual = ancho;
+		}
+
+		//Cuando carga la página y cuando vuelve.
+		protected override void OnAppearing()
+		{
+			RefrescarDatos();
+		}
+
+		private void RefrescarDatos()
+		{
+			//Se quita la grilla para recargarla.
+			ContenedorLibros.Children.Clear();
+			ContenedorLibros.Children.Add(_indicadorActividad);
+			CargarListaLibros();
 		}
 	}
 

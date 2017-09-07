@@ -1,6 +1,5 @@
 ﻿
 using StockProductorCF.Clases;
-using StockProductorCF.Servicios;
 using StockProductorCF.Vistas;
 using System;
 using System.Net.Http;
@@ -54,24 +53,20 @@ namespace StockProductorCF
 
 		private async void DeterminarProcesoParaCargaDatos(string tokenDeAcceso)
 		{
-			if (_conexionExistente) //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros
+			ContentPage pagina;
+
+			if (_conexionExistente
+			) //Si es verdadero debe llevarnos a la Grilla en lugar de avanzar hacia la página de selección de libros
 			{
 				var linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaConsulta();
-				Navigation.InsertPageBefore(new PaginaGrilla(linkHojaConsulta, null), this);
+				App.Instancia.LimpiarNavegadorLuegoIrPagina(new PaginaGrilla(linkHojaConsulta, null));
 			}
 			else
 			{
-				var servicioGoogle = new ServiciosGoogle();
-				var servicio = servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(tokenDeAcceso);
-
-				var libros = servicioGoogle.ObtenerListaLibros(servicio);
-
-				var paginaListaLibros = new ListaLibrosGoogle(servicio, libros.Entries);
-
-				Navigation.InsertPageBefore(paginaListaLibros, this);
+				pagina = new ListaLibrosGoogle(tokenDeAcceso);
+				Navigation.InsertPageBefore(pagina, this);
+				await Navigation.PopAsync();
 			}
-
-			await Navigation.PopAsync();
 		}
 
 		private void ExtraerTokenAccesoDesdeUrl(string url)

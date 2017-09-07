@@ -5,7 +5,6 @@ using Xamarin.Forms;
 using StockProductorCF.Clases;
 using System.Linq;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace StockProductorCF.Vistas
 {
@@ -78,7 +77,7 @@ namespace StockProductorCF.Vistas
 		}
 
 		[Android.Runtime.Preserve]
-		private async void Listo(object sender, EventArgs e)
+		private void Listo(object sender, EventArgs e)
 		{
 			CuentaUsuario.AlmacenarColumnasInventarioDeHoja(_linkHojaConsulta, string.Join(",", _listaColumnas));
 			var paginaGrilla = new PaginaGrilla(_linkHojaConsulta, _servicio);

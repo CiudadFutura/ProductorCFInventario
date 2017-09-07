@@ -4,24 +4,35 @@ using Google.GData.Spreadsheets;
 using Xamarin.Forms;
 using StockProductorCF.Clases;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using StockProductorCF.Servicios;
 
 namespace StockProductorCF.Vistas
 {
 	public partial class ListaHojasCalculoGoogle
 	{
-		private readonly AtomEntryCollection _listaHojas;
+		private AtomEntryCollection _listaHojas;
 		private readonly SpreadsheetsService _servicio;
 		private double _anchoActual;
+		private readonly string _linkLibro;
+		private readonly ActivityIndicator _indicadorActividad;
 
-		public ListaHojasCalculoGoogle(SpreadsheetsService servicio, AtomEntryCollection listaHojas)
+		public ListaHojasCalculoGoogle(SpreadsheetsService servicio, string linkLibro)
 		{
 			InitializeComponent();
 			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
-			_listaHojas = listaHojas;
+			_linkLibro = linkLibro;
 
-			CargarListaHojas();
+			_indicadorActividad = new ActivityIndicator
+			{
+				VerticalOptions = LayoutOptions.CenterAndExpand,
+				IsEnabled = true,
+				BindingContext = this
+			};
+			_indicadorActividad.SetBinding(IsVisibleProperty, "IsBusy");
+			_indicadorActividad.SetBinding(ActivityIndicator.IsRunningProperty, "IsBusy");
 		}
 
 		private async void EnviarPagina(string linkHoja, string nombreHoja, bool desvinculaHoja)
@@ -38,7 +49,7 @@ namespace StockProductorCF.Vistas
 				//Si ya se usó esta hoja alguna vez y si el botón presionado NO es el de Desvincular, carga las columnas ya seleccionadas y envía a Grilla.
 				//Si no (alguna de las dos condiciones) envía a pantallas de selección de histórico y columnas.
 				if (CuentaUsuario.VerificarHojaUsadaRecuperarColumnas(linkHoja))
-					pagina = new PaginaGrilla(linkHoja, _servicio);
+					App.Instancia.LimpiarNavegadorLuegoIrPagina(new PaginaGrilla(linkHoja, _servicio));
 				else
 				{
 					if (CuentaUsuario.VerificarHojaUsada(linkHoja))
@@ -62,13 +73,38 @@ namespace StockProductorCF.Vistas
 					CuentaUsuario.AlmacenarNombreDeHoja(linkHoja, nombreHoja);
 
 					pagina = new ListaHojasHistoricoGoogle(_servicio, _listaHojas);
+					await Navigation.PushAsync(pagina, true);
 				}
-				await Navigation.PushAsync(pagina, true);
 			}
 		}
 
-		private void CargarListaHojas()
+		private async void CargarListaHojas()
 		{
+			try
+			{
+				IsBusy = true;
+
+				await Task.Run(async () =>
+				{
+					if (CuentaUsuario.ValidarTokenDeGoogle())
+					{
+						if (_listaHojas == null || _listaHojas.Count == 0)
+							_listaHojas = new ServiciosGoogle().ObtenerListaHojas(_linkLibro, _servicio);
+					}
+					else
+					{
+						//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
+						var paginaAuntenticacion = new PaginaAuntenticacion(true);
+						Navigation.InsertPageBefore(paginaAuntenticacion, this);
+						await Navigation.PopAsync();
+					}
+				});
+			}
+			finally
+			{
+				IsBusy = false; //Remueve el Indicador de Actividad.
+			}
+
 			var listaHojas = new List<ClaseHoja>();
 			var esTeclaPar = false;
 			foreach (var datosHoja in _listaHojas)
@@ -164,6 +200,20 @@ namespace StockProductorCF.Vistas
 					await GrupoEncabezado.TranslateTo(0, 0, 1000);
 			}
 			_anchoActual = ancho;
+		}
+
+		//Cuando carga la página y cuando vuelve.
+		protected override void OnAppearing()
+		{
+			RefrescarDatos();
+		}
+
+		private void RefrescarDatos()
+		{
+			//Se quita la grilla para recargarla.
+			ContenedorHojas.Children.Clear();
+			ContenedorHojas.Children.Add(_indicadorActividad);
+			CargarListaHojas();
 		}
 	}
 

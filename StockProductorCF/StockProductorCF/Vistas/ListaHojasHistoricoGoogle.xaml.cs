@@ -20,8 +20,6 @@ namespace StockProductorCF.Vistas
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 			_servicio = servicio;
 			_listaHojas = listaHojas;
-
-			CargarListaHojas();
 		}
 
 		private void EnviarPaginaPuntosVenta(string linkHoja, string linkHojaCeldas)
@@ -106,6 +104,7 @@ namespace StockProductorCF.Vistas
 				})
 			};
 
+			ContenedorHojas.Children.Clear();
 			ContenedorHojas.Children.Add(vista);
 		}
 
@@ -126,6 +125,12 @@ namespace StockProductorCF.Vistas
 					await GrupoEncabezado.TranslateTo(0, 0, 1000);
 			}
 			_anchoActual = ancho;
+		}
+
+		//Cuando carga la página y cuando vuelve.
+		protected override void OnAppearing()
+		{
+			CargarListaHojas();
 		}
 	}
 

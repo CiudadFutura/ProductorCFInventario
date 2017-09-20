@@ -10,7 +10,7 @@ namespace StockProductorCF.Clases
 
 		public void ObtenerActualizarLugares(string linkHojaPrincipal, SpreadsheetsService servicio)
 		{
-			//Recibe el link de la hoja principal, obtiene el link de lugares (si tiene) para la hoja y lo actualiza (por si se agregaron lugares)
+			//Recibe el link de la hoja principal, obtiene el link de lugares (si tiene) para la hoja actual y lo actualiza (por si se agregaron lugares)
 			var paginaLugares = CuentaUsuario.RecuperarValorDeCuentaLocal(linkHojaPrincipal + "|hojaPuntosVenta");
 			if (paginaLugares == null) return;
 
@@ -24,7 +24,6 @@ namespace StockProductorCF.Clases
 			}
 
 			CuentaUsuario.AlmacenarPuntosVenta(puntosVentaTexto.TrimEnd('|'));
-			CuentaUsuario.AlmacenarPuntosVentaDeHoja(linkHojaPrincipal, puntosVentaTexto.TrimEnd('|'));
 		}
 	}
 }

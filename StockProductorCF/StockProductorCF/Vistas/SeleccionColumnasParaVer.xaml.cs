@@ -110,8 +110,8 @@ namespace StockProductorCF.Vistas
 
 				var itemColumna = new StackLayout
 				{
-					HorizontalOptions = LayoutOptions.FillAndExpand,
-					VerticalOptions = LayoutOptions.CenterAndExpand,
+					VerticalOptions = LayoutOptions.Start,
+					HorizontalOptions = LayoutOptions.Fill,
 					Orientation = StackOrientation.Horizontal,
 					HeightRequest = 45,
 					WidthRequest = 300,

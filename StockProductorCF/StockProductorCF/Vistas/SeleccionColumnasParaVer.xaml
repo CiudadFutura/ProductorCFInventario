@@ -17,7 +17,7 @@
 				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" HeightRequest="30">Seleccione columnas para ver</Label>
       </StackLayout>
       <ScrollView VerticalOptions="FillAndExpand" HorizontalOptions="Center">
-        <StackLayout x:Name="ContenedorColumnas" VerticalOptions="Start" HorizontalOptions="Center" Spacing="0" Padding="0">
+				<StackLayout x:Name="ContenedorColumnas" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
         </StackLayout>
       </ScrollView>
 			<StackLayout BackgroundColor="#D21721" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">

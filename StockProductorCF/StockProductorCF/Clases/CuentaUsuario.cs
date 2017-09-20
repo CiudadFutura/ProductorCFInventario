@@ -44,7 +44,7 @@ namespace StockProductorCF.Clases
 
 			if (_cuenta == null) return;
 			_cuenta.Properties.Remove(llave); //Si existe la cuenta, remueve el valor de la cuenta
-			//Almacena la cuenta local
+																				//Almacena la cuenta local
 			AccountStore.Create().Save(_cuenta, "InventarioProductorCiudadFutura");
 		}
 
@@ -56,7 +56,7 @@ namespace StockProductorCF.Clases
 
 		internal static void AlmacenarAccesoDatos(string acceso)
 		{
-			if(RecuperarValorDeCuentaLocal("accesoDatos") != acceso)
+			if (RecuperarValorDeCuentaLocal("accesoDatos") != acceso)
 			{
 				GuardarValorEnCuentaLocal("columnasParaVer", "");
 				GuardarValorEnCuentaLocal("columnasInventario", "");
@@ -116,11 +116,6 @@ namespace StockProductorCF.Clases
 			GuardarValorEnCuentaLocal(linkHojaConsulta + "|historicoCeldas", linkHojaHistoricosCeldas);
 		}
 
-		internal static void AlmacenarPuntosVentaDeHoja(string linkHojaConsulta, string puntosVenta)
-		{
-			GuardarValorEnCuentaLocal(linkHojaConsulta + "|puntosVenta", puntosVenta);
-		}
-
 		public static void AlmacenarLinkHojaPuntosVentaDeHoja(string linkHojaConsulta, string linkHojaPuntosVenta)
 		{
 			GuardarValorEnCuentaLocal(linkHojaConsulta + "|hojaPuntosVenta", linkHojaPuntosVenta);
@@ -151,6 +146,16 @@ namespace StockProductorCF.Clases
 			GuardarValorEnCuentaLocal("usuarioDeBaseDeDatos", usuario);
 		}
 
+		public static void AlmacenarLinkHojaRelacionesInsumoProducto(string linkHoja, string linkHojaRelacionesInsumoProducto)
+		{
+			GuardarValorEnCuentaLocal(linkHoja + "|relacionesInsumoProducto", linkHojaRelacionesInsumoProducto);
+		}
+
+		internal static void AlmacenarRelacionesInsumoProducto(string relacionesInsumoProducto)
+		{
+			GuardarValorEnCuentaLocal("relacionesInsumoProducto", relacionesInsumoProducto);
+		}
+
 		internal static bool VerificarHojaUsada(string linkHojaConsulta)
 		{
 			return _cuenta != null && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|nombre");
@@ -159,7 +164,7 @@ namespace StockProductorCF.Clases
 		internal static bool VerificarHojaUsadaConColumnas(string linkHojaConsulta)
 		{
 			return _cuenta != null && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|ver")
-			       && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|inventario") && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|nombre");
+						 && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|inventario") && _cuenta.Properties.ContainsKey(linkHojaConsulta + "|nombre");
 		}
 
 		internal static bool VerificarHojaUsadaPorNombre(string nombreHojaConsulta)
@@ -247,9 +252,19 @@ namespace StockProductorCF.Clases
 			return RecuperarValorDeCuentaLocal(link + "|historicoCeldas");
 		}
 
+		internal static string ObtenerLinkHojaHistoricosParaLinkHoja(string link)
+		{
+			return RecuperarValorDeCuentaLocal(link + "|historico");
+		}
+
 		internal static string ObtenerPuntosVenta()
 		{
 			return RecuperarValorDeCuentaLocal("puntosVenta");
+		}
+
+		internal static string ObtenerRelacionesInsumoProducto()
+		{
+			return RecuperarValorDeCuentaLocal("relacionesInsumoProducto");
 		}
 
 		internal static string ObtenerTokenActualDeBaseDeDatos()
@@ -277,9 +292,9 @@ namespace StockProductorCF.Clases
 			var nombres = new List<string>();
 
 			RecuperarCuentaLocal();
-			if(_cuenta != null)
+			if (_cuenta != null)
 			{
-				foreach(var llaveValor in _cuenta.Properties)
+				foreach (var llaveValor in _cuenta.Properties)
 				{
 					if (llaveValor.Key.Contains("|nombre"))
 						nombres.Add(llaveValor.Value);
@@ -289,37 +304,41 @@ namespace StockProductorCF.Clases
 			return nombres;
 		}
 
-		internal static string ObtenerLinkHojaSeleccionada(string nombreHoja)
+		internal static string ObtenerLinkHojaPorNombre(string nombreHoja)
 		{
 			var link = "";
 			RecuperarCuentaLocal();
-			if (_cuenta != null)
+
+			if (_cuenta == null) return link;
+
+			foreach (var llaveValor in _cuenta.Properties)
 			{
-				foreach (var llaveValor in _cuenta.Properties)
+				if (llaveValor.Key.Contains("|nombre") && llaveValor.Value.Equals(nombreHoja))
 				{
-					if (llaveValor.Key.Contains("|nombre") && llaveValor.Value.Equals(nombreHoja))
-					{
-						link = llaveValor.Key.Split('|')[0];
-						AlmacenarLinkHojaConsulta(link);
-						AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(link + "|ver"));
-						AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(link + "|inventario"));
-						AlmacenarLinkHojaHistoricos(RecuperarValorDeCuentaLocal(link + "|historico"));
-					var puntosVentas = RecuperarValorDeCuentaLocal(link + "|puntosVenta"); // Puntos de venta son opcionales
-						if(puntosVentas != null)
-							AlmacenarPuntosVenta(puntosVentas);
-						else
-							RemoverValorEnCuentaLocal("puntosVenta");
-						break;
-					}
+					link = llaveValor.Key.Split('|')[0];
+					break;
 				}
 			}
 
 			return link;
 		}
 
+		internal static string CambiarHojaSeleccionada(string nombreHoja)
+		{
+			var link = ObtenerLinkHojaPorNombre(nombreHoja);
+			if (string.IsNullOrEmpty(link)) return link;
+
+			AlmacenarLinkHojaConsulta(link);
+			AlmacenarColumnasParaVer(RecuperarValorDeCuentaLocal(link + "|ver"));
+			AlmacenarColumnasInventario(RecuperarValorDeCuentaLocal(link + "|inventario"));
+			AlmacenarLinkHojaHistoricos(RecuperarValorDeCuentaLocal(link + "|historico"));
+
+			return link;
+		}
+
 		internal static bool ValidarTokenDeGoogle()
 		{
-			if(string.IsNullOrEmpty(ObtenerTokenActualDeGoogle()) || ObtenerFechaExpiracionToken() <= DateTime.Now)
+			if (string.IsNullOrEmpty(ObtenerTokenActualDeGoogle()) || ObtenerFechaExpiracionToken() <= DateTime.Now)
 				return false;
 			return true;
 		}
@@ -328,11 +347,11 @@ namespace StockProductorCF.Clases
 		{
 			RemoverValorEnCuentaLocal(linkHoja + "|nombre");
 			RemoverValorEnCuentaLocal(linkHoja + "|historico");
-			RemoverValorEnCuentaLocal(linkHoja + "|puntosVenta");
 			RemoverValorEnCuentaLocal(linkHoja + "|hojaPuntosVenta");
 			RemoverValorEnCuentaLocal(linkHoja + "|ver");
 			RemoverValorEnCuentaLocal(linkHoja + "|inventario");
 			RemoverValorEnCuentaLocal(linkHoja + "|historicoCeldas");
+			RemoverValorEnCuentaLocal(linkHoja + "|relacionesInsumoProducto");
 
 			//Si es la hoja actual vuela la memoria de uso
 			if (ObtenerLinkHojaConsulta() != linkHoja) return;
@@ -341,6 +360,8 @@ namespace StockProductorCF.Clases
 			RemoverValorEnCuentaLocal("puntosVenta");
 			RemoverValorEnCuentaLocal("columnasParaVer");
 			RemoverValorEnCuentaLocal("columnasInventario");
+			RemoverValorEnCuentaLocal("relacionesInsumoProducto");
 		}
+
 	}
 }

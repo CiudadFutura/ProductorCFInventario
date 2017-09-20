@@ -5,13 +5,14 @@ using Xamarin.Forms;
 using StockProductorCF.Clases;
 using StockProductorCF.Servicios;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace StockProductorCF.Vistas
 {
 	public partial class Producto
 	{
 		private bool[] _signoPositivo;
-		private double[] _movimientos;
+		private double[] _cantidades;
 		private double[] _precios;
 		private string[] _lugares;
 		private readonly CellEntry[] _producto;
@@ -22,6 +23,7 @@ namespace StockProductorCF.Vistas
 		private readonly string[] _nombresColumnas;
 		private string _mensaje = "";
 		private double _anchoActual;
+		private ActivityIndicator _indicadorActividad;
 
 		public Producto(CellEntry[] producto, string[] nombresColumnas, SpreadsheetsService servicio)
 		{
@@ -57,6 +59,15 @@ namespace StockProductorCF.Vistas
 		{
 			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProductores));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
+
+			_indicadorActividad = new ActivityIndicator
+			{
+				VerticalOptions = LayoutOptions.CenterAndExpand,
+				IsEnabled = true,
+				BindingContext = this
+			};
+			_indicadorActividad.SetBinding(IsVisibleProperty, "IsBusy");
+			_indicadorActividad.SetBinding(ActivityIndicator.IsRunningProperty, "IsBusy");
 		}
 
 		private void CargarDatosProductos()
@@ -73,7 +84,7 @@ namespace StockProductorCF.Vistas
 				_listaLugares = puntosVentaTexto.Split('|');
 
 			_signoPositivo = new bool[_productoString.Length];
-			_movimientos = new double[_productoString.Length];
+			_cantidades = new double[_productoString.Length];
 			_precios = new double[_productoString.Length];
 			_lugares = new string[_productoString.Length];
 			var i = 0;
@@ -108,8 +119,8 @@ namespace StockProductorCF.Vistas
 
 					var campoValor = new StackLayout
 					{
-						HorizontalOptions = LayoutOptions.FillAndExpand,
-						VerticalOptions = LayoutOptions.CenterAndExpand,
+						VerticalOptions = LayoutOptions.Start,
+						HorizontalOptions = LayoutOptions.Fill,
 						Orientation = StackOrientation.Horizontal,
 						HeightRequest = 50,
 						Children = { nombreCampo, valorCampo }
@@ -129,7 +140,7 @@ namespace StockProductorCF.Vistas
 							HorizontalOptions = LayoutOptions.EndAndExpand,
 							VerticalOptions = LayoutOptions.Center,
 							HorizontalTextAlignment = TextAlignment.End,
-							Text = "Movimiento",
+							Text = "Cantidad",
 							FontSize = 16,
 							WidthRequest = anchoEtiqueta - 13,
 							TextColor = Color.Black
@@ -161,10 +172,10 @@ namespace StockProductorCF.Vistas
 						campoValor = new StackLayout
 						{
 							BackgroundColor = Color.FromHex("#FFFFFF"),
-							HorizontalOptions = LayoutOptions.FillAndExpand,
-							VerticalOptions = LayoutOptions.CenterAndExpand,
+							VerticalOptions = LayoutOptions.Start,
+							HorizontalOptions = LayoutOptions.Fill,
 							Orientation = StackOrientation.Horizontal,
-							HeightRequest = 50,
+							HeightRequest = 60,
 							Children = { nombreCampo, botonSigno, valorCampo }
 						};
 
@@ -198,10 +209,10 @@ namespace StockProductorCF.Vistas
 						campoValor = new StackLayout
 						{
 							BackgroundColor = Color.FromHex("#FFFFFF"),
-							HorizontalOptions = LayoutOptions.FillAndExpand,
-							VerticalOptions = LayoutOptions.CenterAndExpand,
+							VerticalOptions = LayoutOptions.Start,
+							HorizontalOptions = LayoutOptions.Fill,
 							Orientation = StackOrientation.Horizontal,
-							HeightRequest = 50,
+							HeightRequest = 60,
 							Children = { nombreCampo, valorCampo }
 						};
 
@@ -237,10 +248,10 @@ namespace StockProductorCF.Vistas
 							campoValor = new StackLayout
 							{
 								BackgroundColor = Color.FromHex("#FFFFFF"),
-								HorizontalOptions = LayoutOptions.FillAndExpand,
-								VerticalOptions = LayoutOptions.CenterAndExpand,
+								VerticalOptions = LayoutOptions.Start,
+								HorizontalOptions = LayoutOptions.Fill,
 								Orientation = StackOrientation.Horizontal,
-								HeightRequest = 50,
+								HeightRequest = 60,
 								Children = { nombreCampo, puntoVenta }
 							};
 
@@ -266,6 +277,14 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		private async void GuardarCambios(object sender, EventArgs args)
 		{
+			await GuardarCambios();
+
+			await Navigation.PopAsync();
+			await DisplayAlert("Producto", _mensaje, "Listo");
+		}
+
+		private async Task GuardarCambios()
+		{
 			foreach (var stackLayout in ContenedorProducto.Children)
 			{
 				foreach (var control in ((StackLayout)stackLayout).Children)
@@ -276,8 +295,8 @@ namespace StockProductorCF.Vistas
 					{
 						columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
 						valor = ((Entry)control).Text;
-						valor = !string.IsNullOrEmpty(valor) ? valor.Replace('.',',') : "0"; //Todos los decimales con coma, evita problema de cultura.
-						_movimientos.SetValue(Convert.ToDouble(valor), columna);
+						valor = !string.IsNullOrEmpty(valor) ? valor.Replace('.', ',') : "0"; //Todos los decimales con coma, evita problema de cultura.
+						_cantidades.SetValue(Convert.ToDouble(valor), columna);
 					}
 
 					if (control.StyleId != null && control.StyleId.Contains("precio-"))
@@ -298,13 +317,36 @@ namespace StockProductorCF.Vistas
 				}
 			}
 
-			if (CuentaUsuario.ObtenerAccesoDatos() == "G")
-				GuardarProductoHojaDeCalculoGoogle();
-			else
-				GuardarProductoBaseDeDatos();
+			ContenedorProducto.Children.Clear();
+			ContenedorProducto.Children.Add(_indicadorActividad);
 
-			await Navigation.PopAsync();
-			await DisplayAlert("Producto", _mensaje, "Listo");
+			try
+			{
+				IsBusy = true;
+
+				await Task.Run(async () =>
+				{
+					if (CuentaUsuario.ValidarTokenDeGoogle())
+					{
+						if (CuentaUsuario.ObtenerAccesoDatos() == "G")
+							GuardarProductoHojaDeCalculoGoogle();
+						else
+							GuardarProductoBaseDeDatos();
+					}
+					else
+					{
+						//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
+						var paginaAuntenticacion = new PaginaAuntenticacion(true);
+						Navigation.InsertPageBefore(paginaAuntenticacion, this);
+						await Navigation.PopAsync();
+					}
+				});
+			}
+			finally
+			{
+				IsBusy = false; //Remueve el Indicador de Actividad.
+			}
+
 		}
 
 		[Android.Runtime.Preserve]
@@ -329,21 +371,21 @@ namespace StockProductorCF.Vistas
 				if (_listaColumnasInventario[(int)celda.Column - 1] == "1")
 				{
 					var multiplicador = _signoPositivo[(int)celda.Column - 1] ? 1 : -1;
-					var movimiento = _movimientos[(int)celda.Column - 1];
+					var cantidad = _cantidades[(int)celda.Column - 1];
 					var precio = _precios[(int)celda.Column - 1];
 					var lugar = _listaLugares != null ? _lugares[(int)celda.Column - 1] : "No tiene configurado.";
 
-					if (movimiento != 0)
+					if (cantidad != 0)
 					{
-						//celda.InputValue = (Convert.ToDouble(celda.InputValue) + multiplicador * movimiento).ToString();
-
 						try
 						{
-							// Actualiza la celda en Google
-							//celda.Update();
-							// Inserta histórico en Google
-							servicioGoogle.InsertarHistoricos(_servicio, celda, multiplicador * movimiento, precio, lugar, _producto, _nombresColumnas, _listaColumnasInventario);
-							
+							//Ingresa el movimiento de existencia (entrada - salida) en la tabla principal
+							servicioGoogle.EnviarMovimiento(_servicio, celda, multiplicador * cantidad, precio, lugar, _producto, _nombresColumnas,
+								_listaColumnasInventario, CuentaUsuario.ObtenerLinkHojaHistoricos());
+							//Si es página principal y tiene las relaciones insumos - productos, ingresa los movimientos de insumos
+							if (multiplicador == 1) //Si es ingreso positivo
+								servicioGoogle.InsertarMovimientosRelaciones(_servicio, cantidad, _producto);
+
 							grabo = true;
 						}
 						catch (Exception)
@@ -371,7 +413,7 @@ namespace StockProductorCF.Vistas
 				if (_listaColumnasInventario[i] == "1")
 				{
 					//var multiplicador = _signoPositivo[i] ? 1 : -1;
-					var movimiento = _movimientos[i];
+					var movimiento = _cantidades[i];
 
 					if (movimiento != 0)
 					{

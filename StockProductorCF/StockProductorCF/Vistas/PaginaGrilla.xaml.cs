@@ -26,14 +26,13 @@ namespace StockProductorCF.Vistas
 		private ViewCell _ultimoItemSeleccionado;
 		private Color _ultimoColorSeleccionado;
 		private List<string[]> _productos;
-		private bool _esCargaInicial;
+		private bool _esCargaInicial = true;
 		private ActivityIndicator _indicadorActividad;
 		private Image _accesoDatos;
 		private Image _refrescar;
 		private Image _escanearCodigo;
 		private Picker _listaHojas;
 		private double _anchoActual;
-		private readonly LugaresCompraVenta _lugares;
 
 		//Constructor para Hoja de cálculo de Google
 		public PaginaGrilla(string linkHojaConsulta, SpreadsheetsService servicio)
@@ -44,13 +43,10 @@ namespace StockProductorCF.Vistas
 			_servicioGoogle = new ServiciosGoogle();
 			//El servicio viene nulo cuando se llama directamente desde el lanzador (ya tiene conexión a datos configurada)
 			_servicio = servicio ?? _servicioGoogle.ObtenerServicioParaConsultaGoogleSpreadsheets(CuentaUsuario.ObtenerTokenActualDeGoogle());
-			_lugares = new LugaresCompraVenta();
 
 			InicializarValoresGenerales();
 			ConfigurarSelectorHojas();
-			//Se actualizan los valores de Lugares en la carga inicial
-			RefrescarLugaresComprasVentas();
-			
+
 			//La carga de los productos se realiza en el OnAppearing
 		}
 
@@ -64,15 +60,22 @@ namespace StockProductorCF.Vistas
 
 		#region Métodos para Hoja de cálculo de Google
 
-		private async void ObtenerDatosProductosDesdeHCG()
+		private async void ObtenerDatosProductosDesdeHCG(bool refrescarLugaresRelaciones)
 		{
 			try
 			{
 				IsBusy = true;
 
-				await Task.Run(async () => {
+				await Task.Run(async () =>
+				{
 					if (CuentaUsuario.ValidarTokenDeGoogle())
+					{
 						_celdas = _servicioGoogle.ObtenerCeldasDeUnaHoja(_linkHojaConsulta, _servicio);
+
+						//Refresca los lugares (compra o venta) y relaciones (insumos - productos) sólo cuando presionamos el botón de refrescar y durante la carga inicial
+						if (refrescarLugaresRelaciones)
+							RefrescarLugCompVtas_RelacionInsProd();
+					}
 					else
 					{
 						//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
@@ -105,9 +108,7 @@ namespace StockProductorCF.Vistas
 						productos.Add(producto);
 				}
 				else
-				{
 					_nombresColumnas.SetValue(celda.Value, (int)celda.Column - 1);
-				}
 			}
 
 			LlenarGrillaDeProductos(productos);
@@ -159,8 +160,9 @@ namespace StockProductorCF.Vistas
 				try
 				{
 					IsBusy = true;
-					
-					await Task.Run(async () => {
+
+					await Task.Run(async () =>
+					{
 						//Obtiene json de productos desde el webservice
 						var jsonProductos = await cliente.GetStringAsync(url);
 						//Parsea el json para obtener la lista de productos
@@ -173,8 +175,8 @@ namespace StockProductorCF.Vistas
 				{
 					IsBusy = false;
 				}
-				
-				if(productos != null)
+
+				if (productos != null)
 					LlenarGrillaDeProductos(productos);
 			}
 		}
@@ -267,9 +269,9 @@ namespace StockProductorCF.Vistas
 				foreach (CellEntry celda in _celdas.Entries)
 				{
 					if (celda.Column == 1 && celda.Value == codigoProductoSeleccionado)
-						fila = (int) celda.Row;
+						fila = (int)celda.Row;
 					if (celda.Row == fila)
-						productoSeleccionado.SetValue(celda, (int) celda.Column - 1);
+						productoSeleccionado.SetValue(celda, (int)celda.Column - 1);
 
 					//Si encontró producto (fila > -1) y ya pasó alpróximo producto (celda.Row > fila) o es el último producto (celda.Column == _celdas.ColCount.Count)
 					if (fila > -1 && (celda.Row > fila || celda.Column == _celdas.ColCount.Count))
@@ -290,7 +292,7 @@ namespace StockProductorCF.Vistas
 				}
 			}
 			//Si fila = -1 no se ha encuentrado el código
-			if(fila == -1)
+			if (fila == -1)
 				await DisplayAlert("Código", "No se ha encontrado un producto para el código escaneado.", "Listo");
 
 		}
@@ -429,7 +431,6 @@ namespace StockProductorCF.Vistas
 			//Almacena la lista de productos en la variable global que usará el buscador
 			_productos = productos;
 			Buscador.IsVisible = true;
-			_esCargaInicial = true;
 			Buscador.Text = "";
 		}
 
@@ -441,19 +442,14 @@ namespace StockProductorCF.Vistas
 			ContenedorTabla.Children.Add(_indicadorActividad);
 		}
 
-		private void RefrescarDatos()
+		private void RefrescarDatos(bool refrescarLugaresRelaciones = false)
 		{
 			RefrescarUIGrilla();
-			_refrescar.Opacity = 0.5f;
-			Device.StartTimer(TimeSpan.FromMilliseconds(100), () =>
-			{
-				if (!string.IsNullOrEmpty(_linkHojaConsulta))
-					ObtenerDatosProductosDesdeHCG(); //Hoja de cálculo de Google
-				else
-					ObtenerProductosDesdeBD(); //Base de Datos
-				_refrescar.Opacity = 1f;
-				return false;
-			});
+
+			if (CuentaUsuario.ObtenerAccesoDatos() == "G")
+				ObtenerDatosProductosDesdeHCG(refrescarLugaresRelaciones); //Hoja de cálculo de Google
+			else
+				ObtenerProductosDesdeBD(); //Base de Datos
 		}
 
 		#endregion
@@ -476,15 +472,22 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		private void RefrescarDatos(View arg1, object arg2)
 		{
-			RefrescarDatos();
-			//Refresca los lugares (compra o venta) sólo cuando presionamos el botón de refrescar
-			RefrescarLugaresComprasVentas();
+			_refrescar.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(100), () =>
+			{
+				RefrescarDatos(true);
+				_refrescar.Opacity = 1f;
+				return false;
+			});
 		}
 
-		private async void RefrescarLugaresComprasVentas()
+		private async void RefrescarLugCompVtas_RelacionInsProd()
 		{
 			if (CuentaUsuario.ValidarTokenDeGoogle())
-				_lugares.ObtenerActualizarLugares(_linkHojaConsulta, _servicio);
+			{
+				new LugaresCompraVenta().ObtenerActualizarLugares(_linkHojaConsulta, _servicio);
+				new RelacionesInsumoProducto().ObtenerActualizarRelaciones(_linkHojaConsulta, _servicio);
+			}
 			else
 			{
 				//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
@@ -536,7 +539,7 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		private void FiltrarProductos(object sender, EventArgs args)
 		{
-			if (Buscador.Text.Length > 2 || Buscador.Text.Length == 0 && !_esCargaInicial)
+			if (Buscador.Text.Length > 2 || Buscador.Text.Length == 0)
 			{
 				//Se quita la grilla para recargarla.
 				ContenedorTabla.Children.Clear();
@@ -548,21 +551,20 @@ namespace StockProductorCF.Vistas
 				}
 
 				LlenarGrillaDeProductos(productos, true);
-				_esCargaInicial = false;
 			}
 		}
 
 		[Android.Runtime.Preserve]
 		private void CargarHoja(object sender, EventArgs args)
 		{
-			RefrescarUIGrilla();
-
 			Device.StartTimer(TimeSpan.FromMilliseconds(100), () =>
 			{
-				_linkHojaConsulta = CuentaUsuario.ObtenerLinkHojaSeleccionada(_listaHojas.Items[_listaHojas.SelectedIndex]);
+				_linkHojaConsulta = CuentaUsuario.CambiarHojaSeleccionada(_listaHojas.Items[_listaHojas.SelectedIndex]);
 				_listaColumnasParaVer = CuentaUsuario.ObtenerColumnasParaVer().Split(',');
 				_listaColumnasInventario = CuentaUsuario.ObtenerColumnasInventario().Split(',');
-				ObtenerDatosProductosDesdeHCG();
+
+				RefrescarDatos(true);
+				//	ObtenerDatosProductosDesdeHCG();
 				return false;
 			});
 		}
@@ -573,7 +575,7 @@ namespace StockProductorCF.Vistas
 			if (_anchoActual == ancho) return;
 			if (ancho > alto)
 			{
-				if(_anchoActual != 0)
+				if (_anchoActual != 0)
 					await GrupoEncabezado.TranslateTo(0, -100, 1000);
 				GrupoEncabezado.IsVisible = false;
 			}
@@ -589,7 +591,8 @@ namespace StockProductorCF.Vistas
 		//Cuando carga la página y cuando vuelve de registrar un movimiento.
 		protected override void OnAppearing()
 		{
-			RefrescarDatos();
+			RefrescarDatos(_esCargaInicial);
+			_esCargaInicial = false; //Si era carga inicial venía en true, si no ya estaba en false
 		}
 
 		#endregion

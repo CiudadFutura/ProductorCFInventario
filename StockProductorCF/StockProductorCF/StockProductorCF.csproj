@@ -41,6 +41,7 @@
     </Compile>
     <Compile Include="Clases\CuentaUsuario.cs" />
     <Compile Include="Clases\LugaresCompraVenta.cs" />
+    <Compile Include="Clases\RelacionInsumoProducto.cs" />
     <Compile Include="Servicios\ServiciosGoogle.cs" />
     <Compile Include="Vistas\ListaHojasPtosVtaGoogle.xaml.cs">
       <DependentUpon>ListaHojasPtosVtaGoogle.xaml</DependentUpon>

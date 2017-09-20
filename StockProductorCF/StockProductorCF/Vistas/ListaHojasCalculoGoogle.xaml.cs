@@ -72,9 +72,25 @@ namespace StockProductorCF.Vistas
 					CuentaUsuario.AlmacenarLinkHojaConsulta(linkHoja);
 					CuentaUsuario.AlmacenarNombreDeHoja(linkHoja, nombreHoja);
 
+					//Se ha seleccionado una hoja principal (de nombre "Productos App"), se valida si tenemos que habilitar la funcionalidad de Relación Insumo - Producto
+					//Ocurre si existe en el libro una hoja de nombre "Costos variables"
+					if (nombreHoja == "Productos App")
+						ValidarHabilitacionRelacionesInsumoProducto(linkHoja);
+
 					pagina = new ListaHojasHistoricoGoogle(_servicio, _listaHojas);
 					await Navigation.PushAsync(pagina, true);
 				}
+			}
+		}
+
+		private void ValidarHabilitacionRelacionesInsumoProducto(string linkHoja)
+		{
+			foreach (var datosHoja in _listaHojas)
+			{
+				if (!datosHoja.Title.Text.Contains("Costos variables")) continue;
+
+				var linkHojaRelacionesInsumoProducto = datosHoja.Links.FindService(GDataSpreadsheetsNameTable.CellRel, null).HRef.ToString();
+				CuentaUsuario.AlmacenarLinkHojaRelacionesInsumoProducto(linkHoja, linkHojaRelacionesInsumoProducto);
 			}
 		}
 

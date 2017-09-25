@@ -15,6 +15,7 @@ namespace StockProductorCF.Vistas
 		private double[] _cantidades;
 		private double[] _precios;
 		private string[] _lugares;
+		private string _comentario;
 		private readonly CellEntry[] _producto;
 		private string[] _listaColumnasInventario;
 		private string[] _listaLugares;
@@ -46,7 +47,7 @@ namespace StockProductorCF.Vistas
 				i = i + 1;
 			}
 
-			CargarDatosProductos();
+			ConstruirVistaDeProducto();
 		}
 
 		public Producto(string[] productoBD, string[] nombresColumnas)
@@ -56,7 +57,7 @@ namespace StockProductorCF.Vistas
 			_productoString = productoBD;
 			_nombresColumnas = nombresColumnas;
 
-			CargarDatosProductos();
+			ConstruirVistaDeProducto();
 		}
 
 		private void InicializarValoresGenerales()
@@ -90,7 +91,7 @@ namespace StockProductorCF.Vistas
 			ContenedorBotones.Children.Add(_guardarCambios);
 		}
 
-		private void CargarDatosProductos()
+		private void ConstruirVistaDeProducto()
 		{
 			var columnasInventario = CuentaUsuario.ObtenerColumnasInventario();
 			_listaColumnasInventario = null;
@@ -111,11 +112,19 @@ namespace StockProductorCF.Vistas
 
 			var anchoEtiqueta = App.AnchoRetratoDePantalla / 3 - 10;
 			var anchoCampo = App.AnchoRetratoDePantalla / 3 * 2 - 30;
+
+			Label nombreCampo;
+			Entry valorCampo;
+			StackLayout campoValor;
+
+			#region Campos de planilla
 			foreach (var celda in _productoString)
 			{
-				if (celda != null && _nombresColumnas[i] != "Usuario-Movimiento")
+				if (celda != null)
 				{
-					var nombreCampo = new Label
+					#region Datos en planilla o BD
+
+					nombreCampo = new Label
 					{
 						HorizontalOptions = LayoutOptions.EndAndExpand,
 						VerticalOptions = LayoutOptions.Center,
@@ -126,7 +135,7 @@ namespace StockProductorCF.Vistas
 						TextColor = Color.Black
 					};
 
-					var valorCampo = new Entry
+					valorCampo = new Entry
 					{
 						HorizontalOptions = LayoutOptions.CenterAndExpand,
 						VerticalOptions = LayoutOptions.Center,
@@ -137,7 +146,7 @@ namespace StockProductorCF.Vistas
 						TextColor = Color.Black
 					};
 
-					var campoValor = new StackLayout
+					campoValor = new StackLayout
 					{
 						VerticalOptions = LayoutOptions.Start,
 						HorizontalOptions = LayoutOptions.Fill,
@@ -148,7 +157,9 @@ namespace StockProductorCF.Vistas
 
 					ContenedorProducto.Children.Add(campoValor);
 
-					//Si es columna de stock agrega campo movimiento y precio
+					#endregion
+
+					//Si es columna de stock agrega el campo Cantidad. Si tiene lugar de compra/venta agrega los campos Precio total y Lugar.
 					if (!string.IsNullOrEmpty(celda) && _listaColumnasInventario != null && _listaColumnasInventario[i] == "1")
 					{
 						#region Movimiento stock
@@ -243,14 +254,14 @@ namespace StockProductorCF.Vistas
 
 							#endregion
 
-							#region Punto de venta
+							#region Lugar de compra/venta
 
 							nombreCampo = new Label
 							{
 								HorizontalOptions = LayoutOptions.EndAndExpand,
 								VerticalOptions = LayoutOptions.Center,
 								HorizontalTextAlignment = TextAlignment.End,
-								Text = "Punto de venta",
+								Text = "Lugar",
 								FontSize = 16,
 								WidthRequest = anchoEtiqueta,
 								TextColor = Color.Black
@@ -288,6 +299,45 @@ namespace StockProductorCF.Vistas
 
 				i = i + 1;
 			}
+
+			#endregion
+
+			#region Comentario
+
+			nombreCampo = new Label
+			{
+				HorizontalOptions = LayoutOptions.EndAndExpand,
+				VerticalOptions = LayoutOptions.Center,
+				HorizontalTextAlignment = TextAlignment.End,
+				Text = "Comentario",
+				FontSize = 16,
+				WidthRequest = anchoEtiqueta,
+				TextColor = Color.Black
+			};
+
+			var valorCampoArea = new Editor
+			{
+				HorizontalOptions = LayoutOptions.CenterAndExpand,
+				VerticalOptions = LayoutOptions.Center,
+				StyleId = "comentario",
+				WidthRequest = anchoCampo,
+				HeightRequest = 90,
+				Keyboard = Keyboard.Text
+			};
+
+			campoValor = new StackLayout
+			{
+				BackgroundColor = Color.FromHex("#FFFFFF"),
+				VerticalOptions = LayoutOptions.Start,
+				HorizontalOptions = LayoutOptions.Fill,
+				Orientation = StackOrientation.Horizontal,
+				HeightRequest = 90,
+				Children = { nombreCampo, valorCampoArea }
+			};
+
+			ContenedorProducto.Children.Add(campoValor);
+
+			#endregion
 
 		}
 
@@ -331,7 +381,9 @@ namespace StockProductorCF.Vistas
 					{
 						columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
 						valor = ((Entry)control).Text;
-						valor = !string.IsNullOrEmpty(valor) ? valor.Replace('.', ',') : "0"; //Todos los decimales con coma, evita problema de cultura.
+						valor = !string.IsNullOrEmpty(valor)
+							? valor.Replace('.', ',')
+							: "0"; //Todos los decimales con coma, evita problema de cultura.
 						_cantidades.SetValue(Convert.ToDouble(valor), columna);
 					}
 
@@ -339,7 +391,9 @@ namespace StockProductorCF.Vistas
 					{
 						columna = Convert.ToInt32(control.StyleId.Split('-')[1]);
 						valor = ((Entry)control).Text;
-						valor = !string.IsNullOrEmpty(valor) ? valor.Replace('.', ',') : "0"; //Todos los decimales con coma, evita problema de cultura.
+						valor = !string.IsNullOrEmpty(valor)
+							? valor.Replace('.', ',')
+							: "0"; //Todos los decimales con coma, evita problema de cultura.
 						_precios.SetValue(Convert.ToDouble(valor), columna);
 					}
 
@@ -350,6 +404,13 @@ namespace StockProductorCF.Vistas
 						valor = combo.SelectedIndex != -1 ? combo.Items[combo.SelectedIndex] : "-";
 						_lugares.SetValue(valor, columna);
 					}
+
+					if (control.StyleId != null && control.StyleId.Contains("comentario"))
+					{
+						valor = ((Editor)control).Text;
+						_comentario = valor;
+					}
+
 				}
 			}
 
@@ -428,7 +489,7 @@ namespace StockProductorCF.Vistas
 						try
 						{
 							//Ingresa el movimiento de existencia (entrada - salida) en la tabla principal
-							servicioGoogle.EnviarMovimiento(_servicio, celda, multiplicador * cantidad, precio, lugar, _producto, _nombresColumnas,
+							servicioGoogle.EnviarMovimiento(_servicio, celda, multiplicador * cantidad, precio, lugar, _comentario, _producto, _nombresColumnas,
 								_listaColumnasInventario, CuentaUsuario.ObtenerLinkHojaHistoricos());
 							//Si es página principal y tiene las relaciones insumos - productos, ingresa los movimientos de insumos
 							if (multiplicador == 1) //Si es ingreso positivo

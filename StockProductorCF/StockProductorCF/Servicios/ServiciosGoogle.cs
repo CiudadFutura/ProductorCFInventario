@@ -7,6 +7,7 @@ using System.Text;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace StockProductorCF.Servicios
@@ -44,7 +45,7 @@ namespace StockProductorCF.Servicios
 		}
 
 		public string ObtenerHistorico(CellEntry celdaMovimiento, double cantidad, double precio, string lugar, CellEntry[] producto,
-			string[] nombresColumnas, string[] listaColumnasInventario)
+			string[] nombresColumnas, string[] listaColumnasInventario, string comentario)
 		{
 			// Abre la fila
 			var fila = "<entry xmlns=\"http://www.w3.org/2005/Atom\" xmlns:gsx=\"http://schemas.google.com/spreadsheets/2006/extended\">";
@@ -58,7 +59,7 @@ namespace StockProductorCF.Servicios
 					valor = "-"; //Si la columna es de stock pero no la que recibió el movimiento el valor para el histórico es "-"
 
 				var columna = Regex.Replace(nombresColumnas[i].ToLower(), @"\s+", "");
-				fila += "<gsx:" + columna + ">" + valor + "</gsx:" + columna + ">";
+				fila += "<gsx:" + columna + ">" + WebUtility.HtmlEncode(valor) + "</gsx:" + columna + ">";
 			}
 
 			// Agrega el Movimiento
@@ -66,14 +67,16 @@ namespace StockProductorCF.Servicios
 			// Agrega el Precio total
 			fila += "<gsx:preciototal>" + Math.Abs(precio) + "</gsx:preciototal>";
 			// Agrega el Lugar (proveedor o punto de venta)
-			fila += "<gsx:lugar>" + lugar + "</gsx:lugar>";
+			fila += "<gsx:lugar>" + WebUtility.HtmlEncode(lugar) + "</gsx:lugar>";
 			// Agrega el Usuario
 			var usuario = CuentaUsuario.ObtenerNombreUsuarioGoogle() ?? "-";
-			fila += "<gsx:usuario>" + usuario + "</gsx:usuario>";
+			fila += "<gsx:usuario>" + WebUtility.HtmlEncode(usuario) + "</gsx:usuario>";
 			// Agrega Eliminado
 			fila += "<gsx:eliminado>-</gsx:eliminado>";
 			// Agrega Eliminado por
 			fila += "<gsx:eliminadopor>-</gsx:eliminadopor>";
+			// Agrega Comentario
+			fila += "<gsx:comentario>" + WebUtility.HtmlEncode(comentario) + "</gsx:comentario>";
 
 			//fila += "<batch:id>item" + u + "</batch:id>";
 			//fila += "<batch:operation type=\"insert\"/>";
@@ -85,17 +88,17 @@ namespace StockProductorCF.Servicios
 			return fila;
 		}
 
-		public void EnviarMovimiento(SpreadsheetsService servicio, CellEntry celdaMovimiento, double cantidad, double precio, string puntoVenta, CellEntry[] producto,
-			string[] nombresColumnas, string[] listaColumnasInventario, string url)
+		public void EnviarMovimiento(SpreadsheetsService servicio, CellEntry celdaMovimiento, double cantidad, double precio, string puntoVenta, string comentario,
+			CellEntry[] producto, string[] nombresColumnas, string[] listaColumnasInventario, string url)
 		{
-			var movimiento = AgregarHistorico(celdaMovimiento, cantidad, precio, puntoVenta, producto, nombresColumnas, listaColumnasInventario);
+			var movimiento = AgregarHistorico(celdaMovimiento, cantidad, precio, puntoVenta, producto, nombresColumnas, listaColumnasInventario, comentario);
 			EnviarFilas(movimiento, servicio, url);
 		}
 
 		private string AgregarHistorico(CellEntry celdaMovimiento, double cantidad, double precio, string puntoVenta, CellEntry[] producto,
-			string[] nombresColumnas, string[] listaColumnasInventario)
+			string[] nombresColumnas, string[] listaColumnasInventario, string comentario)
 		{
-			return ObtenerHistorico(celdaMovimiento, cantidad, precio, puntoVenta, producto, nombresColumnas, listaColumnasInventario);
+			return ObtenerHistorico(celdaMovimiento, cantidad, precio, puntoVenta, producto, nombresColumnas, listaColumnasInventario, comentario);
 		}
 
 		private static void EnviarFilas(string filas, SpreadsheetsService servicio, string url)
@@ -159,7 +162,8 @@ namespace StockProductorCF.Servicios
 					if (fila > -1 && (celda.Row > fila || celda.Column == celdas.ColCount.Count))
 					{
 						//Se agregan filas de movimientos de insumos para enviar al final
-						var movimiento = AgregarHistorico(celdaMovimiento, -1 * cantidad * cantInsumoRelacion, 0, "-", insumoSeleccionado, nombresColumnas, columnasInventario);
+						var movimiento = AgregarHistorico(celdaMovimiento, -1 * cantidad * cantInsumoRelacion, 0, "-", insumoSeleccionado, nombresColumnas, columnasInventario,
+							"Disminución por producción.");
 						EnviarFilas(movimiento, servicio, linkHistoricoInsumos);
 						fila = -1;
 					}

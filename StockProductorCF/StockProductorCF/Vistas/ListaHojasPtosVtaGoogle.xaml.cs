@@ -106,6 +106,7 @@ namespace StockProductorCF.Vistas
 				})
 			};
 
+			ContenedorHojas.Children.Clear();
 			ContenedorHojas.Children.Add(vista);
 		}
 

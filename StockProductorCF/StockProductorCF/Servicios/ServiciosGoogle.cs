@@ -68,6 +68,9 @@ namespace StockProductorCF.Servicios
 			fila += "<gsx:preciototal>" + Math.Abs(precio) + "</gsx:preciototal>";
 			// Agrega el Lugar (proveedor o punto de venta)
 			fila += "<gsx:lugar>" + WebUtility.HtmlEncode(lugar) + "</gsx:lugar>";
+			// Agrega Comentario
+			comentario = string.IsNullOrEmpty(comentario) ? "-" : WebUtility.HtmlEncode(comentario.Trim());
+			fila += "<gsx:comentario>" + comentario + "</gsx:comentario>";
 			// Agrega el Usuario
 			var usuario = CuentaUsuario.ObtenerNombreUsuarioGoogle() ?? "-";
 			fila += "<gsx:usuario>" + WebUtility.HtmlEncode(usuario) + "</gsx:usuario>";
@@ -75,8 +78,6 @@ namespace StockProductorCF.Servicios
 			fila += "<gsx:eliminado>-</gsx:eliminado>";
 			// Agrega Eliminado por
 			fila += "<gsx:eliminadopor>-</gsx:eliminadopor>";
-			// Agrega Comentario
-			fila += "<gsx:comentario>" + WebUtility.HtmlEncode(comentario) + "</gsx:comentario>";
 
 			//fila += "<batch:id>item" + u + "</batch:id>";
 			//fila += "<batch:operation type=\"insert\"/>";

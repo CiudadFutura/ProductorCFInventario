@@ -145,7 +145,7 @@ namespace StockProductorCF.Vistas
 				{
 					i += 1;
 					//No incluimos Código y Nombre del producto, tampoco Eliminado y Eliminado Por porque son los movimientos (no eliminados) del producto seleccionado.
-					if (i == 1 || i == 2 || i == datosMovimiento.Length - 2 || i == datosMovimiento.Length -1) continue;
+					if (i == 1 || i == 2 || i == datosMovimiento.Length - 2 || i == datosMovimiento.Length - 1) continue;
 
 					datosParaVer.Add(_nombresColumnas[i] + " : " + dato);
 				}

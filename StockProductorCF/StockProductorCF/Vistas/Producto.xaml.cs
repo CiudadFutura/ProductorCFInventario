@@ -114,7 +114,6 @@ namespace StockProductorCF.Vistas
 			var anchoCampo = App.AnchoRetratoDePantalla / 3 * 2 - 30;
 
 			Label nombreCampo;
-			Entry valorCampo;
 			StackLayout campoValor;
 
 			#region Campos de planilla
@@ -135,7 +134,7 @@ namespace StockProductorCF.Vistas
 						TextColor = Color.Black
 					};
 
-					valorCampo = new Entry
+					var valorCampo = new Entry
 					{
 						HorizontalOptions = LayoutOptions.CenterAndExpand,
 						VerticalOptions = LayoutOptions.Center,
@@ -171,7 +170,7 @@ namespace StockProductorCF.Vistas
 							HorizontalOptions = LayoutOptions.EndAndExpand,
 							VerticalOptions = LayoutOptions.Center,
 							HorizontalTextAlignment = TextAlignment.End,
-							Text = "Cantidad",
+							Text = _listaLugares != null ? "Cantidad" : "Precio Total", //Si no hay lugares no hay campo PrecioTotal, el campo Cantidad toma esa etiqueta.
 							FontSize = 16,
 							WidthRequest = anchoEtiqueta - 13,
 							TextColor = Color.Black
@@ -488,6 +487,10 @@ namespace StockProductorCF.Vistas
 					{
 						try
 						{
+							// Si no hay lugares no hay campo de PrecioTotal, entonces el precio lo toma de la cantidad
+							if (_listaLugares == null)
+								precio = multiplicador * cantidad;
+
 							//Ingresa el movimiento de existencia (entrada - salida) en la tabla principal
 							servicioGoogle.EnviarMovimiento(_servicio, celda, multiplicador * cantidad, precio, lugar, _comentario, _producto, _nombresColumnas,
 								_listaColumnasInventario, CuentaUsuario.ObtenerLinkHojaHistoricos());

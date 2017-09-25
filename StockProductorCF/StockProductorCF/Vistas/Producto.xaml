@@ -14,16 +14,13 @@
 				</StackLayout>
 	    </StackLayout>
 			<StackLayout BackgroundColor="#C0C0C0" VerticalOptions="Start" HorizontalOptions="Fill">
-				<Label FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" HeightRequest="30">Detalle del producto</Label>
+				<Label x:Name="Titulo" FontSize="18" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" HeightRequest="30">Detalle de</Label>
       </StackLayout>
       <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="Fill">
 				<StackLayout x:Name="ContenedorProducto" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
 				</StackLayout>
       </ScrollView>
-			<StackLayout BackgroundColor="#D21721" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End">
-				<Button HorizontalOptions="FillAndExpand" VerticalOptions="End" HeightRequest="60" Text="Guardar cambios" Clicked="GuardarCambios"/>
-				<Button HorizontalOptions="FillAndExpand" VerticalOptions="End" HeightRequest="60" Text="Movimientos" Clicked="AccederMovimientos"/>
-				<Button HorizontalOptions="FillAndExpand" VerticalOptions="End" HeightRequest="60" Text="Volver" Clicked="Volver"/>
+			<StackLayout x:Name="ContenedorBotones" Spacing="0" Padding="0" Orientation="Horizontal" BackgroundColor="#E2E2E1" VerticalOptions="End">
 			</StackLayout>
     </StackLayout>
   </ContentPage.Content>

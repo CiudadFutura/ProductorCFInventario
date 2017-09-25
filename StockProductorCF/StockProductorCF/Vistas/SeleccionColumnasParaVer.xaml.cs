@@ -19,12 +19,14 @@ namespace StockProductorCF.Vistas
 		private double _anchoActual;
 		private CellFeed _celdas;
 		private readonly ActivityIndicator _indicadorActividad;
+		private Image _listo;
 
 		public SeleccionColumnasParaVer(SpreadsheetsService servicio)
 		{
 			InitializeComponent();
 			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
+			ConfigurarBotones();
 			_servicio = servicio;
 
 			_indicadorActividad = new ActivityIndicator
@@ -35,6 +37,14 @@ namespace StockProductorCF.Vistas
 			};
 			_indicadorActividad.SetBinding(IsVisibleProperty, "IsBusy");
 			_indicadorActividad.SetBinding(ActivityIndicator.IsRunningProperty, "IsBusy");
+		}
+
+		private void ConfigurarBotones()
+		{
+			_listo = App.Instancia.ObtenerImagen(TipoImagen.BotonListo);
+			_listo.GestureRecognizers.Add(new TapGestureRecognizer(Listo));
+
+			ContenedorBotones.Children.Add(_listo);
 		}
 
 		private async void ObtenerColumnas()
@@ -134,11 +144,18 @@ namespace StockProductorCF.Vistas
 		}
 
 		[Android.Runtime.Preserve]
-		private void Listo(object sender, EventArgs e)
+		private void Listo(View arg1, object arg2)
 		{
-			CuentaUsuario.AlmacenarColumnasParaVerDeHoja(_linkHojaConsulta, string.Join(",", _listaColumnas));
-			var paginaSeleccionColumnasInventario = new SeleccionColumnasInventario(_columnas, _linkHojaConsulta, _servicio);
-			Navigation.PushAsync(paginaSeleccionColumnasInventario, true);
+			_listo.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(300), () =>
+			{
+				CuentaUsuario.AlmacenarColumnasParaVerDeHoja(_linkHojaConsulta, string.Join(",", _listaColumnas));
+				var paginaSeleccionColumnasInventario = new SeleccionColumnasInventario(_columnas, _linkHojaConsulta, _servicio);
+				Navigation.PushAsync(paginaSeleccionColumnasInventario, true);
+
+				_listo.Opacity = 1f;
+				return false;
+			});
 		}
 
 		protected override async void OnSizeAllocated(double ancho, double alto)

@@ -276,7 +276,8 @@ namespace StockProductorCF.Vistas
 					//Si encontró producto (fila > -1) y ya pasó alpróximo producto (celda.Row > fila) o es el último producto (celda.Column == _celdas.ColCount.Count)
 					if (fila > -1 && (celda.Row > fila || celda.Column == _celdas.ColCount.Count))
 					{
-						await Navigation.PushAsync(new Producto(productoSeleccionado, _nombresColumnas, _servicio), true);
+						var titulo = _nombresColumnas != null && _nombresColumnas.Length > 1 ? _nombresColumnas[1] : "PRODUCTO";
+						await Navigation.PushAsync(new Producto(productoSeleccionado, _nombresColumnas, _servicio, titulo), true);
 						break;
 					}
 				}

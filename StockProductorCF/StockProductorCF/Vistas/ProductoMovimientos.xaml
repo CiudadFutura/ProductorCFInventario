@@ -18,8 +18,7 @@
       </StackLayout>
 			<StackLayout x:Name="ContenedorMovimientos" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
 			</StackLayout>
-			<StackLayout BackgroundColor="#D21721" Spacing="0" Padding="0" VerticalOptions="End" HorizontalOptions="Fill">
-				<Button HorizontalOptions="FillAndExpand" VerticalOptions="End" HeightRequest="60" Text="Volver" Clicked="Volver"/>
+			<StackLayout x:Name="ContenedorBotones" Spacing="0" Padding="0" Orientation="Horizontal" BackgroundColor="#E2E2E1" VerticalOptions="End">
 			</StackLayout>
     </StackLayout>
   </ContentPage.Content>

@@ -14,16 +14,26 @@ namespace StockProductorCF.Vistas
 		private readonly string _linkHojaConsulta;
 		private int[] _listaColumnas;
 		private double _anchoActual;
+		private Image _listo;
 
 		public SeleccionColumnasInventario(IReadOnlyCollection<CellEntry> columnas, string linkHojaConsulta, SpreadsheetsService servicio)
 		{
 			InitializeComponent();
 			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
+			ConfigurarBotones();
 			_servicio = servicio;
 			_linkHojaConsulta = linkHojaConsulta;
 
 			LlenarGrillaColumnasInventario(columnas);
+		}
+
+		private void ConfigurarBotones()
+		{
+			_listo = App.Instancia.ObtenerImagen(TipoImagen.BotonListo);
+			_listo.GestureRecognizers.Add(new TapGestureRecognizer(Listo));
+
+			ContenedorBotones.Children.Add(_listo);
 		}
 
 		private void LlenarGrillaColumnasInventario(IReadOnlyCollection<CellEntry> columnas)
@@ -77,11 +87,18 @@ namespace StockProductorCF.Vistas
 		}
 
 		[Android.Runtime.Preserve]
-		private void Listo(object sender, EventArgs e)
+		private void Listo(View arg1, object arg2)
 		{
-			CuentaUsuario.AlmacenarColumnasInventarioDeHoja(_linkHojaConsulta, string.Join(",", _listaColumnas));
-			var paginaGrilla = new PaginaGrilla(_linkHojaConsulta, _servicio);
-			App.Instancia.LimpiarNavegadorLuegoIrPagina(paginaGrilla);
+			_listo.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(300), () =>
+			{
+				CuentaUsuario.AlmacenarColumnasInventarioDeHoja(_linkHojaConsulta, string.Join(",", _listaColumnas));
+				var paginaGrilla = new PaginaGrilla(_linkHojaConsulta, _servicio);
+				App.Instancia.LimpiarNavegadorLuegoIrPagina(paginaGrilla);
+
+				_listo.Opacity = 1f;
+				return false;
+			});
 		}
 
 		protected override async void OnSizeAllocated(double ancho, double alto)

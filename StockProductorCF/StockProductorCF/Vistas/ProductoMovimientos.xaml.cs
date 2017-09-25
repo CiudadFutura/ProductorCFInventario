@@ -18,6 +18,7 @@ namespace StockProductorCF.Vistas
 		private readonly ServiciosGoogle _servicioGoogle;
 		private string[] _nombresColumnas;
 		private ActivityIndicator _indicadorActividad;
+		private Image _listo;
 
 		public ProductoMovimientos(IReadOnlyCollection<CellEntry> producto, SpreadsheetsService servicio)
 		{
@@ -50,7 +51,9 @@ namespace StockProductorCF.Vistas
 		{
 			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProductores));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
-			if(_productoString.Length > 1)
+			ConfigurarBotones();
+
+			if (_productoString.Length > 1)
 				Titulo.Text += " " + _productoString[1];
 
 			_indicadorActividad = new ActivityIndicator
@@ -61,6 +64,14 @@ namespace StockProductorCF.Vistas
 			};
 			_indicadorActividad.SetBinding(IsVisibleProperty, "IsBusy");
 			_indicadorActividad.SetBinding(ActivityIndicator.IsRunningProperty, "IsBusy");
+		}
+
+		private void ConfigurarBotones()
+		{
+			_listo = App.Instancia.ObtenerImagen(TipoImagen.BotonListo);
+			_listo.GestureRecognizers.Add(new TapGestureRecognizer(Listo));
+
+			ContenedorBotones.Children.Add(_listo);
 		}
 
 		private async void ObtenerDatosMovimientosDesdeHCG()
@@ -241,9 +252,16 @@ namespace StockProductorCF.Vistas
 		}
 
 		[Android.Runtime.Preserve]
-		private async void Volver(object sender, EventArgs args)
+		private void Listo(View arg1, object arg2)
 		{
-			await Navigation.PopAsync();
+			_listo.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(300), () =>
+			{
+				Navigation.PopAsync();
+
+				_listo.Opacity = 1f;
+				return false;
+			});
 		}
 
 		protected override async void OnSizeAllocated(double ancho, double alto)

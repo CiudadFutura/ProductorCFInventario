@@ -65,9 +65,6 @@ namespace StockProductorCF.Servicios
 			fila += "<gsx:cantidad>" + cantidad.ToString().Replace('.', ',') + "</gsx:cantidad>";
 			// Agrega el Precio total
 			fila += "<gsx:preciototal>" + Math.Abs(precio) + "</gsx:preciototal>";
-			// Agrega el Costo unitario
-			var costoUnitario = cantidad != 0 ? Math.Round(Math.Abs(precio / cantidad), 2) : 0;
-			fila += "<gsx:costounitario>" + costoUnitario + "</gsx:costounitario>";
 			// Agrega el Lugar (proveedor o punto de venta)
 			fila += "<gsx:lugar>" + lugar + "</gsx:lugar>";
 			// Agrega el Usuario

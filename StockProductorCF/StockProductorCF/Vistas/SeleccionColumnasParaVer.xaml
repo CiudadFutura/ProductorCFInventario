@@ -20,9 +20,8 @@
 				<StackLayout x:Name="ContenedorColumnas" VerticalOptions="FillAndExpand" HorizontalOptions="Fill" Spacing="0" Padding="0">
         </StackLayout>
       </ScrollView>
-			<StackLayout BackgroundColor="#D21721" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
-        <Button HorizontalOptions="FillAndExpand" VerticalOptions="End" Text="Listo" HeightRequest="60" Clicked="Listo"/>
-      </StackLayout>
+			<StackLayout x:Name="ContenedorBotones" Spacing="0" Padding="0" Orientation="Horizontal" BackgroundColor="#E2E2E1" VerticalOptions="End">
+			</StackLayout>
     </StackLayout>
   </ContentPage.Content>
 

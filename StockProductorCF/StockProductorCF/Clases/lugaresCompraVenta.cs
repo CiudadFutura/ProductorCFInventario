@@ -12,15 +12,17 @@ namespace StockProductorCF.Clases
 		{
 			//Recibe el link de la hoja principal, obtiene el link de lugares (si tiene) para la hoja actual y lo actualiza (por si se agregaron lugares)
 			var paginaLugares = CuentaUsuario.RecuperarValorDeCuentaLocal(linkHojaPrincipal + "|hojaPuntosVenta");
-			if (paginaLugares == null) return;
-
-			_celdas = new ServiciosGoogle().ObtenerCeldasDeUnaHoja(paginaLugares, servicio);
-
 			var puntosVentaTexto = "";
-			foreach (CellEntry celda in _celdas.Entries)
+
+			if (paginaLugares != null)
 			{
-				if (celda.Row != 1)
-					puntosVentaTexto += celda.Value + "|";
+				_celdas = new ServiciosGoogle().ObtenerCeldasDeUnaHoja(paginaLugares, servicio);
+
+				foreach (CellEntry celda in _celdas.Entries)
+				{
+					if (celda.Row != 1)
+						puntosVentaTexto += celda.Value + "|";
+				}
 			}
 
 			CuentaUsuario.AlmacenarPuntosVenta(puntosVentaTexto.TrimEnd('|'));

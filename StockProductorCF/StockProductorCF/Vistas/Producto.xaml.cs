@@ -24,14 +24,18 @@ namespace StockProductorCF.Vistas
 		private string _mensaje = "";
 		private double _anchoActual;
 		private ActivityIndicator _indicadorActividad;
+		private Image _volver;
+		private Image _movimientos;
+		private Image _guardarCambios;
 
-		public Producto(CellEntry[] producto, string[] nombresColumnas, SpreadsheetsService servicio)
+		public Producto(CellEntry[] producto, string[] nombresColumnas, SpreadsheetsService servicio, string titulo)
 		{
 			InitializeComponent();
 			InicializarValoresGenerales();
 			_producto = producto;
 			_servicio = servicio;
 			_nombresColumnas = nombresColumnas;
+			Titulo.Text += " " + titulo.Replace("App", "").Replace("es ", " ").Replace("s ", " ");
 
 			//Almacenar el arreglo de strings para cargar el producto en pantalla
 			_productoString = new string[producto.Length];
@@ -60,6 +64,8 @@ namespace StockProductorCF.Vistas
 			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProductores));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 
+			ConfigurarBotones();
+
 			_indicadorActividad = new ActivityIndicator
 			{
 				VerticalOptions = LayoutOptions.CenterAndExpand,
@@ -68,6 +74,20 @@ namespace StockProductorCF.Vistas
 			};
 			_indicadorActividad.SetBinding(IsVisibleProperty, "IsBusy");
 			_indicadorActividad.SetBinding(ActivityIndicator.IsRunningProperty, "IsBusy");
+		}
+
+		private void ConfigurarBotones()
+		{
+			_volver = App.Instancia.ObtenerImagen(TipoImagen.BotonVolver);
+			_volver.GestureRecognizers.Add(new TapGestureRecognizer(Volver));
+			_movimientos = App.Instancia.ObtenerImagen(TipoImagen.BotonMovimientos);
+			_movimientos.GestureRecognizers.Add(new TapGestureRecognizer(AccederMovimientos));
+			_guardarCambios = App.Instancia.ObtenerImagen(TipoImagen.BotonGuardarCambios);
+			_guardarCambios.GestureRecognizers.Add(new TapGestureRecognizer(EventoGuardarCambios));
+
+			ContenedorBotones.Children.Add(_volver);
+			ContenedorBotones.Children.Add(_movimientos);
+			ContenedorBotones.Children.Add(_guardarCambios);
 		}
 
 		private void CargarDatosProductos()
@@ -129,7 +149,7 @@ namespace StockProductorCF.Vistas
 					ContenedorProducto.Children.Add(campoValor);
 
 					//Si es columna de stock agrega campo movimiento y precio
-					if(!string.IsNullOrEmpty(celda) && _listaColumnasInventario != null && _listaColumnasInventario[i] == "1")
+					if (!string.IsNullOrEmpty(celda) && _listaColumnasInventario != null && _listaColumnasInventario[i] == "1")
 					{
 						#region Movimiento stock
 
@@ -183,45 +203,48 @@ namespace StockProductorCF.Vistas
 
 						#endregion
 
-						#region Precio movimiento
-
-						nombreCampo = new Label
+						if (_listaLugares != null)
 						{
-							HorizontalOptions = LayoutOptions.EndAndExpand,
-							VerticalOptions = LayoutOptions.Center,
-							HorizontalTextAlignment = TextAlignment.End,
-							Text = "Precio Total",
-							FontSize = 16,
-							WidthRequest = anchoEtiqueta,
-							TextColor = Color.Black
-						};
 
-						valorCampo = new Entry
-						{
-							HorizontalOptions = LayoutOptions.CenterAndExpand,
-							VerticalOptions = LayoutOptions.Center,
-							HorizontalTextAlignment = TextAlignment.Start,
-							StyleId = "precio-" + i,
-							WidthRequest = anchoCampo - 55,
-							Keyboard = Keyboard.Numeric
-						};
+							#region Precio movimiento
 
-						campoValor = new StackLayout
-						{
-							BackgroundColor = Color.FromHex("#FFFFFF"),
-							VerticalOptions = LayoutOptions.Start,
-							HorizontalOptions = LayoutOptions.Fill,
-							Orientation = StackOrientation.Horizontal,
-							HeightRequest = 60,
-							Children = { nombreCampo, valorCampo }
-						};
+							nombreCampo = new Label
+							{
+								HorizontalOptions = LayoutOptions.EndAndExpand,
+								VerticalOptions = LayoutOptions.Center,
+								HorizontalTextAlignment = TextAlignment.End,
+								Text = "Precio Total",
+								FontSize = 16,
+								WidthRequest = anchoEtiqueta,
+								TextColor = Color.Black
+							};
 
-						ContenedorProducto.Children.Add(campoValor);
+							valorCampo = new Entry
+							{
+								HorizontalOptions = LayoutOptions.CenterAndExpand,
+								VerticalOptions = LayoutOptions.Center,
+								HorizontalTextAlignment = TextAlignment.Start,
+								StyleId = "precio-" + i,
+								WidthRequest = anchoCampo - 55,
+								Keyboard = Keyboard.Numeric
+							};
 
-						#endregion
+							campoValor = new StackLayout
+							{
+								BackgroundColor = Color.FromHex("#FFFFFF"),
+								VerticalOptions = LayoutOptions.Start,
+								HorizontalOptions = LayoutOptions.Fill,
+								Orientation = StackOrientation.Horizontal,
+								HeightRequest = 60,
+								Children = { nombreCampo, valorCampo }
+							};
 
-						#region Punto de venta
-						if(_listaLugares != null) { 
+							ContenedorProducto.Children.Add(campoValor);
+
+							#endregion
+
+							#region Punto de venta
+
 							nombreCampo = new Label
 							{
 								HorizontalOptions = LayoutOptions.EndAndExpand,
@@ -256,8 +279,10 @@ namespace StockProductorCF.Vistas
 							};
 
 							ContenedorProducto.Children.Add(campoValor);
+
+							#endregion
+
 						}
-						#endregion
 					}
 				}
 
@@ -275,15 +300,26 @@ namespace StockProductorCF.Vistas
 		}
 
 		[Android.Runtime.Preserve]
-		private async void GuardarCambios(object sender, EventArgs args)
+		private void EventoGuardarCambios(View arg1, object arg2)
 		{
-			await GuardarCambios();
+			_guardarCambios.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(300), () =>
+			{
+				GuardarCambios();
+				_guardarCambios.Opacity = 1f;
+				return false;
+			});
+		}
+
+		private async void GuardarCambios()
+		{
+			await TareaGuardarCambios();
 
 			await Navigation.PopAsync();
 			await DisplayAlert("Producto", _mensaje, "Listo");
 		}
 
-		private async Task GuardarCambios()
+		private async Task TareaGuardarCambios()
 		{
 			foreach (var stackLayout in ContenedorProducto.Children)
 			{
@@ -350,15 +386,27 @@ namespace StockProductorCF.Vistas
 		}
 
 		[Android.Runtime.Preserve]
-		private async void AccederMovimientos(object sender, EventArgs args)
+		private void AccederMovimientos(View arg1, object arg2)
 		{
-			await Navigation.PushAsync(new ProductoMovimientos(_producto, _servicio), true);
+			_movimientos.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(300), () =>
+			{
+				Navigation.PushAsync(new ProductoMovimientos(_producto, _servicio), true);
+				_movimientos.Opacity = 1f;
+				return false;
+			});
 		}
 
 		[Android.Runtime.Preserve]
-		private async void Volver(object sender, EventArgs args)
+		private void Volver(View arg1, object arg2)
 		{
-			await Navigation.PopAsync();
+			_volver.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(300), () =>
+			{
+				Navigation.PopAsync();
+				_volver.Opacity = 1f;
+				return false;
+			});
 		}
 
 		private async void GuardarProductoHojaDeCalculoGoogle()

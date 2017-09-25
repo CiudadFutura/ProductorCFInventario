@@ -96,6 +96,22 @@ namespace StockProductorCF
 					alineacionHorizontal = LayoutOptions.StartAndExpand;
 					fuenteArchivo = ImageSource.FromResource("StockProductorCF.Imagenes.escanearCodigo.png");
 					break;
+				case TipoImagen.BotonVolver:
+					alineacionHorizontal = LayoutOptions.EndAndExpand;
+					fuenteArchivo = ImageSource.FromResource("StockProductorCF.Imagenes.volver.png");
+					break;
+				case TipoImagen.BotonMovimientos:
+					alineacionHorizontal = LayoutOptions.Center;
+					fuenteArchivo = ImageSource.FromResource("StockProductorCF.Imagenes.movimientos.png");
+					break;
+				case TipoImagen.BotonGuardarCambios:
+					alineacionHorizontal = LayoutOptions.StartAndExpand;
+					fuenteArchivo = ImageSource.FromResource("StockProductorCF.Imagenes.guardarCambios.png");
+					break;
+				case TipoImagen.BotonListo:
+					alineacionHorizontal = LayoutOptions.Center;
+					fuenteArchivo = ImageSource.FromResource("StockProductorCF.Imagenes.listo.png");
+					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(tipoImagen), tipoImagen, null);
 			}
@@ -122,6 +138,10 @@ namespace StockProductorCF
 		BotonAccesoDatos,
 		BotonRefrescarDatos,
 		BotonEscanearCodigo,
+		BotonVolver,
+		BotonMovimientos,
+		BotonGuardarCambios,
+		BotonListo,
 		SombraEncabezado
 	}
 }

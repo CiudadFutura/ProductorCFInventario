@@ -8,39 +8,46 @@ namespace StockProductorCF.Vistas
 	public partial class PaginaConexionBaseDeDatos
 	{
 		private double _anchoActual;
+		private Image _listo;
 
 		public PaginaConexionBaseDeDatos()
 		{
 			InitializeComponent();
 			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProyectos));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
+			ConfigurarBotones();
 			CuentaUsuario.AlmacenarAccesoDatos("B");
 			Usuario.Text = CuentaUsuario.ObtenerUsuarioDeBaseDeDatos();
 		}
 
-		[Android.Runtime.Preserve]
-		private async void Conectar(object sender, EventArgs args)
+		private void ConfigurarBotones()
 		{
-			if (Usuario.Text.ToUpper() == "HUGO" && Contrasena.Text == "Chavez")
+			_listo = App.Instancia.ObtenerImagen(TipoImagen.BotonListo);
+			_listo.GestureRecognizers.Add(new TapGestureRecognizer(Conectar));
+
+			ContenedorBotones.Children.Add(_listo);
+		}
+
+		[Android.Runtime.Preserve]
+		private void Conectar(View arg1, object arg2)
+		{
+			_listo.Opacity = 0.5f;
+			Device.StartTimer(TimeSpan.FromMilliseconds(300), () =>
 			{
-				//var url = string.Format(@"http://169.254.80.80/PruebaMision/Service.asmx/AutenticarEnMision?usuario={0}&contrasena={1}", usuario, contrasena);
+				if (Usuario.Text.ToUpper() == "HUGO" && Contrasena.Text == "Chavez")
+				{
+					CuentaUsuario.AlmacenarUsuarioDeBaseDeDatos(Usuario.Text.ToUpper());
+					CuentaUsuario.AlmacenarColumnasParaVer("0,1,1,1");
+					CuentaUsuario.AlmacenarColumnasInventario("0,0,0,1");
+					CuentaUsuario.RemoverValorEnCuentaLocal("puntosVenta");
+					CuentaUsuario.RemoverValorEnCuentaLocal("relacionesInsumoProducto");
 
-				//using (var cliente = new HttpClient())
-				//{
-				//	var token = await cliente.GetStringAsync(url);
-				//	token = token.Substring(token.IndexOf(".org/\">") + 8);
-				//	token = token.Remove(token.IndexOf("\""));
-				const string token = "token1234";
-				if (string.IsNullOrEmpty(token)) return;
+					App.Instancia.LimpiarNavegadorLuegoIrPagina(new PaginaGrilla());
+				}
 
-				CuentaUsuario.AlmacenarTokenDeBaseDeDatos(token);
-				CuentaUsuario.AlmacenarUsuarioDeBaseDeDatos(Usuario.Text.ToUpper());
-				CuentaUsuario.AlmacenarColumnasParaVer("0,1,1");
-				CuentaUsuario.AlmacenarColumnasInventario("0,0,1");
-				
-				App.Instancia.LimpiarNavegadorLuegoIrPagina(new PaginaGrilla());
-				//}
-			}
+				_listo.Opacity = 1f;
+				return false;
+			});
 		}
 
 		protected override async void OnSizeAllocated(double ancho, double alto)

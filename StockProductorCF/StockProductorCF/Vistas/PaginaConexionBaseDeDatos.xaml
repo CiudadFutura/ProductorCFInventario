@@ -26,8 +26,7 @@
 					<Entry FontSize="18" x:Name="Contrasena" HorizontalOptions="StartAndExpand" WidthRequest="160" VerticalOptions="Center" IsPassword="True"/>
 				</StackLayout>
 			</StackLayout>
-			<StackLayout BackgroundColor="#D21721" Spacing="0" Padding="0" Orientation="Horizontal" VerticalOptions="End" HorizontalOptions="Fill">
-				<Button HorizontalOptions="FillAndExpand" VerticalOptions="Center" Text="Conectar" HeightRequest="60" Clicked="Conectar"/>
+			<StackLayout x:Name="ContenedorBotones" Spacing="0" Padding="0" Orientation="Horizontal" BackgroundColor="#E2E2E1" VerticalOptions="End">
 			</StackLayout>
 		</StackLayout>
 	</ContentPage.Content>

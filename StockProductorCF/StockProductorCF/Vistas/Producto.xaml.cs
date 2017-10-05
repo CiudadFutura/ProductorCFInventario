@@ -28,15 +28,15 @@ namespace StockProductorCF.Vistas
 		private Image _volver;
 		private Image _movimientos;
 		private Image _guardarCambios;
+		private bool _esGoogle;
 
 		public Producto(CellEntry[] producto, string[] nombresColumnas, SpreadsheetsService servicio, string titulo)
 		{
 			InitializeComponent();
-			InicializarValoresGenerales();
+			InicializarValoresGenerales(titulo);
 			_producto = producto;
 			_servicio = servicio;
 			_nombresColumnas = nombresColumnas;
-			Titulo.Text += " " + titulo.Replace("App", "").Replace("es ", " ").Replace("s ", " ");
 
 			//Almacenar el arreglo de strings para cargar el producto en pantalla
 			_productoString = new string[producto.Length];
@@ -50,18 +50,20 @@ namespace StockProductorCF.Vistas
 			ConstruirVistaDeProducto();
 		}
 
-		public Producto(string[] productoBD, string[] nombresColumnas)
+		public Producto(string[] productoBD, string[] nombresColumnas, string titulo)
 		{
 			InitializeComponent();
-			InicializarValoresGenerales();
+			InicializarValoresGenerales(titulo);
 			_productoString = productoBD;
 			_nombresColumnas = nombresColumnas;
 
 			ConstruirVistaDeProducto();
 		}
 
-		private void InicializarValoresGenerales()
+		private void InicializarValoresGenerales(string titulo)
 		{
+			_esGoogle = CuentaUsuario.ObtenerAccesoDatos() == "G";
+			Titulo.Text += " " + titulo.Replace("App", "").Replace("es ", " ").Replace("s ", " ");
 			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProductores));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 
@@ -170,7 +172,7 @@ namespace StockProductorCF.Vistas
 							HorizontalOptions = LayoutOptions.EndAndExpand,
 							VerticalOptions = LayoutOptions.Center,
 							HorizontalTextAlignment = TextAlignment.End,
-							Text = _listaLugares != null ? "Cantidad" : "Precio Total", //Si no hay lugares no hay campo PrecioTotal, el campo Cantidad toma esa etiqueta.
+							Text = _listaLugares != null || !_esGoogle ? "Cantidad" : "Precio Total", //Si no hay lugares no hay campo PrecioTotal, el campo Cantidad toma esa etiqueta.
 							FontSize = 16,
 							WidthRequest = anchoEtiqueta - 13,
 							TextColor = Color.Black
@@ -303,38 +305,41 @@ namespace StockProductorCF.Vistas
 
 			#region Comentario
 
-			nombreCampo = new Label
+			if (_esGoogle)
 			{
-				HorizontalOptions = LayoutOptions.EndAndExpand,
-				VerticalOptions = LayoutOptions.Center,
-				HorizontalTextAlignment = TextAlignment.End,
-				Text = "Comentario",
-				FontSize = 16,
-				WidthRequest = anchoEtiqueta,
-				TextColor = Color.Black
-			};
+				nombreCampo = new Label
+				{
+					HorizontalOptions = LayoutOptions.EndAndExpand,
+					VerticalOptions = LayoutOptions.Center,
+					HorizontalTextAlignment = TextAlignment.End,
+					Text = "Comentario",
+					FontSize = 16,
+					WidthRequest = anchoEtiqueta,
+					TextColor = Color.Black
+				};
 
-			var valorCampoArea = new Editor
-			{
-				HorizontalOptions = LayoutOptions.CenterAndExpand,
-				VerticalOptions = LayoutOptions.Center,
-				StyleId = "comentario",
-				WidthRequest = anchoCampo,
-				HeightRequest = 90,
-				Keyboard = Keyboard.Text
-			};
+				var valorCampoArea = new Editor
+				{
+					HorizontalOptions = LayoutOptions.CenterAndExpand,
+					VerticalOptions = LayoutOptions.Center,
+					StyleId = "comentario",
+					WidthRequest = anchoCampo,
+					HeightRequest = 90,
+					Keyboard = Keyboard.Text
+				};
 
-			campoValor = new StackLayout
-			{
-				BackgroundColor = Color.FromHex("#FFFFFF"),
-				VerticalOptions = LayoutOptions.Start,
-				HorizontalOptions = LayoutOptions.Fill,
-				Orientation = StackOrientation.Horizontal,
-				HeightRequest = 90,
-				Children = { nombreCampo, valorCampoArea }
-			};
+				campoValor = new StackLayout
+				{
+					BackgroundColor = Color.FromHex("#FFFFFF"),
+					VerticalOptions = LayoutOptions.Start,
+					HorizontalOptions = LayoutOptions.Fill,
+					Orientation = StackOrientation.Horizontal,
+					HeightRequest = 90,
+					Children = {nombreCampo, valorCampoArea}
+				};
 
-			ContenedorProducto.Children.Add(campoValor);
+				ContenedorProducto.Children.Add(campoValor);
+			}
 
 			#endregion
 
@@ -424,7 +429,7 @@ namespace StockProductorCF.Vistas
 				{
 					if (CuentaUsuario.ValidarTokenDeGoogle())
 					{
-						if (CuentaUsuario.ObtenerAccesoDatos() == "G")
+						if (_esGoogle)
 							GuardarProductoHojaDeCalculoGoogle();
 						else
 							GuardarProductoBaseDeDatos();

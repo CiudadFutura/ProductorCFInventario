@@ -32,7 +32,9 @@ namespace StockProductorCF.Vistas
 		private Image _refrescar;
 		private Image _escanearCodigo;
 		private Picker _listaHojas;
+		private Picker _listaRubros;
 		private double _anchoActual;
+		private bool _esGoogle;
 
 		//Constructor para Hoja de cálculo de Google
 		public PaginaGrilla(string linkHojaConsulta, SpreadsheetsService servicio)
@@ -55,6 +57,8 @@ namespace StockProductorCF.Vistas
 		{
 			InitializeComponent();
 			InicializarValoresGenerales();
+			ConfigurarSelectorRubros();
+
 			ObtenerProductosDesdeBD();
 		}
 
@@ -146,17 +150,14 @@ namespace StockProductorCF.Vistas
 
 		private async void ObtenerProductosDesdeBD()
 		{
-			//var url = $@"http://169.254.80.80/PruebaMision/Service.asmx/RecuperarProductos?token={
-			//		CuentaUsuario.ObtenerTokenActualDeBaseDeDatos()
-			//	}";
-
 			RefrescarUIGrilla();
 
-			const string url = "http://www.misionantiinflacion.com.ar/api/v1/products?token=05f9a1a6683c2ba246c2b057d0433429a176b674d9a68557ddbdcf33c474aee4";
+			const string url = "https://misionantiinflacion.com.ar/api/v1/products?token=57137b4cabbab300843e45583aae5250f7bfff3115c12d58e3ac7bd195cd2b3c";
 
 			using (var cliente = new HttpClient())
 			{
 				List<string[]> productos = null;
+
 				try
 				{
 					IsBusy = true;
@@ -166,9 +167,9 @@ namespace StockProductorCF.Vistas
 						//Obtiene json de productos desde el webservice
 						var jsonProductos = await cliente.GetStringAsync(url);
 						//Parsea el json para obtener la lista de productos
-						productos = ParsearJSONProductos(jsonProductos);
+						productos = ParsearJsonProductos(jsonProductos);
 
-						_nombresColumnas = new[] { "Código", "Nombre", "Stock" };
+						_nombresColumnas = new[] { "Código", "Nombre", "Rubro", "Stock" };
 					});
 				}
 				finally
@@ -181,11 +182,12 @@ namespace StockProductorCF.Vistas
 			}
 		}
 
-		private static List<string[]> ParsearJSONProductos(string jsonProductos)
+		private List<string[]> ParsearJsonProductos(string jsonProductos)
 		{
-			jsonProductos = jsonProductos.Substring(jsonProductos.IndexOf("\"data\":[{") + 9)
-				.Replace("}]}", "")
-				.Replace("},{\"id\"", "|");
+			jsonProductos = jsonProductos
+				.Replace("[{", "")
+				.Replace("}]", "")
+				.Replace("},{\"id\"", "|\"id\"");
 			var arregloProductos = jsonProductos.Split('|');
 			var productos = new List<string[]>();
 
@@ -194,17 +196,65 @@ namespace StockProductorCF.Vistas
 				var temporal = datos.Replace(",\"", "|").Split('|');
 
 				//Si el producto no está oculto lo agregamos
-				if (temporal[12].Split(':')[1].TrimStart('"').TrimEnd('"') == "true") continue;
-				var producto = new string[3];
+				if (temporal[8].Split(':')[1].TrimStart('"').TrimEnd('"') == "true") continue;
+				var producto = new string[4];
 				producto[0] = temporal[0].Split(':')[1].TrimStart('"').TrimEnd('"'); // ID
-				producto[1] = temporal[2].Split(':')[1].TrimStart('"').TrimEnd('"').Replace("\\\"", "\""); // Nombre
-				var stock = temporal[18].Split(':')[1].TrimStart('"').TrimEnd('"'); // Stock
-				producto[2] = stock == "null" ? "0" : stock;
+				producto[1] = temporal[1].Split(':')[1].TrimStart('"').TrimEnd('"').Replace("\\\"", "\""); // Nombre
+				var rubro = temporal[10].Split(':')[1].TrimStart('"').TrimEnd('"');
+				switch (rubro)
+				{
+					case "wholesaler":
+						rubro = "Almacén";
+						break;
+					case "fragile":
+						rubro = "Frágil";
+						break;
+					case "freshes":
+						rubro = "Frescos";
+						break;
+					case "cleaning":
+						rubro = "Limpieza";
+						break;
+					case "vegetables":
+						rubro = "Vegetales";
+						break;
+					default:
+						rubro = "Almacén";
+						break;
+				}
+				producto[2] = rubro;
+				var stock = temporal[7].Split(':')[1].TrimStart('"').TrimEnd('"'); // Stock
+				producto[3] = stock == "null" ? "0" : stock;
 
 				productos.Add(producto);
 			}
 
-			return productos;
+			if (_listaRubros.Items[_listaRubros.SelectedIndex] != "Todos")
+				productos = productos.Where(y => y[2] == _listaRubros.Items[_listaRubros.SelectedIndex]).ToList();
+
+			return productos.OrderBy(x => x[2]).ThenBy(x => x[1]).ToList();
+		}
+
+		private void ConfigurarSelectorRubros()
+		{
+			_listaRubros = new Picker
+			{
+				WidthRequest = App.AnchoRetratoDePantalla * .3,
+				HorizontalOptions = LayoutOptions.EndAndExpand,
+				VerticalOptions = LayoutOptions.Center,
+				IsVisible = true
+			};
+
+			string[] nombres = { "Todos", "Almacén", "Frágil", "Frescos", "Limpieza", "Vegetales" };
+
+			foreach (var nombre in nombres)
+			{
+				_listaRubros.Items.Add(nombre);
+			}
+			_listaRubros.SelectedIndex = 0;
+			_listaRubros.SelectedIndexChanged += FiltrarProductos;
+
+			Cabecera.Children.Add(_listaRubros);
 		}
 
 		#endregion
@@ -213,6 +263,8 @@ namespace StockProductorCF.Vistas
 
 		private void InicializarValoresGenerales()
 		{
+			_esGoogle = CuentaUsuario.ObtenerAccesoDatos() == "G";
+
 			Cabecera.Children.Add(App.Instancia.ObtenerImagen(TipoImagen.EncabezadoProductores));
 			SombraEncabezado.Source = ImageSource.FromResource(App.RutaImagenSombraEncabezado);
 
@@ -261,7 +313,7 @@ namespace StockProductorCF.Vistas
 		private async void IrAlProducto(string codigoProductoSeleccionado)
 		{
 			var fila = -1;
-			if (CuentaUsuario.ObtenerAccesoDatos() == "G")
+			if (_esGoogle)
 			{
 				var productoSeleccionado = new CellEntry[_celdas.ColCount.Count];
 
@@ -288,7 +340,7 @@ namespace StockProductorCF.Vistas
 				{
 					if (producto[0] != codigoProductoSeleccionado) continue;
 					fila = 0;
-					await Navigation.PushAsync(new Producto(producto, _nombresColumnas), true);
+					await Navigation.PushAsync(new Producto(producto, _nombresColumnas, producto[1]), true);
 					break;
 				}
 			}
@@ -321,12 +373,15 @@ namespace StockProductorCF.Vistas
 					i = i + 1;
 				}
 
-				var producto = new ClaseProducto(datosProducto[0], datosParaVer, esTeclaPar);
+				var producto = new ClaseProducto(datosProducto[0], datosParaVer, esTeclaPar, _esGoogle);
 				listaProductos.Add(producto);
 				esTeclaPar = !esTeclaPar;
 			}
 
-			var anchoColumnaNombreProd = CuentaUsuario.ObtenerAccesoDatos() == "G" ? 120 : 200;
+			var anchoColumnaNombreProd = _esGoogle ? 120 : 200;
+			var anchoColumnaDatosProd = App.AnchoRetratoDePantalla - (anchoColumnaNombreProd + 2);
+			if (!_esGoogle)
+				anchoColumnaDatosProd -= 10; //Cuadro de Rubro
 
 			var titulo = _nombresColumnas != null && _nombresColumnas.Length > 1 ? _nombresColumnas[1].ToUpper() : "PRODUCTO";
 			var encabezado = new StackLayout
@@ -357,7 +412,7 @@ namespace StockProductorCF.Vistas
 										TextColor = Color.Black,
 										VerticalTextAlignment = TextAlignment.Center,
 										VerticalOptions = LayoutOptions.Center,
-										WidthRequest = App.AnchoRetratoDePantalla - (anchoColumnaNombreProd + 2)
+										WidthRequest = anchoColumnaDatosProd
 									}
 								}
 			};
@@ -380,21 +435,21 @@ namespace StockProductorCF.Vistas
 					};
 					nombreProducto.SetBinding(Label.TextProperty, "Nombre");
 
-					var datos = new Label
-					{
-						FontSize = 15,
-						TextColor = Color.FromHex("#1D1D1B"),
-						VerticalOptions = LayoutOptions.CenterAndExpand,
-						WidthRequest = App.AnchoRetratoDePantalla - (anchoColumnaNombreProd + 2)
-					};
-					datos.SetBinding(Label.TextProperty, "Datos");
-
 					var separador = new BoxView
 					{
 						WidthRequest = 2,
 						BackgroundColor = Color.FromHex("#FFFFFF"),
 						HeightRequest = 55
 					};
+
+					var datos = new Label
+					{
+						FontSize = 15,
+						TextColor = Color.FromHex("#1D1D1B"),
+						VerticalOptions = LayoutOptions.CenterAndExpand,
+						WidthRequest = anchoColumnaDatosProd
+					};
+					datos.SetBinding(Label.TextProperty, "Datos");
 
 					var tecla = new StackLayout
 					{
@@ -403,6 +458,18 @@ namespace StockProductorCF.Vistas
 						Children = { nombreProducto, separador, datos }
 					};
 					tecla.SetBinding(BackgroundColorProperty, "ColorFondo");
+
+					if (!_esGoogle)
+					{
+						var rubro = new BoxView
+						{
+							WidthRequest = 10,
+							HeightRequest = 55
+						};
+						rubro.SetBinding(BackgroundColorProperty, "ColorRubro");
+
+						tecla.Children.Add(rubro);
+					}
 
 					var celda = new ViewCell { View = tecla };
 
@@ -540,19 +607,30 @@ namespace StockProductorCF.Vistas
 		[Android.Runtime.Preserve]
 		private void FiltrarProductos(object sender, EventArgs args)
 		{
-			if (Buscador.Text.Length > 2 || Buscador.Text.Length == 0)
+			var productos = new List<string[]>();
+
+			if (_esGoogle)
 			{
-				//Se quita la grilla para recargarla.
-				ContenedorTabla.Children.Clear();
-				var productos = new List<string[]>();
+				if (Buscador.Text.Length > 0 && Buscador.Text.Length <= 2) return;
+
 				foreach (var producto in _productos)
 				{
 					if (producto[1].ToLower().Contains(Buscador.Text.ToLower()))
 						productos.Add(producto);
 				}
-
-				LlenarGrillaDeProductos(productos, true);
 			}
+			else
+			{
+				foreach (var producto in _productos)
+				{
+					if (("Todos|" + producto[2]).Contains(_listaRubros.Items[_listaRubros.SelectedIndex]) && producto[1].ToLower().Contains(Buscador.Text.ToLower()))
+						productos.Add(producto);
+				}
+			}
+
+			//Se quita la grilla para recargarla.
+			ContenedorTabla.Children.Clear();
+			LlenarGrillaDeProductos(productos, true);
 		}
 
 		[Android.Runtime.Preserve]
@@ -605,12 +683,33 @@ namespace StockProductorCF.Vistas
 	public class ClaseProducto
 	{
 		[Android.Runtime.Preserve]
-		public ClaseProducto(string id, IList<string> datos, bool esTeclaPar)
+		public ClaseProducto(string id, IList<string> datos, bool esTeclaPar, bool esGoogle)
 		{
 			Id = id;
 			Nombre = datos[0];
 			Datos = string.Join(" - ", datos.Skip(1).Take(datos.Count));
 			ColorFondo = esTeclaPar ? Color.FromHex("#EDEDED") : Color.FromHex("#E2E2E1");
+			ColorRubro = esGoogle ? Color.Red : ColorearRubro(datos[1]);
+		}
+
+		private Color ColorearRubro(string rubro)
+		{
+			// Si es Misión usa color por rubro
+			switch (rubro)
+			{
+				case "Almacén":
+					return Color.FromHex("#FF9933");
+				case "Frágil":
+					return Color.FromHex("#D21721");
+				case "Frescos":
+					return Color.FromHex("#7A0099");
+				case "Limpieza":
+					return Color.FromHex("#0033CC");
+				case "Vegetales":
+					return Color.FromHex("#00802B"); ;
+			}
+
+			return Color.FromHex("#E2E2E1");
 		}
 
 		[Android.Runtime.Preserve]
@@ -621,6 +720,8 @@ namespace StockProductorCF.Vistas
 		public string Datos { get; }
 		[Android.Runtime.Preserve]
 		public Color ColorFondo { get; }
+		[Android.Runtime.Preserve]
+		public Color ColorRubro { get; }
 	}
 
 }

@@ -40,7 +40,7 @@ namespace StockProductorCF.Servicios
 
 		public CellFeed ObtenerCeldasDeUnaHoja(string linkHojaConsulta, SpreadsheetsService servicio)
 		{
-			var consulta = new CellQuery(linkHojaConsulta);
+			var consulta = new CellQuery(linkHojaConsulta) {ReturnEmpty = ReturnEmptyCells.yes};
 			return servicio.Query(consulta);
 		}
 
@@ -164,7 +164,7 @@ namespace StockProductorCF.Servicios
 					{
 						//Se agregan filas de movimientos de insumos para enviar al final
 						var movimiento = AgregarHistorico(celdaMovimiento, -1 * cantidad * cantInsumoRelacion, 0, "-", insumoSeleccionado, nombresColumnas, columnasInventario,
-							"Disminución por producción.");
+							"Disminución por producción de " + cantidad + " producto/s (" + producto[1].Value + ").");
 						EnviarFilas(movimiento, servicio, linkHistoricoInsumos);
 						fila = -1;
 					}

@@ -1,10 +1,12 @@
 ﻿
 using System;
+using System.IO;
+using System.Net;
 using Google.GData.Spreadsheets;
 using Xamarin.Forms;
 using StockProductorCF.Clases;
 using StockProductorCF.Servicios;
-using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace StockProductorCF.Vistas
@@ -29,6 +31,8 @@ namespace StockProductorCF.Vistas
 		private Image _movimientos;
 		private Image _guardarCambios;
 		private bool _esGoogle;
+		private double _stockBd;
+		private static bool _terminoGuardadoBd;
 
 		public Producto(CellEntry[] producto, string[] nombresColumnas, SpreadsheetsService servicio, string titulo)
 		{
@@ -56,6 +60,7 @@ namespace StockProductorCF.Vistas
 			InicializarValoresGenerales(titulo);
 			_productoString = productoBD;
 			_nombresColumnas = nombresColumnas;
+			_terminoGuardadoBd = false;
 
 			ConstruirVistaDeProducto();
 		}
@@ -335,7 +340,7 @@ namespace StockProductorCF.Vistas
 					HorizontalOptions = LayoutOptions.Fill,
 					Orientation = StackOrientation.Horizontal,
 					HeightRequest = 90,
-					Children = {nombreCampo, valorCampoArea}
+					Children = { nombreCampo, valorCampoArea }
 				};
 
 				ContenedorProducto.Children.Add(campoValor);
@@ -427,20 +432,23 @@ namespace StockProductorCF.Vistas
 
 				await Task.Run(async () =>
 				{
-					if (CuentaUsuario.ValidarTokenDeGoogle())
+					if (_esGoogle)
 					{
-						if (_esGoogle)
-							GuardarProductoHojaDeCalculoGoogle();
+						if (CuentaUsuario.ValidarTokenDeGoogle())
+						{
+							await GuardarProductoHojaDeCalculoGoogle();
+						}
 						else
-							GuardarProductoBaseDeDatos();
+						{
+							//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
+							var paginaAuntenticacion = new PaginaAuntenticacion(true);
+							Navigation.InsertPageBefore(paginaAuntenticacion, this);
+							await Navigation.PopAsync();
+						}
 					}
 					else
-					{
-						//Si se quedó la pantalla abierta un largo tiempo y se venció el token, se cierra y refresca el token
-						var paginaAuntenticacion = new PaginaAuntenticacion(true);
-						Navigation.InsertPageBefore(paginaAuntenticacion, this);
-						await Navigation.PopAsync();
-					}
+						GuardarProductoBaseDeDatos();
+					
 				});
 			}
 			finally
@@ -456,7 +464,10 @@ namespace StockProductorCF.Vistas
 			_movimientos.Opacity = 0.5f;
 			Device.StartTimer(TimeSpan.FromMilliseconds(300), () =>
 			{
-				Navigation.PushAsync(new ProductoMovimientos(_producto, _servicio), true);
+				if (_esGoogle)
+					Navigation.PushAsync(new ProductoMovimientos(_producto, _servicio), true);
+				//else
+					
 				_movimientos.Opacity = 1f;
 				return false;
 			});
@@ -474,7 +485,7 @@ namespace StockProductorCF.Vistas
 			});
 		}
 
-		private async void GuardarProductoHojaDeCalculoGoogle()
+		private async Task GuardarProductoHojaDeCalculoGoogle()
 		{
 			_mensaje = "Ha ocurrido un error mientras se guardaba el movimiento.";
 			var servicioGoogle = new ServiciosGoogle();
@@ -521,27 +532,32 @@ namespace StockProductorCF.Vistas
 		private void GuardarProductoBaseDeDatos()
 		{
 			_mensaje = "Ha ocurrido un error mientras se guardaba el movimiento.";
-			//const string url = @"http://169.254.80.80/PruebaMision/Service.asmx/ActualizarProducto?codigo={0}&movimiento={1}";
-			var i = 0;
 			var grabo = false;
 
-			foreach (var celda in _productoString)
+			for (var i = 0; i < _productoString.Length; i++)
 			{
 				if (_listaColumnasInventario[i] == "1")
 				{
-					//var multiplicador = _signoPositivo[i] ? 1 : -1;
-					var movimiento = _cantidades[i];
+					var movimiento = (_signoPositivo[i] ? 1 : -1) * _cantidades[i];
 
 					if (movimiento != 0)
 					{
-						using (var cliente = new HttpClient())
+
+						_stockBd = movimiento + (string.IsNullOrEmpty(_productoString[4]) ? 0 : Convert.ToDouble(_productoString[4]));
+						var request = HttpWebRequest.Create(
+							$"https://misionantiinflacion.com.ar/api/v1/products/{_productoString[0]}?token=09a68ef6ec3e6438bb2a6d809c3bfba3f70c054f6eb62470467b197fff2c150e") as HttpWebRequest;
+						request.Method = "PUT";
+						request.ContentType = "application/json";
+						request.BeginGetRequestStream(GetRequestStreamCallback, request);
+
+						while (!_terminoGuardadoBd)
 						{
-							grabo = true; //await cliente.GetStringAsync(string.Format(url, _productoString[0], (Convert.ToDouble(celda) + multiplicador * movimiento)));
 						}
+
+						grabo = true;
 					}
 				}
 
-				i = i + 1;
 			}
 			_mensaje = grabo ? "El movimiento ha sido guardado correctamente." : "No se han registrado movimientos.";
 		}
@@ -565,5 +581,31 @@ namespace StockProductorCF.Vistas
 			_anchoActual = ancho;
 		}
 
+		private void GetRequestStreamCallback(IAsyncResult asynchronousResult)
+		{
+			var request = (HttpWebRequest)asynchronousResult.AsyncState;
+			// End the stream request operation
+
+			var postStream = request.EndGetRequestStream(asynchronousResult);
+
+			// Create the post data
+			var postData = "{\"stock\":" + _stockBd + "}";
+
+			var byteArray = Encoding.UTF8.GetBytes(postData);
+
+
+			postStream.Write(byteArray, 0, byteArray.Length);
+			postStream.Dispose();
+
+			//Start the web request
+			request.BeginGetResponse(GetResponceStreamCallback, request);
+		}
+
+		private static void GetResponceStreamCallback(IAsyncResult callbackResult)
+		{
+			var request = (HttpWebRequest)callbackResult.AsyncState;
+			request.EndGetResponse(callbackResult);
+			_terminoGuardadoBd = true;
+		}
 	}
 }

@@ -37,8 +37,8 @@ namespace StockProductorCF.Vistas
 				if (Usuario.Text.ToUpper() == "HUGO" && Contrasena.Text == "Chavez")
 				{
 					CuentaUsuario.AlmacenarUsuarioDeBaseDeDatos(Usuario.Text.ToUpper());
-					CuentaUsuario.AlmacenarColumnasParaVer("0,1,1,1");
-					CuentaUsuario.AlmacenarColumnasInventario("0,0,0,1");
+					CuentaUsuario.AlmacenarColumnasParaVer("0,1,1,1,1");
+					CuentaUsuario.AlmacenarColumnasInventario("0,0,0,0,1");
 					CuentaUsuario.RemoverValorEnCuentaLocal("puntosVenta");
 					CuentaUsuario.RemoverValorEnCuentaLocal("relacionesInsumoProducto");
 

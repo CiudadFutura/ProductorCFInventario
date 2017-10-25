@@ -114,7 +114,7 @@ namespace StockProductorCF.Vistas
 				else
 					_nombresColumnas.SetValue(celda.Value, (int)celda.Column - 1);
 			}
-
+			
 			LlenarGrillaDeProductos(productos);
 		}
 
@@ -169,7 +169,7 @@ namespace StockProductorCF.Vistas
 						//Parsea el json para obtener la lista de productos
 						productos = ParsearJsonProductos(jsonProductos);
 
-						_nombresColumnas = new[] { "Código", "Nombre", "Rubro", "Stock" };
+						_nombresColumnas = new[] { "Código", "Nombre", "Marca", "Rubro", "Stock" };
 					});
 				}
 				finally
@@ -178,7 +178,10 @@ namespace StockProductorCF.Vistas
 				}
 
 				if (productos != null)
+				{
 					LlenarGrillaDeProductos(productos);
+					FiltrarProductos(null, null);
+				}
 			}
 		}
 
@@ -196,11 +199,12 @@ namespace StockProductorCF.Vistas
 				var temporal = datos.Replace(",\"", "|").Split('|');
 
 				//Si el producto no está oculto lo agregamos
-				if (temporal[8].Split(':')[1].TrimStart('"').TrimEnd('"') == "true") continue;
-				var producto = new string[4];
+				if (temporal[9].Split(':')[1].TrimStart('"').TrimEnd('"') == "true") continue;
+				var producto = new string[5];
 				producto[0] = temporal[0].Split(':')[1].TrimStart('"').TrimEnd('"'); // ID
 				producto[1] = temporal[1].Split(':')[1].TrimStart('"').TrimEnd('"').Replace("\\\"", "\""); // Nombre
-				var rubro = temporal[10].Split(':')[1].TrimStart('"').TrimEnd('"');
+				producto[2] = temporal[3].Split(':')[1].TrimStart('"').TrimEnd('"'); // Marca
+				var rubro = temporal[11].Split(':')[1].TrimStart('"').TrimEnd('"');
 				switch (rubro)
 				{
 					case "wholesaler":
@@ -222,17 +226,14 @@ namespace StockProductorCF.Vistas
 						rubro = "Almacén";
 						break;
 				}
-				producto[2] = rubro;
-				var stock = temporal[7].Split(':')[1].TrimStart('"').TrimEnd('"'); // Stock
-				producto[3] = stock == "null" ? "0" : stock;
+				producto[3] = rubro;
+				var stock = temporal[8].Split(':')[1].TrimStart('"').TrimEnd('"'); // Stock
+				producto[4] = stock == "null" ? "0" : stock;
 
 				productos.Add(producto);
 			}
 
-			if (_listaRubros.Items[_listaRubros.SelectedIndex] != "Todos")
-				productos = productos.Where(y => y[2] == _listaRubros.Items[_listaRubros.SelectedIndex]).ToList();
-
-			return productos.OrderBy(x => x[2]).ThenBy(x => x[1]).ToList();
+			return productos.OrderBy(x => x[3]).ThenBy(x => x[1]).ToList();
 		}
 
 		private void ConfigurarSelectorRubros()
@@ -304,10 +305,10 @@ namespace StockProductorCF.Vistas
 
 		private void LlenarGrillaDeProductos(List<string[]> productos, bool esBusqueda = false)
 		{
-			//Se carga la grilla de productos y se muestra en pantalla.
-			ConstruirVistaDeLista(productos);
 			if (!esBusqueda)
 				FijarProductosYBuscador(productos);
+			//Se carga la grilla de productos y se muestra en pantalla.
+			ConstruirVistaDeLista(productos);
 		}
 
 		private async void IrAlProducto(string codigoProductoSeleccionado)
@@ -623,13 +624,13 @@ namespace StockProductorCF.Vistas
 			{
 				foreach (var producto in _productos)
 				{
-					if (("Todos|" + producto[2]).Contains(_listaRubros.Items[_listaRubros.SelectedIndex]) && producto[1].ToLower().Contains(Buscador.Text.ToLower()))
+					if (("Todos|" + producto[3]).Contains(_listaRubros.Items[_listaRubros.SelectedIndex]) 
+						&& (!Buscador.IsVisible || producto[1].ToLower().Contains(Buscador.Text.ToLower())))
 						productos.Add(producto);
 				}
 			}
 
 			//Se quita la grilla para recargarla.
-			ContenedorTabla.Children.Clear();
 			LlenarGrillaDeProductos(productos, true);
 		}
 
@@ -689,7 +690,7 @@ namespace StockProductorCF.Vistas
 			Nombre = datos[0];
 			Datos = string.Join(" - ", datos.Skip(1).Take(datos.Count));
 			ColorFondo = esTeclaPar ? Color.FromHex("#EDEDED") : Color.FromHex("#E2E2E1");
-			ColorRubro = esGoogle ? Color.Red : ColorearRubro(datos[1]);
+			ColorRubro = esGoogle ? Color.Red : ColorearRubro(datos[2]);
 		}
 
 		private Color ColorearRubro(string rubro)
